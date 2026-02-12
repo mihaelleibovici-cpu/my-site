@@ -11,30 +11,27 @@
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; font-size: 18px; }
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
-        .product { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; border-right: 5px solid #28a745; cursor: pointer; display: block; text-decoration: none; color: inherit; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .footer { background: white; padding: 20px; border-top: 1px solid #ddd; margin-top: 30px; }
-        .paypal-btn { background: #ffc439; color: black; text-decoration: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+        .paypal-btn { background: #ffc439; color: black; text-decoration: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; display: inline-block; }
     </style>
 </head>
 <body>
-    <div class="header"><h1>Pricency</h1><p>השוואת מחירים של מיכאל</p></div>
+    <div class="header"><h1>Pricency</h1></div>
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="איזה מוצר לחפש?">
-            <button onclick="search()">חפש עכשיו</button>
+            <input type="text" id="q" placeholder="מה מחפשים?">
+            <button onclick="search()">חפש</button>
         </div>
         <div id="results"></div>
     </div>
     <div class="footer">
-        <p>אהבתם את האתר? מוזמנים לתמוך בפרויקט</p>
-        <a href="https://www.paypal.me/iareah" class="paypal-btn" target="_blank" rel="noopener noreferrer">תרומה באמצעות PayPal</a>
-        <p style="font-size: 12px; color: #777;">כל הזכויות שמורות למיכאל &copy; 2026</p>
+        <a href="https://www.paypal.me/iareah" class="paypal-btn" target="_blank">תרומה ב-PayPal</a>
     </div>
 
     <script>
         async function search() {
-            const qInput = document.getElementById('q');
-            const query = qInput.value;
+            const query = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
             if(!query) return;
 
@@ -47,23 +44,21 @@
                 
                 if(d.shopping_results) {
                     d.shopping_results.forEach(i => {
-                        // וידוא שהקישור תמיד תקין כדי שלא יגרום ל-404 באתר שלך
-                        let link = i.link;
-                        if (!link.startsWith('http')) { link = 'https://' + link; }
-                        
-                        resDiv.innerHTML += `
-                            <div class="product" onclick="window.open('${link}', '_blank')">
-                                <strong>${i.title}</strong><br>
-                                <span>חנות: ${i.source}</span><br>
-                                <span style="color:#28a745; font-weight:bold;">₪${i.extracted_price}</span><br>
-                                <small style="color:#3b82f6;">לחץ כאן למעבר לקנייה</small>
-                            </div>`;
+                        // יצירת אלמנט לכל מוצר
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'product-box';
+                        itemDiv.innerHTML = `
+                            <strong>${i.title}</strong><br>
+                            <span>₪${i.extracted_price}</span><br>
+                            <button style="background:#28a745; margin-top:10px;" onclick="window.open('${i.link}', '_blank')">לקנייה באתר</button>
+                        `;
+                        resDiv.appendChild(itemDiv);
                     });
                 } else {
-                    resDiv.innerHTML = "לא נמצאו תוצאות.";
+                    resDiv.innerHTML = "אין תוצאות";
                 }
             } catch(e) {
-                resDiv.innerHTML = "שגיאה בחיבור, נסה שוב.";
+                resDiv.innerHTML = "שגיאה בחיבור";
             }
         }
     </script>
