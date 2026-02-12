@@ -27,7 +27,7 @@
     </div>
     <div class="footer">
         <p>אהבתם את האתר? מוזמנים לתמוך בפרויקט</p>
-        <a href="https://www.paypal.me/iar750" class="paypal-btn" target="_blank">תרומה באמצעות PayPal</a>
+        <a href="https://www.paypal.me/iareah" class="paypal-btn" target="_blank" rel="noopener noreferrer">תרומה באמצעות PayPal</a>
         <p style="font-size: 12px; color: #777;">כל הזכויות שמורות למיכאל &copy; 2026</p>
     </div>
     <script>
@@ -44,7 +44,7 @@
                 if (data.shopping_results) {
                     data.shopping_results.forEach(item => {
                         resDiv.innerHTML += `
-                            <a href="${item.link}" target="_blank" class="product">
+                            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="product">
                                 <strong>${item.title}</strong><br>
                                 <span>חנות: ${item.source}</span><br>
                                 <span style="color:#28a745; font-weight:bold;">₪${item.extracted_price}</span><br>
