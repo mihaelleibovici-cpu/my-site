@@ -37,42 +37,38 @@
             const resDiv = document.getElementById('results');
             if (!query) return;
 
-            resDiv.innerHTML = "מתחבר למנוע החיפוש...";
+            resDiv.innerHTML = "המנוע מתעורר... מיד מביא תוצאות";
             inputField.value = ""; 
 
-            const fetchWithRetry = async (url, retries = 3) => {
-                for (let i = 0; i < retries; i++) {
-                    try {
-                        const response = await fetch(url);
-                        if (response.ok) return await response.json();
-                    } catch (e) {
-                        if (i === retries - 1) throw e;
-                        resDiv.innerHTML = "מעיר את השרת, כבר נותן תוצאות...";
-                        await new Promise(res => setTimeout(res, 2000));
+            const url = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`;
+            
+            // מנגנון ניסיונות חזק יותר
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const data = await response.json();
+                        resDiv.innerHTML = "";
+                        if (data && data.shopping_results) {
+                            data.shopping_results.forEach(item => {
+                                const cleanLink = item.link.startsWith('http') ? item.link : `https://${item.link}`;
+                                resDiv.innerHTML += `
+                                    <a href="${cleanLink}" target="_blank" rel="noopener noreferrer" class="product">
+                                        <strong>${item.title}</strong><br>
+                                        <span>חנות: ${item.source}</span><br>
+                                        <span style="color:#28a745; font-weight:bold;">₪${item.extracted_price}</span><br>
+                                        <small style="color:#3b82f6;">לחץ כאן למעבר לחנות</small>
+                                    </a>`;
+                            });
+                            return; // הצלחנו, עוצרים כאן
+                        }
                     }
+                } catch (e) {
+                    console.log("ניסיון " + (i+1) + " נכשל, מנסה שוב...");
                 }
-            };
-
-            try {
-                const url = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`;
-                const data = await fetchWithRetry(url);
-                resDiv.innerHTML = "";
-                
-                if (data && data.shopping_results) {
-                    data.shopping_results.forEach(item => {
-                        const cleanLink = item.link.startsWith('http') ? item.link : `https://${item.link}`;
-                        resDiv.innerHTML += `
-                            <a href="${cleanLink}" target="_blank" rel="noopener noreferrer" class="product">
-                                <strong>${item.title}</strong><br>
-                                <span>חנות: ${item.source}</span><br>
-                                <span style="color:#28a745; font-weight:bold;">₪${item.extracted_price}</span><br>
-                                <small style="color:#3b82f6;">לחץ כאן למעבר לחנות</small>
-                            </a>`;
-                    });
-                } else { resDiv.innerHTML = "לא נמצאו תוצאות."; }
-            } catch (e) { 
-                resDiv.innerHTML = "השרת בתפוסה גבוהה. נסה שוב בעוד כמה שניות."; 
+                await new Promise(r => setTimeout(r, 2000)); // מחכים 2 שניות בין ניסיון לניסיון
             }
+            resDiv.innerHTML = "השרת עמוס מדי כרגע. נסה שוב בעוד דקה.";
         }
     </script>
 </body>
