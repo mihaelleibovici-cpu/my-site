@@ -33,29 +33,31 @@
 
     <script>
         async function search() {
-            const q = document.getElementById('q').value;
+            const qInput = document.getElementById('q');
+            const query = qInput.value;
             const resDiv = document.getElementById('results');
-            if(!q) return;
+            if(!query) return;
 
-            resDiv.innerHTML = "מחפש עבורך...";
+            resDiv.innerHTML = "מחפש...";
 
             try {
-                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}`);
+                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
                 const d = await r.json();
                 resDiv.innerHTML = "";
                 
                 if(d.shopping_results) {
                     d.shopping_results.forEach(i => {
-                        // תיקון הקישור: מוודא שהקישור תמיד מתחיל ב-http כדי שיפתח דף חדש בחוץ
-                        const fullLink = i.link.startsWith('http') ? i.link : 'https://' + i.link;
+                        // וידוא שהקישור תמיד תקין כדי שלא יגרום ל-404 באתר שלך
+                        let link = i.link;
+                        if (!link.startsWith('http')) { link = 'https://' + link; }
                         
                         resDiv.innerHTML += `
-                            <a href="${fullLink}" target="_blank" rel="noopener noreferrer" class="product">
+                            <div class="product" onclick="window.open('${link}', '_blank')">
                                 <strong>${i.title}</strong><br>
                                 <span>חנות: ${i.source}</span><br>
                                 <span style="color:#28a745; font-weight:bold;">₪${i.extracted_price}</span><br>
                                 <small style="color:#3b82f6;">לחץ כאן למעבר לקנייה</small>
-                            </a>`;
+                            </div>`;
                     });
                 } else {
                     resDiv.innerHTML = "לא נמצאו תוצאות.";
