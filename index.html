@@ -46,8 +46,11 @@
                 
                 if(d.shopping_results) {
                     d.shopping_results.forEach(i => {
+                        // תיקון הקישור: מוודא שהקישור תמיד מתחיל ב-http כדי שיפתח דף חדש בחוץ
+                        const fullLink = i.link.startsWith('http') ? i.link : 'https://' + i.link;
+                        
                         resDiv.innerHTML += `
-                            <a href="${i.link}" target="_blank" class="product">
+                            <a href="${fullLink}" target="_blank" rel="noopener noreferrer" class="product">
                                 <strong>${i.title}</strong><br>
                                 <span>חנות: ${i.source}</span><br>
                                 <span style="color:#28a745; font-weight:bold;">₪${i.extracted_price}</span><br>
