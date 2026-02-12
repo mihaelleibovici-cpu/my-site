@@ -3,13 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricency - השוואת מחירים של מיכאל</title>
+    <title>Pricency - מיכאל</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; direction: rtl; text-align: center; }
+        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 50px; }
         .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .container { padding: 20px; max-width: 400px; margin: -40px auto 0; }
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; font-size: 18px; }
-        button#searchBtn { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
-        
-        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-right: 5px solid #ccc; }
+        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; }
+        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .cheapest { border: 3px solid #28a745; background-color: #e8f5e9; }
+        .price { font-weight: bold; font-size: 18px; color: #3b82f6; }
+        .buy-btn { display: block; width: 100%; margin-top: 10px; background: #28a745; color: white; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; text-align: center; }
+        .footer { padding: 30px 20px; margin-top: 20px; }
+        .paypal-link { background: #ffc439; color: #003087; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin-bottom: 15px; }
+        .rights { color: #555; font-size: 14px; font-weight: bold; border-top: 1px solid #ddd; padding-top: 15px; display: block; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Pricency</h1>
+        <p>השוואת מחירים חכמה של מיכאל</p>
+    </div>
+    <div class="container">
+        <div class="card">
+            <input type="text" id="q" placeholder="מה תרצה לקנות?">
+            <button onclick="search()">חפש עכשיו</button>
+        </div>
+        <div id="results"></div>
+    </div>
+    <div class="footer">
+        <a href="https://www.paypal.me/iareah" target="_blank" class="paypal-link">תמיכה בפרויקט ב-PayPal</a>
+        <span class="rights">© כל הזכויות שמורות למיכאל - פרויקט Pricency</span>
+    </div>
+    <script>
+        async function search() {
+            const query = document.getElementById('q').value;
+            const resDiv = document.getElementById('results');
+            if(!query) return;
+            resDiv.innerHTML = "<p>מחפש עבורך...</p>";
+            try {
+                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
+                const d = await r.json();
+                resDiv.innerHTML = "";
+                if(d.shopping_results) {
+                    d.shopping_results.sort((a, b) => a.extracted_price - b.extracted_price).forEach((item, index) => {
+                        const isCheapest = index === 0;
+                        const box = document.createElement('div');
+                        box.className = `product-box ${isCheapest ? 'cheapest' : ''}`;
+                        box.innerHTML = `
+                            ${isCheapest ? '<b style="color:#28a745">★ המחיר הכי זול!</b><br>' : ''}
+                            <strong>${item.title}</strong><br>
+                            <span class="price">₪${item.extracted_price}</span><br>
+                            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="buy-btn">לקנייה באתר</a>`;
+                        resDiv.appendChild(box);
+                    });
+                } else {
+                    resDiv.innerHTML = "לא נמצאו תוצאות.";
+                }
+            } catch(e) { resDiv.innerHTML = "שגיאה בחיבור לשרת."; }
+        }
+    </script>
+</body>
+</html>
