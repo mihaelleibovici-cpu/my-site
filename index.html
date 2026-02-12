@@ -15,7 +15,7 @@
         .cheapest { border: 3px solid #28a745; background-color: #e8f5e9; }
         .price { font-weight: bold; font-size: 18px; color: #3b82f6; display: block; margin: 5px 0; }
         .store-name { color: #555; font-weight: bold; font-size: 14px; background: #eee; padding: 2px 8px; border-radius: 5px; display: inline-block; margin-bottom: 5px; }
-        .copy-btn { display: block; width: 100%; margin-top: 10px; background: #34495e; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .copy-btn { display: block; width: 100%; margin-top: 10px; background: #34495e; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; width: 100%; }
         .footer { padding: 30px 20px; margin-top: 20px; }
         .paypal-link { background: #ffc439; color: #003087; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin-bottom: 15px; }
         .rights { color: #555; font-size: 14px; font-weight: bold; border-top: 1px solid #ddd; padding-top: 15px; display: block; }
@@ -51,37 +51,38 @@
                     let results = d.shopping_results.sort((a, b) => a.extracted_price - b.extracted_price);
                     results.forEach((item, index) => {
                         const isCheapest = index === 0;
+                        // התיקון שמוודא שיהיה לינק אמיתי להעתקה:
+                        const finalLink = item.link || item.product_link || item.url || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
+                        
                         const box = document.createElement('div');
                         box.className = `product-box ${isCheapest ? 'cheapest' : ''}`;
-                        // כאן התיקון - מוודאים שהלינק עובר נכון לפונקציית ההעתקה
                         box.innerHTML = `
                             ${isCheapest ? '<b style="color:#28a745">★ המחיר הכי זול שנמצא!</b><br>' : ''}
                             <strong>${item.title}</strong><br>
                             <span class="store-name">חנות: ${item.source || 'חיפוש כללי'}</span><br>
                             <span class="price">מחיר: ₪${item.extracted_price}</span>
-                            <button class="copy-btn" onclick="copyToClipboard('${item.link}', this)">העתק קישור לקנייה</button>`;
+                            <button class="copy-btn" onclick="doCopy('${finalLink}', this)">העתק קישור לקנייה</button>`;
                         resDiv.appendChild(box);
                     });
                 } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>"; }
             } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור לשרת.</p>"; }
         }
 
-        function copyToClipboard(text, btn) {
-            // יצירת אלמנט זמני להעתקה בטוחה בטלפון
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
+        function doCopy(val, btn) {
+            const temp = document.createElement('textarea');
+            temp.value = val;
+            document.body.appendChild(temp);
+            temp.select();
             document.execCommand('copy');
-            document.body.removeChild(el);
+            document.body.removeChild(temp);
             
-            const originalText = btn.innerText;
-            btn.innerText = "✓ הקישור הועתק!";
+            const oldText = btn.innerText;
+            btn.innerText = "✓ הועתק! הדבק בדפדפן";
             btn.style.background = "#28a745";
             setTimeout(() => {
-                btn.innerText = originalText;
+                btn.innerText = oldText;
                 btn.style.background = "#34495e";
-            }, 2000);
+            }, 2500);
         }
     </script>
 </body>
