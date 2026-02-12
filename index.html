@@ -42,7 +42,7 @@
             const query = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
             if(!query) return;
-            resDiv.innerHTML = "<p>מחפש עבורך...</p>";
+            resDiv.innerHTML = "<p>מחפש עבורך את המחיר הכי זול...</p>";
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
                 const d = await r.json();
@@ -53,30 +53,35 @@
                         const isCheapest = index === 0;
                         const box = document.createElement('div');
                         box.className = `product-box ${isCheapest ? 'cheapest' : ''}`;
+                        // כאן התיקון - מוודאים שהלינק עובר נכון לפונקציית ההעתקה
                         box.innerHTML = `
                             ${isCheapest ? '<b style="color:#28a745">★ המחיר הכי זול שנמצא!</b><br>' : ''}
                             <strong>${item.title}</strong><br>
-                            <span class="store-name">חנות: ${item.source || 'כללי'}</span><br>
+                            <span class="store-name">חנות: ${item.source || 'חיפוש כללי'}</span><br>
                             <span class="price">מחיר: ₪${item.extracted_price}</span>
-                            <button class="copy-btn" onclick="copyLink('${item.link}', this)">העתק קישור לקנייה</button>`;
+                            <button class="copy-btn" onclick="copyToClipboard('${item.link}', this)">העתק קישור לקנייה</button>`;
                         resDiv.appendChild(box);
                     });
                 } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>"; }
-            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; }
+            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור לשרת.</p>"; }
         }
 
-        function copyLink(link, btn) {
-            navigator.clipboard.writeText(link).then(() => {
-                const originalText = btn.innerText;
-                btn.innerText = "✓ הקישור הועתק!";
-                btn.style.background = "#28a745";
-                setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.style.background = "#34495e";
-                }, 2000);
-            }).catch(err => {
-                alert("העתקת הקישור: " + link);
-            });
+        function copyToClipboard(text, btn) {
+            // יצירת אלמנט זמני להעתקה בטוחה בטלפון
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            const originalText = btn.innerText;
+            btn.innerText = "✓ הקישור הועתק!";
+            btn.style.background = "#28a745";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = "#34495e";
+            }, 2000);
         }
     </script>
 </body>
