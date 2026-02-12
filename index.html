@@ -43,8 +43,10 @@
                 resDiv.innerHTML = "";
                 if (data.shopping_results) {
                     data.shopping_results.forEach(item => {
+                        // מנגנון ניקוי קישורים כדי למנוע שגיאות 404
+                        const cleanLink = item.link.startsWith('http') ? item.link : `https://${item.link}`;
                         resDiv.innerHTML += `
-                            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="product">
+                            <a href="${cleanLink}" target="_blank" rel="noopener noreferrer" class="product">
                                 <strong>${item.title}</strong><br>
                                 <span>חנות: ${item.source}</span><br>
                                 <span style="color:#28a745; font-weight:bold;">₪${item.extracted_price}</span><br>
