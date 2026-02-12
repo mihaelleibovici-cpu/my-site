@@ -32,18 +32,26 @@
     </div>
     <script>
         async function search() {
-            const query = document.getElementById('q').value;
+            const inputField = document.getElementById('q');
+            const query = inputField.value;
             const resDiv = document.getElementById('results');
+            
             if (!query) return;
+            
             resDiv.innerHTML = "מחפש מחירים...";
+            // ניקוי תיבת החיפוש מיד לאחר הלחיצה
+            inputField.value = ""; 
+
             const url = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`;
+            
             try {
                 const response = await fetch(url);
+                if (!response.ok) throw new Error('Network error');
                 const data = await response.json();
                 resDiv.innerHTML = "";
+                
                 if (data.shopping_results) {
                     data.shopping_results.forEach(item => {
-                        // מנגנון ניקוי קישורים כדי למנוע שגיאות 404
                         const cleanLink = item.link.startsWith('http') ? item.link : `https://${item.link}`;
                         resDiv.innerHTML += `
                             <a href="${cleanLink}" target="_blank" rel="noopener noreferrer" class="product">
@@ -53,8 +61,13 @@
                                 <small style="color:#3b82f6;">לחץ כאן למעבר לחנות</small>
                             </a>`;
                     });
-                } else { resDiv.innerHTML = "לא נמצאו תוצאות."; }
-            } catch (e) { resDiv.innerHTML = "שגיאה בחיבור לשרת."; }
+                } else { 
+                    resDiv.innerHTML = "לא נמצאו תוצאות לחיפוש זה."; 
+                }
+            } catch (e) { 
+                resDiv.innerHTML = "שגיאה בחיבור לשרת. נסה שוב בעוד רגע."; 
+                console.error(e);
+            }
         }
     </script>
 </body>
