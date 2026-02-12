@@ -6,36 +6,29 @@
     <title>Pricency</title>
     <style>
         body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding: 0; }
-        .header { background: #3b82f6; color: white; padding: 20px; margin-bottom: 20px; }
-        .container { padding: 10px; max-width: 500px; margin: auto; }
-        input { width: 70%; padding: 12px; border-radius: 5px; border: 1px solid #ddd; font-size: 16px; }
-        button { padding: 12px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        
-        /* עיצוב השורה ככפתור לחיץ */
-        .product { 
-            background: white; 
-            padding: 15px; 
-            margin-top: 15px; 
-            border-radius: 10px; 
-            text-align: right; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-            cursor: pointer; /* הופך את העכבר ליד */
-            display: block; 
-            text-decoration: none; /* מבטל קו תחתון של לינק */
-            color: inherit; 
-            transition: background 0.2s;
-        }
-        .product:active { background: #e0e0e0; } /* אפקט לחיצה בטלפון */
-        .price { color: #28a745; font-weight: bold; font-size: 18px; }
-        .source { color: #666; font-size: 14px; }
+        .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        .container { padding: 20px; max-width: 400px; margin: -40px auto 0; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; font-size: 18px; }
+        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .product { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; border-right: 5px solid #28a745; cursor: pointer; display: block; text-decoration: none; color: inherit; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .footer { background: white; padding: 20px; border-top: 1px solid #ddd; margin-top: 30px; }
+        .paypal-btn { background: #ffc439; color: black; text-decoration: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <div class="header"><h1>Pricency</h1></div>
+    <div class="header"><h1>Pricency</h1><p>השוואת מחירים של מיכאל</p></div>
     <div class="container">
-        <input type="text" id="q" placeholder="מה תרצה לקנות?">
-        <button onclick="search()">חפש</button>
+        <div class="card">
+            <input type="text" id="q" placeholder="איזה מוצר לחפש?">
+            <button onclick="search()">חפש עכשיו</button>
+        </div>
         <div id="results"></div>
+    </div>
+    <div class="footer">
+        <p>אהבתם את האתר? מוזמנים לתמוך בפרויקט</p>
+        <a href="https://www.paypal.me/iareah" class="paypal-btn" target="_blank" rel="noopener noreferrer">תרומה באמצעות PayPal</a>
+        <p style="font-size: 12px; color: #777;">כל הזכויות שמורות למיכאל &copy; 2026</p>
     </div>
 
     <script>
@@ -53,12 +46,11 @@
                 
                 if(d.shopping_results) {
                     d.shopping_results.forEach(i => {
-                        // כל השורה עטופה בלינק שמוביל לחנות
                         resDiv.innerHTML += `
                             <a href="${i.link}" target="_blank" class="product">
                                 <strong>${i.title}</strong><br>
-                                <span class="source">חנות: ${i.source}</span><br>
-                                <span class="price">₪${i.extracted_price}</span><br>
+                                <span>חנות: ${i.source}</span><br>
+                                <span style="color:#28a745; font-weight:bold;">₪${i.extracted_price}</span><br>
                                 <small style="color:#3b82f6;">לחץ כאן למעבר לקנייה</small>
                             </a>`;
                     });
