@@ -35,22 +35,30 @@
             const inputField = document.getElementById('q');
             const query = inputField.value;
             const resDiv = document.getElementById('results');
-            
             if (!query) return;
-            
-            resDiv.innerHTML = "מחפש מחירים...";
-            // ניקוי תיבת החיפוש מיד לאחר הלחיצה
+
+            resDiv.innerHTML = "מתחבר למנוע החיפוש...";
             inputField.value = ""; 
 
-            const url = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`;
-            
+            const fetchWithRetry = async (url, retries = 3) => {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(url);
+                        if (response.ok) return await response.json();
+                    } catch (e) {
+                        if (i === retries - 1) throw e;
+                        resDiv.innerHTML = "מעיר את השרת, כבר נותן תוצאות...";
+                        await new Promise(res => setTimeout(res, 2000));
+                    }
+                }
+            };
+
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Network error');
-                const data = await response.json();
+                const url = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`;
+                const data = await fetchWithRetry(url);
                 resDiv.innerHTML = "";
                 
-                if (data.shopping_results) {
+                if (data && data.shopping_results) {
                     data.shopping_results.forEach(item => {
                         const cleanLink = item.link.startsWith('http') ? item.link : `https://${item.link}`;
                         resDiv.innerHTML += `
@@ -61,12 +69,9 @@
                                 <small style="color:#3b82f6;">לחץ כאן למעבר לחנות</small>
                             </a>`;
                     });
-                } else { 
-                    resDiv.innerHTML = "לא נמצאו תוצאות לחיפוש זה."; 
-                }
+                } else { resDiv.innerHTML = "לא נמצאו תוצאות."; }
             } catch (e) { 
-                resDiv.innerHTML = "שגיאה בחיבור לשרת. נסה שוב בעוד רגע."; 
-                console.error(e);
+                resDiv.innerHTML = "השרת בתפוסה גבוהה. נסה שוב בעוד כמה שניות."; 
             }
         }
     </script>
