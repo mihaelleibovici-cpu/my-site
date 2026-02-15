@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>זול צ'ק - מיכאל</title>
-    
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/263/263142.png">
     <meta name="theme-color" content="#3b82f6">
-
     <style>
         body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 140px; }
         .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
@@ -16,22 +14,18 @@
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
         input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        
         .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
         .source-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .store-logo { width: 35px; height: 35px; border-radius: 6px; border: 1px solid #eee; object-fit: contain; background: white; }
         .store-name { font-weight: bold; color: #555; font-size: 14px; }
         .price { font-weight: bold; font-size: 22px; color: #3b82f6; display: block; margin: 5px 0; }
-        
         .actions { display: flex; gap: 10px; margin-top: 15px; }
         .btn-action { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
         .btn-copy { background: #34495e; color: white; }
         .btn-whatsapp { background: #25D366; color: white; }
-
         .bottom-area { position: fixed; bottom: 0; width: 100%; left: 0; z-index: 100; }
         .paypal-bar { background: rgba(244, 244, 244, 0.95); padding: 10px; border-top: 1px solid #ddd; }
         .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 14px; border: 2px solid #edb120; }
-
         .footer-orange-bar { background: #ff9800; color: white; padding: 15px; font-weight: bold; font-size: 16px; }
         .medical-tag { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; margin-right: auto; border: 1px solid #c8e6c9; }
     </style>
@@ -41,24 +35,19 @@
         <h1>זול צ'ק</h1>
         <p>השוואת מחירים חכמה לכל סוגי החנויות</p>
     </div>
-
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="רשום שם של זן או מוצר...">
+            <input type="text" id="q" placeholder="חפש מוצר או זן רפואי...">
             <button onclick="search()">חפש עכשיו</button>
         </div>
         <div id="results"></div>
     </div>
-
     <div class="bottom-area">
         <div class="paypal-bar">
             <a href="https://www.paypal.com/paypalme/m0546663240" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a>
         </div>
-        <div class="footer-orange-bar">
-            © כל הזכויות שמורות למיכאל - זול צ'ק
-        </div>
+        <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק</div>
     </div>
-
     <script>
         async function search() {
             const query = document.getElementById('q').value;
@@ -73,27 +62,31 @@
                 if(d.shopping_results) {
                     let results = d.shopping_results;
                     
-                    // מילות מפתח לחסימת בגדים ומוצרי צריכה לא קשורים בחיפוש רפואי
-                    const medicalKeywords = ['תפרחת', 'זן', 'T20', 'T15', 'T10', 'C4', 'C3', 'מרקחת', 'גרופ', 'קנאביס'];
-                    
-                    if(medicalKeywords.some(word => query.includes(word))) {
-                        results = results.filter(item => 
-                            medicalKeywords.some(word => item.title.includes(word) || item.source.includes('מרקחת') || item.source.includes('פארם')) &&
-                            !item.title.includes('תחתון') && 
-                            !item.title.includes('בגד') && 
-                            !item.title.includes('מיץ')
-                        );
+                    const medicalKeywords = ['תפרחת', 'זן', 't20', 't15', 't10', 'c4', 'c3', 'קנאביס', 'רפואי'];
+                    const isMedicalQuery = medicalKeywords.some(w => query.toLowerCase().includes(w));
+
+                    if(isMedicalQuery) {
+                        results = results.filter(item => {
+                            const title = item.title.toLowerCase();
+                            const source = (item.source || "").toLowerCase();
+                            const hasMedWord = medicalKeywords.some(w => title.includes(w) || source.includes('מרקחת') || source.includes('פארם'));
+                            const isGarbage = title.includes('תחתון') || title.includes('חולצה') || title.includes('בגד') || title.includes('גרביים');
+                            return hasMedWord && !isGarbage;
+                        });
                     }
 
                     results.sort((a, b) => a.extracted_price - b.extracted_price);
                     
+                    if(results.length === 0 && isMedicalQuery) {
+                        resDiv.innerHTML = "<p>לא נמצאו תוצאות רלוונטיות לתפרחת. נסה חיפוש ממוקד יותר.</p>";
+                        return;
+                    }
+
                     results.forEach((item) => {
                         const store = item.source || 'חנות כללית';
                         const link = item.link || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
                         const logoUrl = item.thumbnail || `https://ui-avatars.com/api/?name=${encodeURIComponent(store)}&background=3b82f6&color=fff`;
-                        
-                        // תיוג רפואי בולט
-                        const isMedical = medicalKeywords.some(word => item.title.includes(word) || store.includes('מרקחת'));
+                        const isMed = medicalKeywords.some(w => item.title.toLowerCase().includes(w)) || store.toLowerCase().includes('מרקחת');
 
                         const box = document.createElement('div');
                         box.className = 'product-box';
@@ -101,7 +94,7 @@
                             <div class="source-container">
                                 <img src="${logoUrl}" class="store-logo">
                                 <span class="store-name">חנות: ${store}</span>
-                                ${isMedical ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
+                                ${isMed ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
                             </div>
                             <strong style="display:block;">${item.title}</strong>
                             <span class="price">₪${item.extracted_price}</span>
@@ -112,18 +105,14 @@
                             </div>`;
                         resDiv.appendChild(box);
                     });
-                } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות רלוונטיות.</p>"; }
+                } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>"; }
             } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; }
         }
-
         function doCopy(val, btn) {
             navigator.clipboard.writeText(val);
-            const oldText = btn.innerText;
             btn.innerText = "✓ הועתק!";
-            setTimeout(() => { btn.innerText = oldText; }, 2000);
+            setTimeout(() => { btn.innerText = "העתק לינק"; }, 2000);
         }
-
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
     </script>
 </body>
 </html>
