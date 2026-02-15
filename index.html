@@ -29,7 +29,7 @@
     <div class="header"><h1>זול צ'ק</h1><p>השוואת מחירים חכמה מכל העולם</p></div>
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="מה תרצה לקנות? (לדוגמה: טלוויזיה 60 אינץ')">
+            <input type="text" id="q" placeholder="מה תרצה לקנות?">
             <button onclick="search()">חפש עכשיו</button>
         </div>
         <div id="results"></div>
@@ -43,7 +43,7 @@
             const q = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
             if(!q) return;
-            resDiv.innerHTML = "<p>מחפש עבורך את המחיר הזול ביותר...</p>";
+            resDiv.innerHTML = "<p>זול צ'ק בודק עבורך בכל החנויות...</p>";
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}`);
                 const d = await r.json();
@@ -51,46 +51,48 @@
                 
                 if(d.shopping_results) {
                     let results = d.shopping_results;
+                    const searchWords = q.toLowerCase().split(/\s+/).filter(w => w.length > 1);
                     
-                    // סינון קשוח: מציג רק מוצרים שבאמת קשורים למה שהמשתמש כתב
-                    const searchTerms = q.toLowerCase().split(' ');
+                    // מנגנון סינון חכם שבודק התאמה לכל מילה שהמשתמש כתב
                     results = results.filter(item => {
                         const title = item.title.toLowerCase();
-                        // חייב להכיל לפחות את רוב מילות החיפוש כדי לא להביא 32 אינץ' כשביקשו 60
-                        return searchTerms.every(term => title.includes(term));
+                        const price = item.extracted_price;
+                        // חסימת מחירים לא הגיוניים (כמו 1 ש"ח למוצר חשמלי)
+                        if (price < 5 && q.length > 5) return false;
+                        // מוודא שכל המילים החשובות בחיפוש מופיעות בתוצאה
+                        return searchWords.every(word => title.includes(word));
                     });
 
                     results.sort((a, b) => a.extracted_price - b.extracted_price);
                     
                     if(results.length === 0) {
-                        resDiv.innerHTML = "<p>לא נמצאו תוצאות מדויקות. נסה לשנות מעט את החיפוש.</p>";
+                        resDiv.innerHTML = "<p>לא נמצאו תוצאות מדויקות. נסה חיפוש קצר יותר.</p>";
                         return;
                     }
 
                     results.forEach((item, index) => {
                         const store = item.source || 'חנות כללית';
-                        const cleanLink = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
-                        
+                        const link = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
                         const box = document.createElement('div');
                         box.className = 'product-box' + (index === 0 ? ' cheapest' : '');
                         box.innerHTML = `
-                            ${index === 0 ? '<span class="cheapest-tag">המחיר הכי זול לחיפוש שלך</span>' : ''}
+                            ${index === 0 ? '<span class="cheapest-tag">המחיר הזול ביותר שמצאנו</span>' : ''}
                             <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
                                 <img src="${item.thumbnail || 'https://ui-avatars.com/api/?name='+store}" style="width:35px; height:35px; border-radius:6px; object-fit:contain;">
                                 <span class="store-name">חנות: ${store}</span>
                             </div>
-                            <strong style="display:block; cursor:pointer;" onclick="window.open('${cleanLink}', '_blank')">${item.title}</strong>
+                            <strong style="display:block; cursor:pointer;" onclick="window.open('${link}', '_blank')">${item.title}</strong>
                             <span class="price">₪${item.extracted_price}</span>
                             <div class="actions">
-                                <button class="btn-action btn-copy" onclick="doCopy('${cleanLink}', this)">העתק לינק לקנייה</button>
-                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי את המחיר הכי זול בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + cleanLink)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
+                                <button class="btn-action btn-copy" onclick="doCopy('${link}', this)">העתק לינק</button>
+                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי את המחיר הכי זול בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
                             </div>`;
                         resDiv.appendChild(box);
                     });
                 } else resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>";
-            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור. נסה שוב בעוד רגע.</p>"; }
+            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור. נסה שוב.</p>"; }
         }
-        function doCopy(v, b) { navigator.clipboard.writeText(v); b.innerText = "✓ הועתק!"; setTimeout(() => b.innerText = "העתק לינק לקנייה", 2000); }
+        function doCopy(v, b) { navigator.clipboard.writeText(v); b.innerText = "✓ הועתק!"; setTimeout(() => b.innerText = "העתק לינק", 2000); }
     </script>
 </body>
 </html>
