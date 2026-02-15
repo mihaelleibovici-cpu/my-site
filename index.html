@@ -69,17 +69,31 @@
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
                 const d = await r.json();
                 resDiv.innerHTML = "";
+                
                 if(d.shopping_results) {
                     let results = d.shopping_results;
                     
-                    // מיון אוטומטי מהזול ליקר ביותר
+                    // מילות מפתח לחסימת בגדים ומוצרי צריכה לא קשורים בחיפוש רפואי
+                    const medicalKeywords = ['תפרחת', 'זן', 'T20', 'T15', 'T10', 'C4', 'C3', 'מרקחת', 'גרופ', 'קנאביס'];
+                    
+                    if(medicalKeywords.some(word => query.includes(word))) {
+                        results = results.filter(item => 
+                            medicalKeywords.some(word => item.title.includes(word) || item.source.includes('מרקחת') || item.source.includes('פארם')) &&
+                            !item.title.includes('תחתון') && 
+                            !item.title.includes('בגד') && 
+                            !item.title.includes('מיץ')
+                        );
+                    }
+
                     results.sort((a, b) => a.extracted_price - b.extracted_price);
                     
                     results.forEach((item) => {
                         const store = item.source || 'חנות כללית';
                         const link = item.link || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
                         const logoUrl = item.thumbnail || `https://ui-avatars.com/api/?name=${encodeURIComponent(store)}&background=3b82f6&color=fff`;
-                        const isMedical = item.title.includes('תפרחת') || item.title.includes('T20') || store.includes('מרקחת');
+                        
+                        // תיוג רפואי בולט
+                        const isMedical = medicalKeywords.some(word => item.title.includes(word) || store.includes('מרקחת'));
 
                         const box = document.createElement('div');
                         box.className = 'product-box';
@@ -98,7 +112,7 @@
                             </div>`;
                         resDiv.appendChild(box);
                     });
-                } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>"; }
+                } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות רלוונטיות.</p>"; }
             } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; }
         }
 
