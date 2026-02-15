@@ -2,65 +2,99 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zol-Check - מיכאל</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>זול צ'ק - מיכאל</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/263/263142.png">
+    <meta name="theme-color" content="#3b82f6">
+
     <style>
         body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 50px; }
         .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .container { padding: 20px; max-width: 400px; margin: -40px auto 0; }
+        .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .cheapest { border: 3px solid #28a745; background-color: #e8f5e9; }
-        .price { font-weight: bold; font-size: 18px; color: #3b82f6; display: block; margin: 5px 0; }
-        .store-name { color: #555; font-weight: bold; font-size: 14px; background: #eee; padding: 2px 8px; border-radius: 5px; display: inline-block; margin-bottom: 5px; }
-        .copy-btn { display: block; width: 100%; margin-top: 10px; background: #34495e; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .footer { padding: 30px 20px; margin-top: 20px; }
-        .paypal-link { background: #ffc439; color: #003087; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin-bottom: 15px; }
-        .rights { color: #555; font-size: 14px; font-weight: bold; border-top: 1px solid #ddd; padding-top: 15px; display: block; }
+        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
+        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        
+        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
+        .cheapest { border: 2px solid #28a745; background-color: #f0fff4; }
+        
+        .source-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .store-logo { width: 35px; height: 35px; border-radius: 6px; border: 1px solid #eee; object-fit: contain; background: white; }
+        .store-name { font-weight: bold; color: #555; font-size: 14px; }
+        
+        .medical-tag { background: #e3f2fd; color: #1976d2; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; margin-right: auto; }
+        
+        .price { font-weight: bold; font-size: 22px; color: #3b82f6; display: block; margin: 5px 0; }
+        
+        .actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-action { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
+        .btn-copy { background: #34495e; color: white; }
+        .btn-whatsapp { background: #25D366; color: white; }
+        
+        .footer { padding: 30px 20px; color: #555; font-size: 14px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Zol-Check</h1>
-        <p>השוואת מחירים חכמה של מיכאל</p>
+        <h1>זול צ'ק</h1>
+        <p>השוואת מחירים חכמה לכל סוגי החנויות</p>
     </div>
+
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="מה תרצה לקנות?">
+            <input type="text" id="q" placeholder="מה תרצה לקנות? (מוצר או זן)">
             <button onclick="search()">חפש עכשיו</button>
         </div>
         <div id="results"></div>
     </div>
+
     <div class="footer">
-        <a href="https://www.paypal.me/iareah" target="_blank" class="paypal-link">תמיכה בפרויקט ב-PayPal</a>
-        <span class="rights">© כל הזכויות שמורות למיכאל - פרויקט Zol-Check</span>
+        © כל הזכויות שמורות למיכאל - זול צ'ק
     </div>
+
     <script>
         async function search() {
             const query = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
             if(!query) return;
-            resDiv.innerHTML = "<p>מחפש עבורך את המחיר הכי זול ב-Zol-Check...</p>";
+            resDiv.innerHTML = "<p>בודק מחירים בזול צ'ק...</p>";
+            
             try {
+                // שימוש ב-API הקיים והעובד שלך ב-Vercel
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
                 const d = await r.json();
                 resDiv.innerHTML = "";
+                
                 if(d.shopping_results) {
                     let results = d.shopping_results.sort((a, b) => a.extracted_price - b.extracted_price);
                     results.forEach((item, index) => {
                         const isCheapest = index === 0;
-                        const finalLink = item.link || item.product_link || item.url || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
+                        const store = item.source || 'חנות כללית';
+                        const link = item.link || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
                         
+                        // לוגו מה-API או לוגו גנרי עם שם החנות
+                        const logoUrl = item.thumbnail || `https://ui-avatars.com/api/?name=${encodeURIComponent(store)}&background=3b82f6&color=fff`;
+
+                        // זיהוי מוצר רפואי/קנאביס (למשל סופר פארם או תיקון עולם)
+                        const isMedical = query.includes('T20') || query.includes('C4') || query.includes('קנאביס') || store.includes('פארם') || store.includes('מרקחת') || store.includes('תיקון עולם');
+
                         const box = document.createElement('div');
                         box.className = `product-box ${isCheapest ? 'cheapest' : ''}`;
                         box.innerHTML = `
-                            ${isCheapest ? '<b style="color:#28a745">★ המחיר הכי זול שנמצא!</b><br>' : ''}
-                            <strong>${item.title}</strong><br>
-                            <span class="store-name">חנות: ${item.source || 'חיפוש כללי'}</span><br>
-                            <span class="price">מחיר: ₪${item.extracted_price}</span>
-                            <button class="copy-btn" onclick="doCopy('${finalLink}', this)">העתק קישור לקנייה</button>`;
+                            <div class="source-container">
+                                <img src="${logoUrl}" class="store-logo" alt="לוגו">
+                                <span class="store-name">חנות: ${store}</span>
+                                ${isMedical ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
+                            </div>
+                            <strong style="font-size:16px; display:block;">${item.title}</strong>
+                            <span class="price">₪${item.extracted_price}</span>
+                            <div class="actions">
+                                <button class="btn-action btn-copy" onclick="doCopy('${link}', this)">העתק לינק</button>
+                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי מחיר מעולה בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" 
+                                   class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
+                            </div>`;
                         resDiv.appendChild(box);
                     });
                 } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>"; }
@@ -68,21 +102,14 @@
         }
 
         function doCopy(val, btn) {
-            const temp = document.createElement('textarea');
-            temp.value = val;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            document.body.removeChild(temp);
-            
+            navigator.clipboard.writeText(val);
             const oldText = btn.innerText;
-            btn.innerText = "✓ הועתק! הדבק בדפדפן";
-            btn.style.background = "#28a745";
-            setTimeout(() => {
-                btn.innerText = oldText;
-                btn.style.background = "#34495e";
-            }, 2500);
+            btn.innerText = "✓ הועתק!";
+            setTimeout(() => { btn.innerText = oldText; }, 2000);
         }
+
+        // רישום ה-Service Worker לאפליקציה
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
     </script>
 </body>
 </html>
