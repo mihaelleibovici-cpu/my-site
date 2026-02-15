@@ -8,31 +8,36 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/263/263142.png">
     <meta name="theme-color" content="#3b82f6">
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 140px; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f4f4f4; direction: rtl; margin: 0; padding-bottom: 140px; text-align: center; }
         .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .store-name { font-weight: bold; color: #555; font-size: 14px; }
+        
+        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid #eee; position: relative; }
+        
+        .cheapest { border: 2px solid #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+        .cheapest-tag { background: #3b82f6; color: white; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; position: absolute; top: -10px; left: 15px; }
+
         .price { font-weight: bold; font-size: 22px; color: #3b82f6; display: block; margin: 5px 0; }
         .actions { display: flex; gap: 10px; margin-top: 15px; }
         .btn-action { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
         .btn-copy { background: #34495e; color: white; }
         .btn-whatsapp { background: #25D366; color: white; }
+        
         .bottom-area { position: fixed; bottom: 0; width: 100%; left: 0; z-index: 100; }
-        .paypal-bar { background: rgba(244, 244, 244, 0.95); padding: 10px; border-top: 1px solid #ddd; }
-        .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 14px; border: 2px solid #edb120; }
-        .footer-orange-bar { background: #ff9800; color: white; padding: 15px; font-weight: bold; font-size: 16px; }
-        .medical-tag { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; margin-right: auto; border: 1px solid #c8e6c9; }
+        .paypal-bar { background: rgba(244, 244, 244, 0.98); padding: 10px; border-top: 1px solid #ddd; }
+        .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; border: 2px solid #edb120; }
+        .footer-orange-bar { background: #ff9800; color: white; padding: 15px; font-weight: bold; }
+        .medical-tag { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; margin-right: auto; }
     </style>
 </head>
 <body>
     <div class="header"><h1>זול צ'ק</h1><p>השוואת מחירים חכמה לכל סוגי החנויות</p></div>
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="חפש מוצר או זן...">
+            <input type="text" id="q" placeholder="מה תרצה לקנות?">
             <button onclick="search()">חפש עכשיו</button>
         </div>
         <div id="results"></div>
@@ -43,54 +48,57 @@
     </div>
     <script>
         async function search() {
-            const query = document.getElementById('q').value;
+            const q = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
-            if(!query) return;
-            resDiv.innerHTML = "<p>בודק מחירים בזול צ'ק...</p>";
+            if(!q) return;
+            resDiv.innerHTML = "<p>בודק מחירים...</p>";
             try {
-                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
+                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}`);
                 const d = await r.json();
                 resDiv.innerHTML = "";
                 if(d.shopping_results) {
                     let results = d.shopping_results;
-                    const medKeywords = ['תפרחת', 'זן', 't20', 't15', 'קנאביס', 'שמן', 'רפואי'];
-                    const isMedSearch = medKeywords.some(w => query.toLowerCase().includes(w));
+                    const medWords = ['תפרחת', 'זן', 't20', 't15', 'קנאביס', 'שמן', 'רפואי'];
+                    const isMed = medWords.some(w => q.toLowerCase().includes(w));
                     
-                    if(isMedSearch) {
-                        results = results.filter(item => {
-                            const t = item.title.toLowerCase();
-                            const s = (item.source || "").toLowerCase();
-                            const hasMed = medWords.some(w => t.includes(w) || s.includes('מרקחת') || s.includes('פארם'));
+                    results = results.filter(item => {
+                        const t = item.title.toLowerCase();
+                        const p = item.extracted_price;
+                        if ((q.includes('טלוויזיה') || q.includes('מחשב')) && p < 100) return false;
+                        if (isMed) {
+                            const hasMed = medWords.some(w => t.includes(w) || (item.source || "").toLowerCase().includes('מרקחת') || (item.source || "").toLowerCase().includes('פארם'));
                             const isTrash = t.includes('תחתון') || t.includes('בגד') || t.includes('מברג') || t.includes('bit') || t.includes('torx');
                             return hasMed && !isTrash;
-                        });
-                    }
+                        }
+                        return true;
+                    });
+
                     results.sort((a, b) => a.extracted_price - b.extracted_price);
-                    results.forEach((item) => {
-                        const store = item.source || 'חנות כללית';
-                        const link = item.link || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
-                        const logoUrl = item.thumbnail || `https://ui-avatars.com/api/?name=${encodeURIComponent(store)}&background=3b82f6&color=fff`;
-                        const isProductMed = medKeywords.some(w => item.title.toLowerCase().includes(w)) || store.toLowerCase().includes('מרקחת');
+                    
+                    results.forEach((item, index) => {
+                        const store = item.source || 'כללי', link = item.link || "https://google.com/search?q="+encodeURIComponent(item.title);
+                        const isItMed = medWords.some(w => item.title.toLowerCase().includes(w)) || store.toLowerCase().includes('מרקחת') || store.toLowerCase().includes('פארם');
                         const box = document.createElement('div');
-                        box.className = 'product-box';
+                        box.className = 'product-box' + (index === 0 ? ' cheapest' : '');
                         box.innerHTML = `
+                            ${index === 0 ? '<span class="cheapest-tag">המחיר המשתלם ביותר</span>' : ''}
                             <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                                <img src="${logoUrl}" style="width:35px; height:35px; border-radius:6px; object-fit:contain;">
+                                <img src="${item.thumbnail || 'https://ui-avatars.com/api/?name='+store}" style="width:35px; height:35px; border-radius:6px; object-fit:contain;">
                                 <span class="store-name">חנות: ${store}</span>
-                                ${isProductMed ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
+                                ${isItMed ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
                             </div>
                             <strong style="display:block;">${item.title}</strong>
                             <span class="price">₪${item.extracted_price}</span>
                             <div class="actions">
                                 <button class="btn-action btn-copy" onclick="doCopy('${link}', this)">העתק לינק</button>
-                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי מחיר מעולה בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
+                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
                             </div>`;
                         resDiv.appendChild(box);
                     });
-                } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>"; }
-            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; }
+                } else resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>";
+            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור. נסה שוב.</p>"; }
         }
-        function doCopy(val, btn) { navigator.clipboard.writeText(val); btn.innerText = "✓ הועתק!"; setTimeout(() => { btn.innerText = "העתק לינק"; }, 2000); }
+        function doCopy(v, b) { navigator.clipboard.writeText(v); b.innerText = "✓ הועתק!"; setTimeout(() => b.innerText = "העתק לינק", 2000); }
     </script>
 </body>
 </html>
