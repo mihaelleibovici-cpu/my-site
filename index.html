@@ -13,7 +13,6 @@
         
         #suggestions { position: absolute; background: white; width: calc(100% - 50px); border: 1px solid #ddd; border-radius: 10px; z-index: 1000; display: none; text-align: right; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; }
         .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 14px; }
-        .suggestion-item:last-child { border-bottom: none; }
         .suggestion-item:hover { background: #f0f7ff; }
 
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
@@ -64,9 +63,11 @@
                         div.className = 'suggestion-item';
                         div.innerText = key + " " + brand;
                         div.onclick = () => {
-                            document.getElementById('q').value = key + " " + brand;
+                            const input = document.getElementById('q');
+                            // מכניס את המותג ומשאיר רווח להמשך הקלדה
+                            input.value = key + " " + brand + " ";
                             container.style.display = 'none';
-                            search();
+                            input.focus(); // מחזיר את הסמן לתיבה
                         };
                         container.appendChild(div);
                     });
@@ -81,7 +82,7 @@
             const resDiv = document.getElementById('results');
             document.getElementById('suggestions').style.display = 'none';
             if(!q) return;
-            resDiv.innerHTML = "<p>זול צ'ק בודק עבורך...</p>";
+            resDiv.innerHTML = "<p>בודק מחירים בזול צ'ק...</p>";
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}`);
                 const d = await r.json();
