@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricency - מיכאל</title>
+    <title>Zol-Check - מיכאל</title>
     <style>
         body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 50px; }
         .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
@@ -15,7 +15,7 @@
         .cheapest { border: 3px solid #28a745; background-color: #e8f5e9; }
         .price { font-weight: bold; font-size: 18px; color: #3b82f6; display: block; margin: 5px 0; }
         .store-name { color: #555; font-weight: bold; font-size: 14px; background: #eee; padding: 2px 8px; border-radius: 5px; display: inline-block; margin-bottom: 5px; }
-        .copy-btn { display: block; width: 100%; margin-top: 10px; background: #34495e; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; width: 100%; }
+        .copy-btn { display: block; width: 100%; margin-top: 10px; background: #34495e; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
         .footer { padding: 30px 20px; margin-top: 20px; }
         .paypal-link { background: #ffc439; color: #003087; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin-bottom: 15px; }
         .rights { color: #555; font-size: 14px; font-weight: bold; border-top: 1px solid #ddd; padding-top: 15px; display: block; }
@@ -23,7 +23,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Pricency</h1>
+        <h1>Zol-Check</h1>
         <p>השוואת מחירים חכמה של מיכאל</p>
     </div>
     <div class="container">
@@ -35,14 +35,14 @@
     </div>
     <div class="footer">
         <a href="https://www.paypal.me/iareah" target="_blank" class="paypal-link">תמיכה בפרויקט ב-PayPal</a>
-        <span class="rights">© כל הזכויות שמורות למיכאל - פרויקט Pricency</span>
+        <span class="rights">© כל הזכויות שמורות למיכאל - פרויקט Zol-Check</span>
     </div>
     <script>
         async function search() {
             const query = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
             if(!query) return;
-            resDiv.innerHTML = "<p>מחפש עבורך את המחיר הכי זול...</p>";
+            resDiv.innerHTML = "<p>מחפש עבורך את המחיר הכי זול ב-Zol-Check...</p>";
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
                 const d = await r.json();
@@ -51,7 +51,6 @@
                     let results = d.shopping_results.sort((a, b) => a.extracted_price - b.extracted_price);
                     results.forEach((item, index) => {
                         const isCheapest = index === 0;
-                        // התיקון שמוודא שיהיה לינק אמיתי להעתקה:
                         const finalLink = item.link || item.product_link || item.url || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
                         
                         const box = document.createElement('div');
