@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>זול צ'ק - מיכאל</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/263/263142.png">
-    <meta name="theme-color" content="#3b82f6">
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; background: #f4f4f4; direction: rtl; margin: 0; padding-bottom: 140px; text-align: center; }
         .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
@@ -14,18 +11,14 @@
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        
         .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid #eee; position: relative; }
-        
         .cheapest { border: 2px solid #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
         .cheapest-tag { background: #3b82f6; color: white; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; position: absolute; top: -10px; left: 15px; }
-
         .price { font-weight: bold; font-size: 22px; color: #3b82f6; display: block; margin: 5px 0; }
         .actions { display: flex; gap: 10px; margin-top: 15px; }
         .btn-action { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
         .btn-copy { background: #34495e; color: white; }
         .btn-whatsapp { background: #25D366; color: white; }
-        
         .bottom-area { position: fixed; bottom: 0; width: 100%; left: 0; z-index: 100; }
         .paypal-bar { background: rgba(244, 244, 244, 0.98); padding: 10px; border-top: 1px solid #ddd; }
         .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; border: 2px solid #edb120; }
@@ -76,7 +69,10 @@
                     results.sort((a, b) => a.extracted_price - b.extracted_price);
                     
                     results.forEach((item, index) => {
-                        const store = item.source || 'כללי', link = item.link || "https://google.com/search?q="+encodeURIComponent(item.title);
+                        const store = item.source || 'כללי';
+                        // הבטחה שהלינק יהיה הישיר ביותר (Direct link)
+                        const cleanLink = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
+                        
                         const isItMed = medWords.some(w => item.title.toLowerCase().includes(w)) || store.toLowerCase().includes('מרקחת') || store.toLowerCase().includes('פארם');
                         const box = document.createElement('div');
                         box.className = 'product-box' + (index === 0 ? ' cheapest' : '');
@@ -87,11 +83,11 @@
                                 <span class="store-name">חנות: ${store}</span>
                                 ${isItMed ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
                             </div>
-                            <strong style="display:block;">${item.title}</strong>
+                            <strong style="display:block; cursor:pointer;" onclick="window.open('${cleanLink}', '_blank')">${item.title}</strong>
                             <span class="price">₪${item.extracted_price}</span>
                             <div class="actions">
-                                <button class="btn-action btn-copy" onclick="doCopy('${link}', this)">העתק לינק</button>
-                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
+                                <button class="btn-action btn-copy" onclick="doCopy('${cleanLink}', this)">העתק לינק</button>
+                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + cleanLink)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
                             </div>`;
                         resDiv.appendChild(box);
                     });
