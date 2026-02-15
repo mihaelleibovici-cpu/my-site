@@ -15,8 +15,6 @@
         input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
         .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .source-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .store-logo { width: 35px; height: 35px; border-radius: 6px; border: 1px solid #eee; object-fit: contain; background: white; }
         .store-name { font-weight: bold; color: #555; font-size: 14px; }
         .price { font-weight: bold; font-size: 22px; color: #3b82f6; display: block; margin: 5px 0; }
         .actions { display: flex; gap: 10px; margin-top: 15px; }
@@ -31,21 +29,16 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>זול צ'ק</h1>
-        <p>השוואת מחירים חכמה לכל סוגי החנויות</p>
-    </div>
+    <div class="header"><h1>זול צ'ק</h1><p>השוואת מחירים חכמה לכל סוגי החנויות</p></div>
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="חפש מוצר או זן רפואי...">
+            <input type="text" id="q" placeholder="חפש מוצר או זן...">
             <button onclick="search()">חפש עכשיו</button>
         </div>
         <div id="results"></div>
     </div>
     <div class="bottom-area">
-        <div class="paypal-bar">
-            <a href="https://www.paypal.com/paypalme/m0546663240" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a>
-        </div>
+        <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/m0546663240" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a></div>
         <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק</div>
     </div>
     <script>
@@ -58,61 +51,46 @@
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
                 const d = await r.json();
                 resDiv.innerHTML = "";
-                
                 if(d.shopping_results) {
                     let results = d.shopping_results;
+                    const medKeywords = ['תפרחת', 'זן', 't20', 't15', 'קנאביס', 'שמן', 'רפואי'];
+                    const isMedSearch = medKeywords.some(w => query.toLowerCase().includes(w));
                     
-                    const medicalKeywords = ['תפרחת', 'זן', 't20', 't15', 't10', 'c4', 'c3', 'קנאביס', 'רפואי'];
-                    const isMedicalQuery = medicalKeywords.some(w => query.toLowerCase().includes(w));
-
-                    if(isMedicalQuery) {
+                    if(isMedSearch) {
                         results = results.filter(item => {
-                            const title = item.title.toLowerCase();
-                            const source = (item.source || "").toLowerCase();
-                            const hasMedWord = medicalKeywords.some(w => title.includes(w) || source.includes('מרקחת') || source.includes('פארם'));
-                            const isGarbage = title.includes('תחתון') || title.includes('חולצה') || title.includes('בגד') || title.includes('גרביים');
-                            return hasMedWord && !isGarbage;
+                            const t = item.title.toLowerCase();
+                            const s = (item.source || "").toLowerCase();
+                            const hasMed = medWords.some(w => t.includes(w) || s.includes('מרקחת') || s.includes('פארם'));
+                            const isTrash = t.includes('תחתון') || t.includes('בגד') || t.includes('מברג') || t.includes('bit') || t.includes('torx');
+                            return hasMed && !isTrash;
                         });
                     }
-
                     results.sort((a, b) => a.extracted_price - b.extracted_price);
-                    
-                    if(results.length === 0 && isMedicalQuery) {
-                        resDiv.innerHTML = "<p>לא נמצאו תוצאות רלוונטיות לתפרחת. נסה חיפוש ממוקד יותר.</p>";
-                        return;
-                    }
-
                     results.forEach((item) => {
                         const store = item.source || 'חנות כללית';
                         const link = item.link || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
                         const logoUrl = item.thumbnail || `https://ui-avatars.com/api/?name=${encodeURIComponent(store)}&background=3b82f6&color=fff`;
-                        const isMed = medicalKeywords.some(w => item.title.toLowerCase().includes(w)) || store.toLowerCase().includes('מרקחת');
-
+                        const isProductMed = medKeywords.some(w => item.title.toLowerCase().includes(w)) || store.toLowerCase().includes('מרקחת');
                         const box = document.createElement('div');
                         box.className = 'product-box';
                         box.innerHTML = `
-                            <div class="source-container">
-                                <img src="${logoUrl}" class="store-logo">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                                <img src="${logoUrl}" style="width:35px; height:35px; border-radius:6px; object-fit:contain;">
                                 <span class="store-name">חנות: ${store}</span>
-                                ${isMed ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
+                                ${isProductMed ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
                             </div>
                             <strong style="display:block;">${item.title}</strong>
                             <span class="price">₪${item.extracted_price}</span>
                             <div class="actions">
                                 <button class="btn-action btn-copy" onclick="doCopy('${link}', this)">העתק לינק</button>
-                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי מחיר מעולה בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" 
-                                   class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
+                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי מחיר מעולה בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
                             </div>`;
                         resDiv.appendChild(box);
                     });
                 } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>"; }
             } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; }
         }
-        function doCopy(val, btn) {
-            navigator.clipboard.writeText(val);
-            btn.innerText = "✓ הועתק!";
-            setTimeout(() => { btn.innerText = "העתק לינק"; }, 2000);
-        }
+        function doCopy(val, btn) { navigator.clipboard.writeText(val); btn.innerText = "✓ הועתק!"; setTimeout(() => { btn.innerText = "העתק לינק"; }, 2000); }
     </script>
 </body>
 </html>
