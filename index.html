@@ -23,14 +23,13 @@
         .paypal-bar { background: rgba(244, 244, 244, 0.98); padding: 10px; border-top: 1px solid #ddd; }
         .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; border: 2px solid #edb120; }
         .footer-orange-bar { background: #ff9800; color: white; padding: 15px; font-weight: bold; }
-        .medical-tag { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; margin-right: auto; }
     </style>
 </head>
 <body>
-    <div class="header"><h1>זול צ'ק</h1><p>השוואת מחירים חכמה לכל סוגי החנויות</p></div>
+    <div class="header"><h1>זול צ'ק</h1><p>השוואת מחירים חכמה מכל העולם</p></div>
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="מה תרצה לקנות?">
+            <input type="text" id="q" placeholder="מה תרצה לקנות? (לדוגמה: טלוויזיה 60 אינץ')">
             <button onclick="search()">חפש עכשיו</button>
         </div>
         <div id="results"></div>
@@ -44,57 +43,54 @@
             const q = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
             if(!q) return;
-            resDiv.innerHTML = "<p>בודק מחירים...</p>";
+            resDiv.innerHTML = "<p>מחפש עבורך את המחיר הזול ביותר...</p>";
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}`);
                 const d = await r.json();
                 resDiv.innerHTML = "";
+                
                 if(d.shopping_results) {
                     let results = d.shopping_results;
-                    const medWords = ['תפרחת', 'זן', 't20', 't15', 'קנאביס', 'שמן', 'רפואי'];
-                    const isMed = medWords.some(w => q.toLowerCase().includes(w));
                     
+                    // סינון קשוח: מציג רק מוצרים שבאמת קשורים למה שהמשתמש כתב
+                    const searchTerms = q.toLowerCase().split(' ');
                     results = results.filter(item => {
-                        const t = item.title.toLowerCase();
-                        const p = item.extracted_price;
-                        if ((q.includes('טלוויזיה') || q.includes('מחשב')) && p < 100) return false;
-                        if (isMed) {
-                            const hasMed = medWords.some(w => t.includes(w) || (item.source || "").toLowerCase().includes('מרקחת') || (item.source || "").toLowerCase().includes('פארם'));
-                            const isTrash = t.includes('תחתון') || t.includes('בגד') || t.includes('מברג') || t.includes('bit') || t.includes('torx');
-                            return hasMed && !isTrash;
-                        }
-                        return true;
+                        const title = item.title.toLowerCase();
+                        // חייב להכיל לפחות את רוב מילות החיפוש כדי לא להביא 32 אינץ' כשביקשו 60
+                        return searchTerms.every(term => title.includes(term));
                     });
 
                     results.sort((a, b) => a.extracted_price - b.extracted_price);
                     
+                    if(results.length === 0) {
+                        resDiv.innerHTML = "<p>לא נמצאו תוצאות מדויקות. נסה לשנות מעט את החיפוש.</p>";
+                        return;
+                    }
+
                     results.forEach((item, index) => {
-                        const store = item.source || 'כללי';
-                        // הבטחה שהלינק יהיה הישיר ביותר (Direct link)
+                        const store = item.source || 'חנות כללית';
                         const cleanLink = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
                         
-                        const isItMed = medWords.some(w => item.title.toLowerCase().includes(w)) || store.toLowerCase().includes('מרקחת') || store.toLowerCase().includes('פארם');
                         const box = document.createElement('div');
                         box.className = 'product-box' + (index === 0 ? ' cheapest' : '');
                         box.innerHTML = `
-                            ${index === 0 ? '<span class="cheapest-tag">המחיר המשתלם ביותר</span>' : ''}
+                            ${index === 0 ? '<span class="cheapest-tag">המחיר הכי זול לחיפוש שלך</span>' : ''}
                             <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
                                 <img src="${item.thumbnail || 'https://ui-avatars.com/api/?name='+store}" style="width:35px; height:35px; border-radius:6px; object-fit:contain;">
                                 <span class="store-name">חנות: ${store}</span>
-                                ${isItMed ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
                             </div>
                             <strong style="display:block; cursor:pointer;" onclick="window.open('${cleanLink}', '_blank')">${item.title}</strong>
                             <span class="price">₪${item.extracted_price}</span>
                             <div class="actions">
-                                <button class="btn-action btn-copy" onclick="doCopy('${cleanLink}', this)">העתק לינק</button>
-                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + cleanLink)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
+                                <button class="btn-action btn-copy" onclick="doCopy('${cleanLink}', this)">העתק לינק לקנייה</button>
+                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי את המחיר הכי זול בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + cleanLink)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
                             </div>`;
                         resDiv.appendChild(box);
                     });
                 } else resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>";
-            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור. נסה שוב.</p>"; }
+            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור. נסה שוב בעוד רגע.</p>"; }
         }
-        function doCopy(v, b) { navigator.clipboard.writeText(v); b.innerText = "✓ הועתק!"; setTimeout(() => b.innerText = "העתק לינק", 2000); }
+        function doCopy(v, b) { navigator.clipboard.writeText(v); b.innerText = "✓ הועתק!"; setTimeout(() => b.innerText = "העתק לינק לקנייה", 2000); }
     </script>
 </body>
 </html>
