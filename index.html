@@ -8,9 +8,15 @@
         body { font-family: system-ui, -apple-system, sans-serif; background: #f4f4f4; direction: rtl; margin: 0; padding-bottom: 140px; text-align: center; }
         .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
-        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); position: relative; }
+        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 5px; box-sizing: border-box; font-size: 16px; outline: none; }
+        
+        #suggestions { position: absolute; background: white; width: calc(100% - 50px); border: 1px solid #ddd; border-radius: 10px; z-index: 1000; display: none; text-align: right; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; }
+        .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 14px; }
+        .suggestion-item:last-child { border-bottom: none; }
+        .suggestion-item:hover { background: #f0f7ff; }
+
+        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
         .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid #eee; position: relative; }
         .cheapest { border: 2px solid #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
         .cheapest-tag { background: #3b82f6; color: white; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; position: absolute; top: -10px; left: 15px; }
@@ -23,14 +29,14 @@
         .paypal-bar { background: rgba(244, 244, 244, 0.98); padding: 10px; border-top: 1px solid #ddd; }
         .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; border: 2px solid #edb120; }
         .footer-orange-bar { background: #ff9800; color: white; padding: 15px; font-weight: bold; }
-        .medical-tag { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; margin-right: auto; }
     </style>
 </head>
 <body>
     <div class="header"><h1>זול צ'ק</h1><p>השוואת מחירים חכמה מכל העולם</p></div>
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="מה תרצה לקנות?">
+            <input type="text" id="q" placeholder="מה תרצה לקנות?" autocomplete="off" oninput="showSuggestions(this.value)">
+            <div id="suggestions"></div>
             <button onclick="search()">חפש עכשיו</button>
         </div>
         <div id="results"></div>
@@ -40,11 +46,42 @@
         <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק</div>
     </div>
     <script>
+        const brands = {
+            "טלפון": ["סמסונג", "אייפון", "שיאומי", "גוגל פיקסל", "וואן פלוס"],
+            "טלוויזיה": ["LG", "סמסונג", "סוני", "הייסנס", "TCL", "פיליפס"],
+            "מחשב": ["אפל מקבוק", "דל", "HP", "לנובו", "אסוס"]
+        };
+
+        function showSuggestions(val) {
+            const container = document.getElementById('suggestions');
+            container.innerHTML = '';
+            if (!val) { container.style.display = 'none'; return; }
+            let found = false;
+            for (let key in brands) {
+                if (val.includes(key)) {
+                    brands[key].forEach(brand => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.innerText = key + " " + brand;
+                        div.onclick = () => {
+                            document.getElementById('q').value = key + " " + brand;
+                            container.style.display = 'none';
+                            search();
+                        };
+                        container.appendChild(div);
+                    });
+                    found = true;
+                }
+            }
+            container.style.display = found ? 'block' : 'none';
+        }
+
         async function search() {
             const q = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
+            document.getElementById('suggestions').style.display = 'none';
             if(!q) return;
-            resDiv.innerHTML = "<p>בודק מחירים בזול צ'ק...</p>";
+            resDiv.innerHTML = "<p>זול צ'ק בודק עבורך...</p>";
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}`);
                 const d = await r.json();
@@ -52,18 +89,9 @@
                 if(d.shopping_results) {
                     let results = d.shopping_results;
                     const searchWords = q.toLowerCase().split(/\s+/).filter(w => w.length > 1);
-                    const medKeywords = ['תפרחת', 'זן', 't20', 't15', 'קנאביס', 'שמן', 'רפואי'];
-                    const isMedSearch = medKeywords.some(w => q.toLowerCase().includes(w));
-                    
                     results = results.filter(item => {
                         const t = item.title.toLowerCase();
-                        const p = item.extracted_price;
-                        if (p < 5 && q.length > 5) return false;
-                        if (isMedSearch) {
-                            const hasMed = medKeywords.some(w => t.includes(w) || (item.source || "").toLowerCase().includes('מרקחת') || (item.source || "").toLowerCase().includes('פארם'));
-                            const isTrash = t.includes('תחתון') || t.includes('בגד') || t.includes('מברג') || t.includes('bit');
-                            return hasMed && !isTrash;
-                        }
+                        if (item.extracted_price < 5 && q.length > 5) return false;
                         return searchWords.every(word => t.includes(word));
                     });
                     results.sort((a, b) => a.extracted_price - b.extracted_price);
@@ -72,18 +100,16 @@
                         const link = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
                         const box = document.createElement('div');
                         box.className = 'product-box' + (index === 0 ? ' cheapest' : '');
-                        const isItMed = medKeywords.some(w => item.title.toLowerCase().includes(w)) || store.toLowerCase().includes('מרקחת');
                         box.innerHTML = `
                             ${index === 0 ? '<span class="cheapest-tag">המחיר המשתלם ביותר</span>' : ''}
                             <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
                                 <img src="${item.thumbnail || 'https://ui-avatars.com/api/?name='+store}" style="width:35px; height:35px; border-radius:6px; object-fit:contain;">
                                 <span class="store-name">חנות: ${store}</span>
-                                ${isItMed ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
                             </div>
                             <strong style="display:block; cursor:pointer;" onclick="window.open('${link}', '_blank')">${item.title}</strong>
                             <span class="price">₪${item.extracted_price}</span>
                             <div class="actions">
-                                <button class="btn-action btn-copy" onclick="doCopy('${link}', this)">העתק לינק</button>
+                                <button class="btn-action btn-copy" onclick="doCopy(this, '${link.replace(/'/g, "\\'")}')">העתק לינק</button>
                                 <a href="https://wa.me/?text=${encodeURIComponent('מצאתי בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
                             </div>`;
                         resDiv.appendChild(box);
@@ -91,7 +117,29 @@
                 } else resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>";
             } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; }
         }
-        function doCopy(v, b) { navigator.clipboard.writeText(v); b.innerText = "✓ הועתק!"; setTimeout(() => b.innerText = "העתק לינק", 2000); }
+
+        function doCopy(btn, text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            textArea.style.top = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            textArea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                const originalText = btn.innerText;
+                btn.innerText = "✓ הועתק!";
+                btn.style.background = "#2ecc71";
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = "#34495e";
+                }, 2000);
+            } catch (err) { console.error('Copy failed', err); }
+            document.body.removeChild(textArea);
+        }
     </script>
 </body>
 </html>
