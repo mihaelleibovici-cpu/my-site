@@ -10,15 +10,12 @@
     <meta name="theme-color" content="#3b82f6">
 
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 80px; }
+        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 140px; }
         .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
         input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        
-        .paypal-section { margin: 20px 0; }
-        .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #edb120; }
         
         .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
         .source-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -31,7 +28,11 @@
         .btn-copy { background: #34495e; color: white; }
         .btn-whatsapp { background: #25D366; color: white; }
 
-        .footer-orange-bar { background: #ff8c00; color: white; padding: 15px; font-weight: bold; font-size: 16px; position: fixed; bottom: 0; width: 100%; left: 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; }
+        .bottom-area { position: fixed; bottom: 0; width: 100%; left: 0; z-index: 100; }
+        .paypal-bar { background: rgba(244, 244, 244, 0.95); padding: 10px; border-top: 1px solid #ddd; }
+        .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 14px; border: 2px solid #edb120; }
+
+        .footer-orange-bar { background: #ff9800; color: white; padding: 15px; font-weight: bold; font-size: 16px; }
         .medical-tag { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; margin-right: auto; border: 1px solid #c8e6c9; }
     </style>
 </head>
@@ -43,19 +44,19 @@
 
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="מה תרצה לקנות? (מוצר או תפרחת)">
+            <input type="text" id="q" placeholder="רשום שם של זן או מוצר...">
             <button onclick="search()">חפש עכשיו</button>
         </div>
-
-        <div class="paypal-section">
-            <a href="https://www.paypal.com/paypalme/m0546663240" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a>
-        </div>
-
         <div id="results"></div>
     </div>
 
-    <div class="footer-orange-bar">
-        © כל הזכויות שמורות למיכאל - זול צ'ק
+    <div class="bottom-area">
+        <div class="paypal-bar">
+            <a href="https://www.paypal.com/paypalme/m0546663240" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a>
+        </div>
+        <div class="footer-orange-bar">
+            © כל הזכויות שמורות למיכאל - זול צ'ק
+        </div>
     </div>
 
     <script>
@@ -63,7 +64,7 @@
             const query = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
             if(!query) return;
-            resDiv.innerHTML = "<p>בודק מחירים...</p>";
+            resDiv.innerHTML = "<p>בודק מחירים בזול צ'ק...</p>";
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
                 const d = await r.json();
@@ -71,24 +72,14 @@
                 if(d.shopping_results) {
                     let results = d.shopping_results;
                     
-                    // מנגנון סינון חכם לתפרחות וקנאביס רפואי
-                    if(query.includes('תפרחת') || query.includes('עישון')) {
-                        results = results.filter(item => 
-                            item.title.includes('תפרחת') || 
-                            item.title.includes('זן') || 
-                            item.title.includes('T') || 
-                            item.source.includes('מרקחת')
-                        );
-                    }
-
+                    // מיון אוטומטי מהזול ליקר ביותר
                     results.sort((a, b) => a.extracted_price - b.extracted_price);
                     
                     results.forEach((item) => {
                         const store = item.source || 'חנות כללית';
                         const link = item.link || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
                         const logoUrl = item.thumbnail || `https://ui-avatars.com/api/?name=${encodeURIComponent(store)}&background=3b82f6&color=fff`;
-                        
-                        const isMedical = item.title.includes('תפרחת') || store.includes('מרקחת') || store.includes('פארם');
+                        const isMedical = item.title.includes('תפרחת') || item.title.includes('T20') || store.includes('מרקחת');
 
                         const box = document.createElement('div');
                         box.className = 'product-box';
@@ -96,7 +87,7 @@
                             <div class="source-container">
                                 <img src="${logoUrl}" class="store-logo">
                                 <span class="store-name">חנות: ${store}</span>
-                                ${isMedical ? '<span class="medical-tag">⚕️ מוצר רפואי</span>' : ''}
+                                ${isMedical ? '<span class="medical-tag">⚕️ רפואי</span>' : ''}
                             </div>
                             <strong style="display:block;">${item.title}</strong>
                             <span class="price">₪${item.extracted_price}</span>
