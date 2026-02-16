@@ -13,8 +13,7 @@
         input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; text-align: center; }
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
         
-        /* שורת מותגים וזנים דינמית */
-        .brands-bar { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; margin-bottom: 10px; white-space: nowrap; min-height: 60px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .brands-bar { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; margin-bottom: 10px; white-space: nowrap; min-height: 60px; scrollbar-width: none; }
         .brand-chip { background: #fff; color: #3b82f6; padding: 10px 20px; border-radius: 25px; font-size: 14px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid #3b82f6; }
 
         .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
@@ -45,9 +44,7 @@
     <script>
         let allResults = [];
         let timer;
-
-        // רשימת זנים מובילים לקנאביס רפואי
-        const cannabisStrains = ["מרמלדה", "תכלת", "פיקאסו", "בלאק", "גורילה", "אלסקה", "ארז", "אבידקל", "מיקס", "סנסי"];
+        const cannabisStrains = ["מרמלדה", "תכלת", "פיקאסו", "בלאק", "גורילה", "אלסקה", "ארז", "אבידקל", "סנסי"];
         const commonBrands = ["LG", "SAMSUNG", "DYSON", "SONY", "SHARP", "BOSCH", "BEKO", "HAIER", "XIAOMI", "APPLE", "NIKE", "SHARK"];
 
         function handleInput() {
@@ -61,8 +58,8 @@
             timer = setTimeout(performSearch, 600);
         }
 
-        async function performSearch() {
-            const q = document.getElementById('q').value;
+        async function performSearch(customQuery = null) {
+            const q = customQuery || document.getElementById('q').value;
             if (!q) return;
 
             try {
@@ -73,22 +70,19 @@
                     allResults = d.shopping_results.filter(item => {
                         const title = item.title.toUpperCase();
                         const price = item.extracted_price || 0;
+                        const originalQ = document.getElementById('q').value;
 
-                        // סינון קנבס לציור כשמחפשים קנאביס
-                        if ((q.includes('קנאביס') || q.includes('תפרחת')) && 
-                            (title.includes('ציור') || title.includes('אמנות') || title.includes('בד') || price < 50)) {
+                        if ((originalQ.includes('קנאביס') || originalQ.includes('תפרחת')) && 
+                            (title.includes('ציור') || title.includes('קנבס') || title.includes('בד') || title.includes('קוניאק') || price < 50)) {
                             return false;
                         }
-
-                        // סינון מחירי זבל למכשירים יקרים
-                        if ((q.includes('מקרר') || q.includes('טלוויזיה')) && price < 200) return false;
-                        
+                        if ((originalQ.includes('מקרר') || originalQ.includes('טלוויזיה')) && price < 200) return false;
                         return price > 0;
                     });
-                    renderBrands(allResults, q);
+                    renderBrands(allResults, document.getElementById('q').value);
                     renderResults(allResults);
                 }
-            } catch (e) { console.log("error fetching"); }
+            } catch (e) { console.log("error"); }
         }
 
         function renderBrands(items, q) {
@@ -97,10 +91,8 @@
             let foundFilters = new Set();
 
             if (q.includes('קנאביס') || q.includes('תפרחת')) {
-                // הצגת זני קנאביס בשורת המותגים
                 cannabisStrains.forEach(strain => foundFilters.add(strain));
             } else {
-                // הצגת מותגי מוצרים רגילים
                 items.forEach(item => {
                     const title = item.title.toUpperCase();
                     commonBrands.forEach(b => { if (title.includes(b)) foundFilters.add(b); });
@@ -111,7 +103,13 @@
                 const btn = document.createElement('button');
                 btn.className = 'brand-chip';
                 btn.innerText = f;
-                btn.onclick = () => renderResults(allResults.filter(i => i.title.toUpperCase().includes(f.toUpperCase())));
+                btn.onclick = () => {
+                    if (cannabisStrains.includes(f)) {
+                        performSearch(f + " תפרחת קנאביס");
+                    } else {
+                        renderResults(allResults.filter(i => i.title.toUpperCase().includes(f.toUpperCase())));
+                    }
+                };
                 bDiv.appendChild(btn);
             });
         }
