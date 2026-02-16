@@ -3,56 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>זול צ'ק - השוואת מחירים</title>
+    <title>זול צ'ק - מיכאל</title>
     <style>
-        body { font-family: sans-serif; background-color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-        .logo { font-size: 85px; font-weight: bold; color: #4a86e8; margin-top: 60px; text-align: center; }
-        .tagline { font-size: 20px; color: #555; margin-bottom: 45px; text-align: center; }
+        /* העיצוב האורגינל המדויק מאתמול */
+        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        .search-container { width: 100%; max-width: 500px; text-align: center; position: relative; }
-        input[type="text"] { width: 100%; padding: 18px; font-size: 22px; border-radius: 50px; border: 1px solid #ddd; outline: none; margin-bottom: 25px; text-align: center; box-sizing: border-box; }
-        
-        .btn-search { width: 85%; padding: 18px; font-size: 24px; font-weight: bold; border-radius: 50px; background-color: #2b579a; color: white; border: none; cursor: pointer; margin-bottom: 40px; }
+        .blue-header { background-color: #4a86e8; width: 100%; height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; border-radius: 0 0 50px 50px; position: relative; }
+        .logo-main { font-size: 80px; font-weight: bold; margin-bottom: 10px; }
+        .sub-main { font-size: 20px; font-weight: normal; margin-bottom: 40px; text-align: center; width: 85%; }
 
-        #resultsWrapper { width: 100%; max-width: 500px; display: none; }
-        .result-card { border: 2px solid #ddd; border-radius: 20px; padding: 20px; margin-bottom: 20px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .search-card { background: white; width: 90%; max-width: 450px; border-radius: 25px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: -80px; z-index: 10; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
+        
+        input[type="text"] { width: 100%; padding: 15px; font-size: 20px; border: 1px solid #ddd; border-radius: 15px; outline: none; margin-bottom: 20px; text-align: center; }
+        
+        .btn-search { width: 100%; padding: 18px; font-size: 24px; font-weight: bold; border-radius: 15px; background-color: #4a86e8; color: white; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(74, 134, 232, 0.3); }
+
+        /* ריבועי התוצאות מהעיצוב האורגינל */
+        #resultsWrapper { width: 90%; max-width: 450px; margin-top: 30px; display: none; }
+        .result-card { background: white; border: 2px solid #ddd; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .winner { border-color: #28a745; }
         
-        .store-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .store-info { font-size: 18px; font-weight: bold; color: #555; }
-        
-        .product-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; text-align: right; }
-        .price-tag { font-size: 32px; font-weight: bold; color: #4a86e8; text-align: right; margin-bottom: 20px; display: block; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .store-name { font-size: 18px; font-weight: bold; color: #555; }
+        .medical-tag { background: #e8f0fe; color: #4a86e8; padding: 5px 12px; border-radius: 8px; font-size: 14px; font-weight: bold; }
+
+        .product-title { font-size: 22px; font-weight: bold; color: #000; margin-bottom: 10px; text-align: right; line-height: 1.3; }
+        .price-text { font-size: 36px; font-weight: bold; color: #4a86e8; text-align: right; margin-bottom: 20px; display: block; }
         
         .card-buttons { display: flex; gap: 10px; }
-        .btn-card { flex: 1; padding: 12px; border-radius: 12px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; text-align: center; text-decoration: none; }
+        .btn-action { flex: 1; padding: 15px; border-radius: 12px; font-size: 20px; font-weight: bold; border: none; cursor: pointer; text-decoration: none; text-align: center; }
+        .btn-wa { background-color: #2ecc71; color: white; }
         .btn-copy { background-color: #34495e; color: white; }
-        .btn-wa { background-color: #58d68d; color: white; }
 
-        .footer { margin-top: auto; padding: 40px 0; text-align: center; width: 100%; }
+        .donate-btn { background-color: #f1c40f; color: #2b579a; font-weight: bold; padding: 15px 40px; border-radius: 50px; text-decoration: none; margin-top: 30px; font-size: 20px; display: inline-block; }
+        
+        .footer-text { margin-top: 50px; padding: 30px 0; text-align: center; width: 100%; font-size: 18px; color: #333; font-weight: bold; border-top: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
-    <div class="logo">זול צ'ק</div>
-    <div class="tagline">המחיר הכי זול בארץ ובחו"ל בלחיצה אחת</div>
+    <div class="blue-header">
+        <div class="logo-main">זול צ'ק</div>
+        <div class="sub-main">השוואת מחירים חכמה לכל סוגי החנויות</div>
+    </div>
 
-    <div class="search-container">
-        <input type="text" id="mainInput" placeholder="חפש מוצר..." autocomplete="off">
-        <button class="btn-search" id="searchBtn">חפש מחיר</button>
+    <div class="search-card">
+        <input type="text" id="mainInput" placeholder="מה תרצה לקנות? (מוצר או תפו..." autocomplete="off">
+        <button class="btn-search" id="searchBtn">חפש עכשיו</button>
+    </div>
+
+    <div style="text-align: center; width: 100%;">
+        <a href="#" class="donate-btn">תמיכה בפייפאל - זול צ'ק</a>
     </div>
 
     <div id="resultsWrapper">
         <div id="resultsList"></div>
     </div>
 
-    <div class="footer">
-        <p style="font-weight: bold;">תרומה לקידום הפרויקט:</p>
-        <form action="https://www.paypal.com/donate" method="post" target="_top">
-            <input type="hidden" name="hosted_button_id" value="YOUR_PAYPAL_ID" />
-            <input type="image" src="https://www.paypalobjects.com/he_IL/IL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate" />
-        </form>
-        <div style="margin-top: 20px; font-size: 14px; color: #999;">כל הזכויות שמורות לזול צ'ק © 2026 - מיכאל</div>
+    <div class="footer-text">
+        © כל הזכויות שמורות למיכאל - זול צ'ק
     </div>
 
     <script>
@@ -60,6 +69,7 @@
             const inputField = document.getElementById('mainInput');
             const resultsWrapper = document.getElementById('resultsWrapper');
 
+            // חוק הסמן [cite: 2025-10-14]
             function fixCursor(el) {
                 setTimeout(() => {
                     const pos = el.value.length;
@@ -73,16 +83,18 @@
 
                 resultsWrapper.style.display = 'block';
                 
+                // החזרת הנתונים לריבועים כפי שמופיע בתמונה 1000050007.jpg
                 document.getElementById('resultsList').innerHTML = `
                     <div class="result-card winner">
-                        <div class="store-header">
-                            <div class="store-info">חנות: BULLmarket</div>
+                        <div class="card-header">
+                            <span class="medical-tag">⚕️ רפואי</span>
+                            <span class="store-name">חנות: BULLmarket</span>
                         </div>
-                        <div class="product-title">${q} - נמצא עבורך מחיר זול</div>
-                        <span class="price-tag">₪2,490</span>
+                        <div class="product-title">${q} - תוצאה שנמצאה עבורך</div>
+                        <span class="price-text">₪12.9</span>
                         <div class="card-buttons">
-                            <a href="https://wa.me/?text=מצאתי מוצר בזול צ'ק" target="_blank" class="btn-card btn-wa">וואטסאפ</a>
-                            <button class="btn-card btn-copy" onclick="navigator.clipboard.writeText(window.location.href); alert('הלינק הועתק')">העתק לינק</button>
+                            <a href="https://wa.me/" target="_blank" class="btn-action btn-wa">וואטסאפ</a>
+                            <button class="btn-action btn-copy" onclick="navigator.clipboard.writeText(window.location.href); alert('הלינק הועתק')">העתק לינק</button>
                         </div>
                     </div>
                 `;
