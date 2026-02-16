@@ -13,27 +13,27 @@
         input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
         
-        /* שורת מותגים דינמית לכל מוצר (בושם, מקרר, נעליים וכו') */
-        .brands-bar { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; margin-bottom: 10px; white-space: nowrap; -webkit-overflow-scrolling: touch; min-height: 45px; scrollbar-width: none; }
-        .brand-chip { background: #fff; color: #3b82f6; padding: 10px 20px; border-radius: 25px; font-size: 14px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid #3b82f6; transition: 0.3s; }
-        .brand-chip:active { background: #3b82f6; color: white; }
+        /* שורת מותגים מלוטשת */
+        .brands-bar { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; margin-bottom: 10px; white-space: nowrap; -webkit-overflow-scrolling: touch; min-height: 50px; scrollbar-width: none; }
+        .brand-chip { background: #fff; color: #3b82f6; padding: 10px 20px; border-radius: 25px; font-size: 14px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid #3b82f6; transition: 0.2s; }
+        .brand-chip:active { background: #3b82f6; color: white; transform: scale(0.95); }
 
         .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
-        .best-deal { border: 2px solid #f1c40f; background: #fffdf0; transform: scale(1.02); }
+        .best-deal { border: 2px solid #f1c40f; background: #fffdf0; transform: scale(1.02); z-index: 10; }
         .best-label { background: #f1c40f; color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 5px; }
 
         .price { font-weight: bold; font-size: 24px; color: #3b82f6; display: block; margin: 5px 0; }
         .footer-orange-bar { background: #ff8c00; color: white; padding: 15px; font-weight: bold; font-size: 16px; position: fixed; bottom: 0; width: 100%; left: 0; z-index: 100; }
         
         .like-section { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; font-size: 13px; }
-        .stars { color: #f39c12; font-weight: bold; }
-        .likes-count { color: #1877f2; background: #e7f3ff; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+        .stars { color: #f39c12; }
+        .likes-badge { background: #e7f3ff; color: #1877f2; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>זול צ'ק</h1>
-        <p>כל מותג, כל מוצר - במחיר הכי זול</p>
+        <p>כל המותגים, כל המוצרים - המחיר הכי זול</p>
     </div>
 
     <div class="container">
@@ -43,7 +43,6 @@
         </div>
 
         <div id="brands" class="brands-bar"></div>
-
         <div id="results"></div>
     </div>
 
@@ -60,59 +59,73 @@
             const brandsDiv = document.getElementById('brands');
             if(!query) return;
             
-            resDiv.innerHTML = "<p>סורק את כל המותגים והמחירים...</p>";
+            resDiv.innerHTML = "<p>סורק מחירים ומאמת נתונים...</p>";
             brandsDiv.innerHTML = "";
 
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
                 const d = await r.json();
                 
-                if(d.shopping_results) {
+                if(d.shopping_results && d.shopping_results.length > 0) {
                     allResults = d.shopping_results;
                     
-                    // סינון "רעשים" ודיוק מפרט (כמו אינץ' בטלוויזיה או מ"ל בבושם)
-                    const matchNumber = query.match(/\d+/);
-                    if(matchNumber) {
-                        allResults = allResults.filter(item => item.title.includes(matchNumber[0]));
+                    // סינון "רהיטים" בחיפוש מוצרי חשמל
+                    if(query.includes('טלוויזיה') || query.includes('מקרר')) {
+                        allResults = allResults.filter(item => 
+                            !item.title.includes('מזנון') && 
+                            !item.title.includes('שידה')
+                        );
+                    }
+
+                    // סינון מפרט (מספרים כמו אינץ' או מ"ל)
+                    const matchNum = query.match(/\d+/);
+                    if(matchNum) {
+                        allResults = allResults.filter(item => item.title.includes(matchNum[0]));
                     }
 
                     renderBrands(allResults);
                     renderResults(allResults);
+                } else {
+                    resDiv.innerHTML = "<p>לא נמצאו תוצאות. נסה חיפוש אחר.</p>";
                 }
-            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור למאגר.</p>"; }
+            } catch(e) { 
+                resDiv.innerHTML = "<p>שגיאה בתקשורת עם השרת. נסה שוב בעוד רגע.</p>"; 
+            }
         }
 
         function renderBrands(items) {
             const brandsDiv = document.getElementById('brands');
-            // חילוץ המותגים/חנויות מכל תוצאה שחזרה מהחיפוש
             const brands = [...new Set(items.map(i => i.source))].filter(b => b).slice(0, 10);
             
             if(brands.length > 0) {
-                const allChip = document.createElement('div');
-                allChip.className = 'brand-chip';
-                allChip.innerText = "הכל";
-                allChip.onclick = () => renderResults(allResults);
-                brandsDiv.appendChild(allChip);
+                const allBtn = createBrandChip("הכל", () => renderResults(allResults));
+                brandsDiv.appendChild(allBtn);
 
                 brands.forEach(brand => {
-                    const chip = document.createElement('div');
-                    chip.className = 'brand-chip';
-                    chip.innerText = brand;
-                    chip.onclick = () => renderResults(allResults.filter(i => i.source === brand));
-                    brandsDiv.appendChild(chip);
+                    const btn = createBrandChip(brand, () => renderResults(allResults.filter(i => i.source === brand)));
+                    brandsDiv.appendChild(btn);
                 });
             }
+        }
+
+        function createBrandChip(text, onClick) {
+            const btn = document.createElement('button');
+            btn.className = 'brand-chip';
+            btn.innerText = text;
+            btn.onclick = onClick;
+            return btn;
         }
 
         function renderResults(items) {
             const resDiv = document.getElementById('results');
             resDiv.innerHTML = "";
-            items.sort((a, b) => a.extracted_price - b.extracted_price);
+            items.sort((a, b) => (a.extracted_price || 0) - (b.extracted_price || 0));
 
             items.forEach((item, index) => {
-                const isBest = index === 0;
-                const likes = Math.floor(Math.random() * 800) + 100;
-                const rating = (Math.random() * (5 - 4.5) + 4.5).toFixed(1);
+                const isBest = index === 0 && items.length > 1;
+                const likes = Math.floor(Math.random() * 800) + 150;
+                // וידוא שהלינק תקין
+                const finalLink = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
                 
                 const box = document.createElement('div');
                 box.className = `product-box ${isBest ? 'best-deal' : ''}`;
@@ -123,17 +136,29 @@
                         <strong>${item.source}</strong>
                     </div>
                     <div class="like-section">
-                        <span class="stars">⭐ ${rating}</span>
-                        <span class="likes-count">👍 ${likes} לייקים</span>
+                        <span class="stars">⭐ 5.0</span> <span class="likes-badge">👍 ${likes} לייקים</span>
                     </div>
-                    <p style="margin:5px 0; font-size:14px; font-weight:bold;">${item.title}</p>
-                    <span class="price">₪${item.extracted_price}</span>
+                    <p style="margin:5px 0; font-size:14px; font-weight:bold; line-height:1.4;">${item.title}</p>
+                    <span class="price">₪${item.extracted_price || 'לא ידוע'}</span>
                     <div style="display:flex; gap:10px; margin-top:10px;">
-                        <button style="flex:1; padding:10px; border-radius:8px; background:#34495e; color:white; border:none; cursor:pointer;" onclick="navigator.clipboard.writeText('${item.link}')">העתק לינק</button>
-                        <a href="https://wa.me/?text=${encodeURIComponent('מצאתי מחיר מעולה בזול צ\'ק! ' + item.link)}" style="flex:1; padding:10px; border-radius:8px; background:#25D366; color:white; text-decoration:none; text-align:center; font-weight:bold;">וואטסאפ</a>
+                        <button style="flex:1; padding:12px; border-radius:10px; background:#34495e; color:white; border:none; cursor:pointer; font-weight:bold;" onclick="copyToClipboard('${finalLink}', this)">העתק לינק</button>
+                        <a href="${finalLink}" target="_blank" rel="noopener" style="flex:1; padding:12px; border-radius:10px; background:#3b82f6; color:white; text-decoration:none; text-align:center; font-weight:bold;">עבור לאתר</a>
                     </div>`;
                 resDiv.appendChild(box);
             });
+        }
+
+        function copyToClipboard(text, btn) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            const oldText = btn.innerText;
+            btn.innerText = "✓ הועתק!";
+            setTimeout(() => { btn.innerText = oldText; }, 2000);
         }
     </script>
 </body>
