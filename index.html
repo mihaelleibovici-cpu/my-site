@@ -48,7 +48,7 @@
         </div>
 
         <div class="paypal-section">
-            <a href="https://www.paypal.com/paypalme/m0546663240" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a>
+            <a href="https://www.paypal.com/paypalme/iareah" class="paypal-btn" target="_blank" rel="noopener">תמיכה בפייפאל - זול צ'ק</a>
         </div>
 
         <div id="results"></div>
@@ -71,7 +71,6 @@
                 if(d.shopping_results) {
                     let results = d.shopping_results;
                     
-                    // מנגנון סינון חכם לתפרחות וקנאביס רפואי
                     if(query.includes('תפרחת') || query.includes('עישון')) {
                         results = results.filter(item => 
                             item.title.includes('תפרחת') || 
