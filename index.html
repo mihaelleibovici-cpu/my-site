@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>זול צ'ק - מיכאל</title>
     <style>
-        /* העיצוב האורגינל והמדויק מאתמול - ללא שינוי */
         body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .blue-header { background-color: #4a86e8; width: 100%; height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; border-radius: 0 0 50px 50px; position: relative; }
         .logo-main { font-size: 80px; font-weight: bold; margin-bottom: 10px; }
@@ -15,14 +14,10 @@
         input[type="text"] { width: 100%; padding: 15px; font-size: 20px; border: 1px solid #ddd; border-radius: 15px; outline: none; margin-bottom: 20px; text-align: center; }
         .btn-search { width: 100%; padding: 18px; font-size: 24px; font-weight: bold; border-radius: 15px; background-color: #4a86e8; color: white; border: none; cursor: pointer; }
 
-        /* תוספת מותגים - צפה מעל המבנה הקיים */
-        .suggestions { position: absolute; top: 75px; left: 5%; right: 5%; background: white; border: 1px solid #ddd; border-radius: 15px; z-index: 1000; list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .suggestions li { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; text-align: right; font-size: 18px; }
-
-        /* ריבועי התוצאות מהמבנה של אתמול */
         #resultsWrapper { width: 90%; max-width: 450px; margin-top: 10px; display: none; }
         .result-card { background: white; border: 2px solid #28a745; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .price-text { font-size: 36px; font-weight: bold; color: #4a86e8; text-align: right; margin-bottom: 20px; display: block; }
+        
         .card-buttons { display: flex; gap: 10px; }
         .btn-action { flex: 1; padding: 15px; border-radius: 12px; font-size: 20px; font-weight: bold; border: none; cursor: pointer; text-decoration: none; text-align: center; }
         .btn-wa { background-color: #58d68d; color: white; }
@@ -40,7 +35,6 @@
     
     <div class="search-card">
         <input type="text" id="mainInput" placeholder="מה תרצה לקנות?">
-        <ul id="brandSuggestions" class="suggestions" style="display: none;"></ul>
         <button class="btn-search" id="searchBtn">חפש עכשיו</button>
     </div>
 
@@ -49,7 +43,7 @@
     </div>
 
     <div class="paypal-container">
-        <p style="font-weight: bold; color: #2b579a; font-size: 18px; margin-bottom: 10px;">תרומה לקידום הפרויקט:</p>
+        <p style="font-weight: bold; color: #2b579a; font-size: 18px; margin-bottom: 15px;">תמיכה בפייפאל - זול צ'ק</p>
         <form action="https://www.paypal.com/donate" method="post" target="_top">
             <input type="hidden" name="hosted_button_id" value="76XN7D8P99P6N" />
             <input type="image" src="https://www.paypalobjects.com/he_IL/IL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal" />
@@ -60,58 +54,28 @@
 
     <script>
         (function() {
-            // מאגר מותגים מורחב לכל הקטגוריות
-            const MASTER_DATA = { 
-                'מזגן': ['טורנדו', 'אלקטרה', 'תדיראן'], 
-                'טלוויזיה': ['סמסונג', 'LG', 'סוני'], 
-                'מקרר': ['סמסונג', 'LG', 'שרפ'],
-                'נעליים': ['נייקי', 'אדידס', 'גורדן'],
-                'שעון': ['רולקס', 'קאסיו', 'אפל'],
-                'בושם': ['CK', 'דיור', 'ורסצ\'ה']
-            };
-            const PHARM_DB = ['תפרחת', 'קנאביס', 'קוקי קוש'];
-            
             const inputField = document.getElementById('mainInput');
-            const suggestions = document.getElementById('brandSuggestions');
             const resultsWrapper = document.getElementById('resultsWrapper');
 
             function fixCursor(el) { setTimeout(() => { const pos = el.value.length; el.setSelectionRange(pos, pos); }, 0); }
-
-            inputField.addEventListener('input', (e) => {
-                const val = e.target.value.trim();
-                suggestions.innerHTML = '';
-                if (MASTER_DATA[val]) {
-                    MASTER_DATA[val].forEach(b => {
-                        const li = document.createElement('li');
-                        li.textContent = b;
-                        li.onclick = () => { inputField.value = val + ' ' + b; suggestions.style.display = 'none'; fixCursor(inputField); };
-                        suggestions.appendChild(li);
-                    });
-                    suggestions.style.display = 'block';
-                } else { suggestions.style.display = 'none'; }
-                fixCursor(e.target);
-            });
 
             document.getElementById('searchBtn').onclick = () => {
                 const q = inputField.value.trim();
                 if (!q) return;
                 resultsWrapper.style.display = 'block';
-                const lowQ = q.toLowerCase();
-                let store = "BULLmarket";
-                if (PHARM_DB.some(term => lowQ.includes(term))) { store = "בתי מרקחת"; }
-
                 document.getElementById('resultsList').innerHTML = `
                     <div class="result-card">
-                        <div style="font-weight:bold; margin-bottom:10px; color:#555;">חנות: ${store}</div>
+                        <div style="font-weight:bold; margin-bottom:10px; color:#555;">חנות: BULLmarket</div>
                         <div style="font-size:22px; margin-bottom:10px; font-weight:bold;">${q}</div>
                         <span class="price-text">₪12.9</span>
                         <div class="card-buttons">
-                            <a href="https://wa.me/?text=מצאתי ${q} בזול צ'ק" target="_blank" class="btn-action btn-wa">וואטסאפ</a>
+                            <a href="https://wa.me/" target="_blank" class="btn-action btn-wa">וואטסאפ</a>
                             <button class="btn-action btn-copy" onclick="alert('הלינק הועתק')">העתק לינק</button>
                         </div>
                     </div>`;
                 resultsWrapper.scrollIntoView({ behavior: 'smooth' });
             };
+            inputField.addEventListener('input', (e) => fixCursor(e.target));
             inputField.addEventListener('focus', (e) => fixCursor(e.target));
         })();
     </script>
