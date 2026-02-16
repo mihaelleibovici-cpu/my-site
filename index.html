@@ -194,10 +194,12 @@
                 if (d.shopping_results) {
                     allResults = d.shopping_results.filter(item => {
                         const price = item.extracted_price || 0;
-                        if ((q.includes('מקרר') || q.includes('טלוויזיה') || q.includes('שואב')) && price < 150) {
+                        // ליטוש אמינות למכשירים יקרים - מחיר מינימלי למניעת זיופים
+                        const isExpensive = q.includes('מקרר') || q.includes('טלוויזיה') || q.includes('שואב') || q.includes('מזגן');
+                        if (isExpensive && price < 200) {
                             return false;
                         }
-                        return true;
+                        return price > 0;
                     });
                     renderBrands(allResults);
                     renderResults(allResults);
@@ -210,7 +212,7 @@
         function renderBrands(items) {
             const bDiv = document.getElementById('brands');
             bDiv.innerHTML = "";
-            const commonBrands = ["LG", "SAMSUNG", "DYSON", "SONY", "SHARP", "BOSCH", "BEKO", "HAIER", "XIAOMI", "APPLE", "NIKE", "SHARK"];
+            const commonBrands = ["LG", "SAMSUNG", "DYSON", "SONY", "SHARP", "BOSCH", "BEKO", "HAIER", "XIAOMI", "APPLE", "NIKE", "SHARK", "MIDEA", "AMCOR"];
             let foundBrands = new Set();
 
             items.forEach(item => {
@@ -241,10 +243,10 @@
                 
                 box.innerHTML = `
                     <strong>${item.source}</strong>
-                    <p style="font-size:14px;">${item.title}</p>
+                    <p style="font-size:14px; font-weight: bold;">${item.title}</p>
                     <span class="price">₪${item.extracted_price}</span>
                     <div style="display:flex; gap:10px; margin-top:10px;">
-                        <button style="flex:1; padding:10px; border-radius:8px; background:#34495e; color:white; border:none;" onclick="copyText('${link}')">העתק לינק</button>
+                        <button style="flex:1; padding:10px; border-radius:8px; background:#34495e; color:white; border:none; cursor:pointer;" onclick="copyText('${link}')">העתק לינק</button>
                         <a href="${link}" target="_blank" style="flex:1; padding:10px; border-radius:8px; background:#3b82f6; color:white; text-decoration:none; text-align:center;">עבור לאתר</a>
                     </div>
                 `;
