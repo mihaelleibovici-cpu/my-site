@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>זול צ'ק - השוואת מחירים</title>
     <style>
-        /* חזרה לעיצוב האורגינל והמדויק של מיכאל */
         body { font-family: sans-serif; background-color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
         .logo { font-size: 85px; font-weight: bold; color: #4a86e8; margin-top: 60px; text-align: center; }
         .tagline { font-size: 20px; color: #555; margin-bottom: 45px; text-align: center; }
@@ -13,14 +12,23 @@
         .search-container { width: 100%; max-width: 500px; text-align: center; position: relative; }
         input[type="text"] { width: 100%; padding: 18px; font-size: 22px; border-radius: 50px; border: 1px solid #ddd; outline: none; margin-bottom: 25px; text-align: center; box-sizing: border-box; }
         
-        .btn-search { width: 85%; padding: 18px; font-size: 24px; font-weight: bold; border-radius: 50px; background-color: #2b579a; color: white; border: none; cursor: pointer; }
+        .btn-search { width: 85%; padding: 18px; font-size: 24px; font-weight: bold; border-radius: 50px; background-color: #2b579a; color: white; border: none; cursor: pointer; margin-bottom: 40px; }
+
+        /* מבנה הריבועים מהתמונה הישנה */
+        #resultsWrapper { width: 100%; max-width: 500px; display: none; }
+        .result-card { border: 2px solid #ddd; border-radius: 20px; padding: 20px; margin-bottom: 20px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .winner { border-color: #28a745; }
         
-        /* תוצאות בתוך האתר - שמות חנויות ומחירים */
-        #resultsWrapper { width: 100%; max-width: 500px; display: none; margin-top: 30px; }
-        .result-card { border: 2px solid #ddd; border-radius: 15px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .winner { border: 2px solid #28a745; background-color: #f0fff4; } 
-        .store-name { font-size: 18px; font-weight: bold; color: #333; }
-        .price-text { color: #28a745; font-weight: bold; font-size: 28px; display: block; }
+        .store-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .store-info { font-size: 18px; font-weight: bold; color: #555; }
+        
+        .product-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; text-align: right; }
+        .price-tag { font-size: 32px; font-weight: bold; color: #4a86e8; text-align: right; margin-bottom: 20px; display: block; }
+        
+        .card-buttons { display: flex; gap: 10px; }
+        .btn-card { flex: 1; padding: 12px; border-radius: 12px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; text-align: center; text-decoration: none; }
+        .btn-copy { background-color: #34495e; color: white; }
+        .btn-wa { background-color: #58d68d; color: white; }
 
         .footer { margin-top: auto; padding: 40px 0; text-align: center; width: 100%; }
     </style>
@@ -36,7 +44,6 @@
     </div>
 
     <div id="resultsWrapper">
-        <h3 style="text-align: right;">תוצאות השוואה:</h3>
         <div id="resultsList"></div>
     </div>
 
@@ -46,18 +53,14 @@
             <input type="hidden" name="hosted_button_id" value="YOUR_PAYPAL_ID" />
             <input type="image" src="https://www.paypalobjects.com/he_IL/IL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate" />
         </form>
-        <div style="margin-top: 15px; font-size: 14px; color: #999;">כל הזכויות שמורות לזול צ'ק © 2026 - מיכאל</div>
+        <div style="margin-top: 20px; font-size: 14px; color: #999;">כל הזכויות שמורות לזול צ'ק © 2026 - מיכאל</div>
     </div>
 
     <script>
         (function() {
-            // מאגר נתונים מעודכן
-            const PHARM_DB = ['דסטיני','יודה','גוראקאן','ג\'י אם או','wedding','דון קוש','גופ','ארלו','rs11','תפרחת','קנאביס','t22','t20','c4','קוקי קוש'];
-            
             const inputField = document.getElementById('mainInput');
             const resultsWrapper = document.getElementById('resultsWrapper');
 
-            // חוק הסמן - שלא יקפוץ בסמסונג S24
             function fixCursor(el) {
                 setTimeout(() => {
                     const pos = el.value.length;
@@ -70,31 +73,19 @@
                 if (!q) return;
 
                 resultsWrapper.style.display = 'block';
-                const lowQ = q.toLowerCase();
                 
-                let link1 = `https://www.google.com/search?q=${encodeURIComponent(q)}+מחיר`;
-                let name1 = "חנות מקומית (ישראל)";
-                
-                if (PHARM_DB.some(term => lowQ.includes(term))) {
-                    link1 = `https://www.isracann.com/search?q=${encodeURIComponent(q)}`;
-                    name1 = "מלאי בתי מרקחת";
-                }
-
-                // הצגת שם החנות והמחיר באתר שלך
+                // החזרת הנתונים לריבועים
                 document.getElementById('resultsList').innerHTML = `
                     <div class="result-card winner">
-                        <div style="text-align: right;">
-                            <span class="store-name">${name1}</span>
-                            <span class="price-text">₪2,490</span>
+                        <div class="store-header">
+                            <div class="store-info">חנות: BULLmarket</div>
                         </div>
-                        <a href="${link1}" target="_blank" style="background:#2b579a; color:white; padding:12px 20px; border-radius:20px; text-decoration:none; font-weight:bold;">מעבר לקנייה</a>
-                    </div>
-                    <div class="result-card">
-                        <div style="text-align: right;">
-                            <span class="store-name">אלי אקספרס (חו"ל)</span>
-                            <span class="price-text">₪2,150</span>
+                        <div class="product-title">${q} - תוצאה הכי זולה שנמצאה</div>
+                        <span class="price-tag">₪2,490</span>
+                        <div class="card-buttons">
+                            <a href="https://wa.me/?text=מצאתי מוצר בזול צ'ק" class="btn-card btn-wa">וואטסאפ</a>
+                            <button class="btn-card btn-copy" onclick="alert('הלינק הועתק')">העתק לינק</button>
                         </div>
-                        <a href="https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(q)}" target="_blank" style="background:#2b5998; color:white; padding:12px 20px; border-radius:20px; text-decoration:none; font-weight:bold;">מעבר לקנייה</a>
                     </div>
                 `;
                 resultsWrapper.scrollIntoView({ behavior: 'smooth' });
