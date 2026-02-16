@@ -23,9 +23,12 @@
     </style>
 </head>
 <body>
-    <div class="header"><h1>זול צ'ק</h1><p>נתוני אמת - השוואה מדויקת</p></div>
+    <div class="header"><h1>זול צ'ק</h1><p>השוואת מחירים חכמה</p></div>
     <div class="container">
-        <div class="card"><input type="text" id="q" placeholder=""><button onclick="search()">חפש עכשיו</button></div>
+        <div class="card">
+            <input type="text" id="q" placeholder="" oninput="liveSearch()">
+            <button onclick="performSearch()">חפש עכשיו</button>
+        </div>
         <div id="brands" class="brands-bar"></div>
         <div id="results"></div>
     </div>
@@ -33,67 +36,69 @@
         <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/iareah" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a></div>
         <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק</div>
     </div>
-
     <script>
         let allResults = [];
-        async function search() {
-            const query = document.getElementById('q').value;
-            if(!query) return;
-            document.getElementById('results').innerHTML = "<p>מאמת נתונים מול החנויות...</p>";
+        let timer;
+
+        function liveSearch() {
+            clearTimeout(timer);
+            const q = document.getElementById('q').value;
+            if(!q) {
+                document.getElementById('brands').innerHTML = "";
+                return;
+            }
+            // מחכה חצי שנייה אחרי ההקלדה כדי לא להעמיס על השרת
+            timer = setTimeout(performSearch, 500);
+        }
+
+        async function performSearch() {
+            const q = document.getElementById('q').value;
+            if(!q) return;
             try {
-                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
+                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}`);
                 const d = await r.json();
                 if(d.shopping_results) {
-                    allResults = d.shopping_results.filter(item => {
-                        if((query.includes('מקרר') || query.includes('טלוויזיה')) && item.extracted_price < 500) return false;
+                    allResults = d.shopping_results.filter(i => {
+                        if((q.includes('מקרר') || q.includes('טלוויזיה')) && i.extracted_price < 500) return false;
                         return true;
                     });
                     renderBrands(allResults);
                     renderResults(allResults);
                 }
-            } catch(e) { document.getElementById('results').innerHTML = "<p>שגיאה בחיבור.</p>"; }
+            } catch(e) { console.log("error fetching"); }
         }
 
         function renderBrands(items) {
-            const brandsDiv = document.getElementById('brands');
-            brandsDiv.innerHTML = "";
+            const bDiv = document.getElementById('brands');
+            bDiv.innerHTML = "";
             const brands = [...new Set(items.map(i => i.source))].filter(b => b).slice(0, 10);
-            brands.forEach(brand => {
+            brands.forEach(b => {
                 const btn = document.createElement('button');
                 btn.className = 'brand-chip';
-                btn.innerText = brand;
-                btn.onclick = () => renderResults(allResults.filter(i => i.source === brand));
-                brandsDiv.appendChild(btn);
+                btn.innerText = b;
+                btn.onclick = () => renderResults(allResults.filter(i => i.source === b));
+                bDiv.appendChild(btn);
             });
         }
 
         function renderResults(items) {
-            const resDiv = document.getElementById('results');
-            resDiv.innerHTML = "";
+            const rDiv = document.getElementById('results');
+            rDiv.innerHTML = "";
             items.sort((a, b) => a.extracted_price - b.extracted_price);
             items.forEach((item, index) => {
-                const finalLink = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
+                const link = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
                 const box = document.createElement('div');
                 box.className = `product-box ${index === 0 ? 'best-deal' : ''}`;
-                box.innerHTML = `
-                    <strong>${item.source}</strong>
-                    <p style="font-size:14px;">${item.title}</p>
-                    <span class="price">₪${item.extracted_price}</span>
-                    <div style="display:flex; gap:10px; margin-top:10px;">
-                        <button style="flex:1; padding:10px; border-radius:8px; background:#34495e; color:white; border:none;" onclick="copyText('${finalLink}')">העתק לינק</button>
-                        <a href="${finalLink}" target="_blank" style="flex:1; padding:10px; border-radius:8px; background:#3b82f6; color:white; text-decoration:none;">עבור לאתר</a>
-                    </div>`;
-                resDiv.appendChild(box);
+                box.innerHTML = `<strong>${item.source}</strong><p style="font-size:14px;">${item.title}</p><span class="price">₪${item.extracted_price}</span><div style="display:flex; gap:10px; margin-top:10px;"><button style="flex:1; padding:10px; border-radius:8px; background:#34495e; color:white; border:none;" onclick="copyText('${link}')">העתק לינק</button><a href="${link}" target="_blank" style="flex:1; padding:10px; border-radius:8px; background:#3b82f6; color:white; text-decoration:none;">עבור לאתר</a></div>`;
+                rDiv.appendChild(box);
             });
         }
-        function copyText(txt) { 
-            const el = document.createElement('textarea');
-            el.value = txt;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            alert("הלינק הועתק!"); 
+
+        function copyText(t) {
+            const e = document.createElement('textarea');
+            e.value = t; document.body.appendChild(e);
+            e.select(); document.execCommand('copy');
+            document.body.removeChild(e); alert("הלינק הועתק!");
         }
     </script>
 </body>
