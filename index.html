@@ -23,12 +23,9 @@
     </style>
 </head>
 <body>
-    <div class="header"><h1>זול צ'ק</h1><p>נתוני אמת בלבד</p></div>
+    <div class="header"><h1>זול צ'ק</h1><p>נתוני אמת - השוואה מדויקת</p></div>
     <div class="container">
-        <div class="card">
-            <input type="text" id="q" placeholder="" oninput="handleInput()">
-            <button onclick="performSearch()">חפש עכשיו</button>
-        </div>
+        <div class="card"><input type="text" id="q" placeholder="" oninput="handleInput()"><button onclick="performSearch()">חפש עכשיו</button></div>
         <div id="brands" class="brands-bar"></div>
         <div id="results"></div>
     </div>
@@ -39,64 +36,46 @@
     <script>
         let allResults = [];
         let timer;
-
         function handleInput() {
             const q = document.getElementById('q').value;
-            if(!q) {
-                document.getElementById('brands').innerHTML = "";
-                document.getElementById('results').innerHTML = "";
-                allResults = [];
-                return;
-            }
+            if(!q) { document.getElementById('brands').innerHTML = ""; document.getElementById('results').innerHTML = ""; return; }
             clearTimeout(timer);
             timer = setTimeout(performSearch, 600);
         }
-
         async function performSearch() {
             const q = document.getElementById('q').value;
             if(!q) return;
-            const resDiv = document.getElementById('results');
-            resDiv.innerHTML = "<p>מושך מחירים מעודכנים מהחנויות...</p>";
-            
             try {
-                // הוספת מזהה ייחודי כדי למנוע נתונים ישנים (Cache Busting)
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}&t=${Date.now()}`);
                 const d = await r.json();
                 if(d.shopping_results) {
                     allResults = d.shopping_results.filter(i => {
-                        if((q.includes('מקרר') || q.includes('טלוויזיה') || q.includes('שואב')) && i.extracted_price < 100) return false;
+                        // פילטר אמינות קשוח: מקרר/שואב/טלוויזיה לא יכולים לעלות פחות מ-100 ש"ח
+                        const price = i.extracted_price || 0;
+                        if((q.includes('מקרר') || q.includes('טלוויזיה') || q.includes('שואב')) && price < 150) return false;
                         return true;
                     });
                     renderBrands(allResults);
                     renderResults(allResults);
                 }
-            } catch(e) { resDiv.innerHTML = "<p>שגיאה בעדכון הנתונים.</p>"; }
+            } catch(e) { console.log("error"); }
         }
-
         function renderBrands(items) {
             const bDiv = document.getElementById('brands');
             bDiv.innerHTML = "";
             const commonBrands = ["LG", "SAMSUNG", "DYSON", "SONY", "SHARP", "BOSCH", "BEKO", "HAIER", "XIAOMI", "APPLE", "NIKE", "SHARK"];
             let foundBrands = new Set();
-            
             items.forEach(item => {
                 const title = item.title.toUpperCase();
-                commonBrands.forEach(b => {
-                    if(title.includes(b)) foundBrands.add(b);
-                });
+                commonBrands.forEach(b => { if(title.includes(b)) foundBrands.add(b); });
             });
-
-            if(foundBrands.size > 0) {
-                foundBrands.forEach(b => {
-                    const btn = document.createElement('button');
-                    btn.className = 'brand-chip';
-                    btn.innerText = b;
-                    btn.onclick = () => renderResults(allResults.filter(i => i.title.toUpperCase().includes(b)));
-                    bDiv.appendChild(btn);
-                });
-            }
+            foundBrands.forEach(b => {
+                const btn = document.createElement('button');
+                btn.className = 'brand-chip'; btn.innerText = b;
+                btn.onclick = () => renderResults(allResults.filter(i => i.title.toUpperCase().includes(b)));
+                bDiv.appendChild(btn);
+            });
         }
-
         function renderResults(items) {
             const rDiv = document.getElementById('results');
             rDiv.innerHTML = "";
@@ -105,11 +84,10 @@
                 const link = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
                 const box = document.createElement('div');
                 box.className = `product-box ${index === 0 ? 'best-deal' : ''}`;
-                box.innerHTML = `<strong>${item.source}</strong><p style="font-size:14px;">${item.title}</p><span class="price">₪${item.extracted_price}</span><div style="display:flex; gap:10px; margin-top:10px;"><button style="flex:1; padding:10px; border-radius:8px; background:#34495e; color:white; border:none;" onclick="copyText('${link}')">העתק לינק</button><a href="${link}" target="_blank" style="flex:1; padding:10px; border-radius:8px; background:#3b82f6; color:white; text-decoration:none;">עבור לאתר</a></div>`;
+                box.innerHTML = `<strong>${item.source}</strong><p style="font-size:14px;">${item.title}</p><span class="price">₪${item.extracted_price}</span><div style="display:flex; gap:10px; margin-top:10px;"><button style="flex:1; padding:10px; border-radius:8px; background:#34495e; color:white; border:none;" onclick="copyText('${link}')">העתק לינק</button><a href="${link}" target="_blank" style="flex:1; padding:10px; border-radius:8px; background:#3b82f6; color:white; text-decoration:none; text-align:center;">עבור לאתר</a></div>`;
                 rDiv.appendChild(box);
             });
         }
-
         function copyText(t) {
             const e = document.createElement('textarea');
             e.value = t; document.body.appendChild(e);
