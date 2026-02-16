@@ -2,90 +2,123 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>זול צ'ק - מיכאל</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/263/263142.png">
+    <meta name="theme-color" content="#3b82f6">
+
     <style>
-        /* העיצוב המנצח של אתמול בלילה */
-        body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 80px; }
+        .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
+        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
         
-        .blue-header { background-color: #4a86e8; width: 100%; height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; border-radius: 0 0 50px 50px; position: relative; }
-        .logo-main { font-size: 80px; font-weight: bold; margin-bottom: 10px; }
-        .sub-main { font-size: 20px; font-weight: normal; margin-bottom: 40px; text-align: center; width: 85%; }
+        .paypal-section { margin: 20px 0; }
+        .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #edb120; }
+        
+        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .source-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .store-logo { width: 35px; height: 35px; border-radius: 6px; border: 1px solid #eee; object-fit: contain; background: white; }
+        .store-name { font-weight: bold; color: #555; font-size: 14px; }
+        .price { font-weight: bold; font-size: 22px; color: #3b82f6; display: block; margin: 5px 0; }
+        
+        .actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-action { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
+        .btn-copy { background: #34495e; color: white; }
+        .btn-whatsapp { background: #25D366; color: white; }
 
-        .search-card { background: white; width: 90%; max-width: 450px; border-radius: 25px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: -80px; z-index: 10; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; position: relative; margin-bottom: 20px; }
-        
-        input[type="text"] { width: 100%; padding: 15px; font-size: 20px; border: 1px solid #ddd; border-radius: 15px; outline: none; margin-bottom: 20px; text-align: center; }
-        
-        .btn-search { width: 100%; padding: 18px; font-size: 24px; font-weight: bold; border-radius: 15px; background-color: #4a86e8; color: white; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(74, 134, 232, 0.3); }
-
-        /* ריבועי התוצאות מהמבנה התקין */
-        #resultsWrapper { width: 90%; max-width: 450px; margin-top: 10px; display: none; }
-        .result-card { background: white; border: 2px solid #28a745; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        
-        .product-title { font-size: 22px; font-weight: bold; color: #000; margin-bottom: 10px; text-align: right; }
-        .price-text { font-size: 36px; font-weight: bold; color: #4a86e8; text-align: right; margin-bottom: 20px; display: block; }
-        
-        .card-buttons { display: flex; gap: 10px; }
-        .btn-action { flex: 1; padding: 15px; border-radius: 12px; font-size: 20px; font-weight: bold; border: none; cursor: pointer; text-decoration: none; text-align: center; }
-        .btn-wa { background-color: #58d68d; color: white; }
-        .btn-copy { background-color: #34495e; color: white; }
-
-        .paypal-container { margin: 30px 0; text-align: center; width: 100%; }
-        .footer-text { padding: 25px 0; text-align: center; width: 100%; font-size: 18px; color: #fff; font-weight: bold; background-color: #ff9933; margin-top: auto; }
+        .footer-orange-bar { background: #ff8c00; color: white; padding: 15px; font-weight: bold; font-size: 16px; position: fixed; bottom: 0; width: 100%; left: 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; }
+        .medical-tag { background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; margin-right: auto; border: 1px solid #c8e6c9; }
     </style>
 </head>
 <body>
-
-    <div class="blue-header">
-        <div class="logo-main">זול צ'ק</div>
-        <div class="sub-main">השוואת מחירים חכמה לכל סוגי החנויות</div>
+    <div class="header">
+        <h1>זול צ'ק</h1>
+        <p>השוואת מחירים חכמה לכל סוגי החנויות</p>
     </div>
 
-    <div class="search-card">
-        <input type="text" id="mainInput" placeholder="מה תרצה לקנות?">
-        <button class="btn-search" id="searchBtn">חפש עכשיו</button>
+    <div class="container">
+        <div class="card">
+            <input type="text" id="q" placeholder="מה תרצה לקנות? (מוצר או תפרחת)">
+            <button onclick="search()">חפש עכשיו</button>
+        </div>
+
+        <div class="paypal-section">
+            <a href="https://www.paypal.com/paypalme/m0546663240" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a>
+        </div>
+
+        <div id="results"></div>
     </div>
 
-    <div id="resultsWrapper">
-        <div id="resultsList"></div>
+    <div class="footer-orange-bar">
+        © כל הזכויות שמורות למיכאל - זול צ'ק
     </div>
-
-    <div class="paypal-container">
-        <p style="font-weight: bold; color: #2b579a; font-size: 18px; margin-bottom: 15px;">תמיכה בפייפאל - זול צ'ק</p>
-        <form action="https://www.paypal.com/donate" method="post" target="_top">
-            <input type="hidden" name="hosted_button_id" value="76XN7D8P99P6N" />
-            <input type="image" src="https://www.paypalobjects.com/he_IL/IL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal" />
-        </form>
-    </div>
-
-    <div class="footer-text">© כל הזכויות שמורות למיכאל - זול צ'ק</div>
 
     <script>
-        (function() {
-            const inputField = document.getElementById('mainInput');
-            const resultsWrapper = document.getElementById('resultsWrapper');
+        async function search() {
+            const query = document.getElementById('q').value;
+            const resDiv = document.getElementById('results');
+            if(!query) return;
+            resDiv.innerHTML = "<p>בודק מחירים...</p>";
+            try {
+                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
+                const d = await r.json();
+                resDiv.innerHTML = "";
+                if(d.shopping_results) {
+                    let results = d.shopping_results;
+                    
+                    // מנגנון סינון חכם לתפרחות וקנאביס רפואי
+                    if(query.includes('תפרחת') || query.includes('עישון')) {
+                        results = results.filter(item => 
+                            item.title.includes('תפרחת') || 
+                            item.title.includes('זן') || 
+                            item.title.includes('T') || 
+                            item.source.includes('מרקחת')
+                        );
+                    }
 
-            function fixCursor(el) { setTimeout(() => { const pos = el.value.length; el.setSelectionRange(pos, pos); }, 0); }
+                    results.sort((a, b) => a.extracted_price - b.extracted_price);
+                    
+                    results.forEach((item) => {
+                        const store = item.source || 'חנות כללית';
+                        const link = item.link || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
+                        const logoUrl = item.thumbnail || `https://ui-avatars.com/api/?name=${encodeURIComponent(store)}&background=3b82f6&color=fff`;
+                        
+                        const isMedical = item.title.includes('תפרחת') || store.includes('מרקחת') || store.includes('פארם');
 
-            document.getElementById('searchBtn').onclick = () => {
-                const q = inputField.value.trim();
-                if (!q) return;
-                resultsWrapper.style.display = 'block';
-                document.getElementById('resultsList').innerHTML = `
-                    <div class="result-card">
-                        <div style="font-weight:bold; margin-bottom:10px; color:#555;">חנות: BULLmarket</div>
-                        <div class="product-title">${q}</div>
-                        <span class="price-text">₪12.9</span>
-                        <div class="card-buttons">
-                            <a href="https://wa.me/" target="_blank" class="btn-action btn-wa">וואטסאפ</a>
-                            <button class="btn-action btn-copy" onclick="alert('הלינק הועתק')">העתק לינק</button>
-                        </div>
-                    </div>`;
-                resultsWrapper.scrollIntoView({ behavior: 'smooth' });
-            };
-            inputField.addEventListener('input', (e) => fixCursor(e.target));
-            inputField.addEventListener('focus', (e) => fixCursor(e.target));
-        })();
+                        const box = document.createElement('div');
+                        box.className = 'product-box';
+                        box.innerHTML = `
+                            <div class="source-container">
+                                <img src="${logoUrl}" class="store-logo">
+                                <span class="store-name">חנות: ${store}</span>
+                                ${isMedical ? '<span class="medical-tag">⚕️ מוצר רפואי</span>' : ''}
+                            </div>
+                            <strong style="display:block;">${item.title}</strong>
+                            <span class="price">₪${item.extracted_price}</span>
+                            <div class="actions">
+                                <button class="btn-action btn-copy" onclick="doCopy('${link}', this)">העתק לינק</button>
+                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי מחיר מעולה בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" 
+                                   class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
+                            </div>`;
+                        resDiv.appendChild(box);
+                    });
+                } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>"; }
+            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; }
+        }
+
+        function doCopy(val, btn) {
+            navigator.clipboard.writeText(val);
+            const oldText = btn.innerText;
+            btn.innerText = "✓ הועתק!";
+            setTimeout(() => { btn.innerText = oldText; }, 2000);
+        }
+
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
     </script>
 </body>
 </html>
