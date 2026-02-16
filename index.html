@@ -2,149 +2,104 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>זול צ'ק - מיכאל</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>זול צ'ק - השוואת מחירים גלובלית</title>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; background: #f4f4f4; direction: rtl; margin: 0; padding-bottom: 140px; text-align: center; }
-        .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); position: relative; }
-        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 5px; box-sizing: border-box; font-size: 16px; outline: none; text-align: right; direction: rtl; }
+        /* עיצוב האתר - נשמר נקי ומקצועי לטלפון */
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; align-items: center; color: #333; }
+        .container { width: 90%; max-width: 600px; text-align: center; margin-top: 60px; }
+        .logo { font-size: 55px; font-weight: 900; color: #007bff; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        .tagline { font-size: 18px; margin-bottom: 30px; color: #555; }
         
-        /* עיצוב תפריט צף שלא חוסם את הכפתור */
-        #suggestions-wrapper { position: absolute; background: white; width: calc(100% - 50px); border: 1px solid #ddd; border-radius: 10px; z-index: 1000; display: none; text-align: right; box-shadow: 0 5px 15px rgba(0,0,0,0.2); right: 25px; top: 75px; }
-        .suggestions-header { background: #f8f9fa; padding: 5px 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0; }
-        .close-suggestions { cursor: pointer; color: #ff4444; font-weight: bold; padding: 5px; font-size: 18px; }
-        #suggestions-list { max-height: 180px; overflow-y: auto; }
-        .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 15px; }
-        .suggestion-item:active { background: #e0f0ff; }
-
-        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; position: relative; z-index: 1; }
-        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid #eee; position: relative; }
-        .cheapest { border: 2px solid #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
-        .cheapest-tag { background: #3b82f6; color: white; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; position: absolute; top: -10px; left: 15px; }
-        .price { font-weight: bold; font-size: 22px; color: #3b82f6; display: block; margin: 5px 0; }
-        .actions { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-action { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
-        .btn-copy { background: #34495e; color: white; }
-        .btn-whatsapp { background: #25D366; color: white; }
-        .bottom-area { position: fixed; bottom: 0; width: 100%; left: 0; z-index: 100; }
-        .paypal-bar { background: rgba(244, 244, 244, 0.98); padding: 10px; border-top: 1px solid #ddd; }
-        .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; border: 2px solid #edb120; }
-        .footer-orange-bar { background: #ff9800; color: white; padding: 15px; font-weight: bold; }
+        .search-box { width: 100%; position: relative; }
+        input[type="text"] { width: 100%; padding: 22px 25px; font-size: 20px; border-radius: 50px; border: 2px solid #ddd; box-shadow: 0 4px 15px rgba(0,0,0,0.05); outline: none; transition: 0.3s; box-sizing: border-box; text-align: right; }
+        input[type="text"]:focus { border-color: #007bff; box-shadow: 0 4px 20px rgba(0,123,255,0.15); }
+        
+        .search-btn { background-color: #007bff; color: white; border: none; padding: 18px 50px; font-size: 22px; font-weight: bold; border-radius: 50px; margin-top: 25px; cursor: pointer; transition: 0.3s; width: 80%; box-shadow: 0 4px 10px rgba(0,123,255,0.3); }
+        .search-btn:hover { background-color: #0056b3; transform: translateY(-2px); }
+        
+        /* פוטר - פייפאל וזכויות יוצרים */
+        .footer { margin-top: auto; padding: 40px 0; width: 100%; text-align: center; background: #fff; border-top: 1px solid #eee; }
+        .paypal-box { margin-bottom: 20px; }
+        .copy { font-size: 15px; color: #777; border-top: 1px dotted #ccc; display: inline-block; padding-top: 15px; width: 80%; }
     </style>
 </head>
 <body>
-    <div class="header"><h1>זול צ'ק</h1><p>השוואת מחירים חכמה מכל העולם</p></div>
-    <div class="container">
-        <div class="card">
-            <input type="text" id="q" placeholder="מה תרצה לקנות?" autocomplete="off" oninput="showSuggestions(this.value)">
-            <div id="suggestions-wrapper">
-                <div class="suggestions-header">
-                    <span style="font-size: 12px; color: #666;">הצעות מותגים:</span>
-                    <span class="close-suggestions" onclick="hideSuggestions()">✕</span>
-                </div>
-                <div id="suggestions-list"></div>
-            </div>
-            <button onclick="search()">חפש עכשיו</button>
-        </div>
-        <div id="results"></div>
-    </div>
-    <div class="bottom-area">
-        <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/m0546663240" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a></div>
-        <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק</div>
-    </div>
-    <script>
-        const brands = {
-            "טלוויזיה": ["LG", "סמסונג", "סוני", "הייסנס", "TCL"],
-            "בושם": ["CK1", "דיור", "שאנל", "גוצ'י", "ארמני"],
-            "טלפון": ["סמסונג", "אייפון", "שיאומי"]
-        };
 
-        function showSuggestions(val) {
-            const wrapper = document.getElementById('suggestions-wrapper');
-            const list = document.getElementById('suggestions-list');
-            list.innerHTML = '';
-            if (!val) { wrapper.style.display = 'none'; return; }
-            let found = false;
-            for (let key in brands) {
-                if (val.includes(key)) {
-                    brands[key].forEach(brand => {
-                        const div = document.createElement('div');
-                        div.className = 'suggestion-item';
-                        div.innerText = key + " " + brand;
-                        div.onclick = () => {
-                            const input = document.getElementById('q');
-                            input.value = key + " " + brand + " ";
-                            input.focus();
-                            setTimeout(() => {
-                                const len = input.value.length;
-                                input.setSelectionRange(len, len);
-                            }, 50);
-                        };
-                        list.appendChild(div);
-                    });
-                    found = true;
+    <div class="container">
+        <div class="logo">זול צ'ק</div>
+        <div class="tagline">המחיר הכי זול בארץ ובחו"ל בלחיצה אחת</div>
+        
+        <div class="search-box">
+            <input type="text" id="mainInput" placeholder="חפש מוצר, מותג או זן..." autocomplete="off">
+        </div>
+        <button class="search-btn" id="goBtn">חפש מחיר</button>
+    </div>
+
+    <div class="footer">
+        <div class="paypal-box">
+            <p style="font-weight: bold; font-size: 14px;">תרומה לקידום הפרויקט:</p>
+            <form action="https://www.paypal.com/donate" method="post" target="_top">
+                <input type="hidden" name="hosted_button_id" value="YOUR_PAYPAL_ID" />
+                <input type="image" src="https://www.paypalobjects.com/he_IL/IL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate with PayPal" />
+            </form>
+        </div>
+        <div class="copy">
+            כל הזכויות שמורות לזול צ'ק © 2026 - מיכאל
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // מאגר הנתונים המורחב לזיהוי הקשרים
+            const PHARM_DB = ['דסטיני','יודה','גוראקאן','ג\'י אם או','wedding','דון קוש','תל אביב','גופ','טובי','ארלו','rs11','תפרחת','קנאביס','קנדוק','שיח','t22','t20','c4','אינדיקה','סאטיבה','קוקי קוש'];
+            const ELEC_DB = ['סמסונג','samsung','lg','טלוויזיה','מקרר','אייפון','מחשב','מכונת כביסה','נינג\'ה','דייסון'];
+
+            const inputField = document.getElementById('mainInput');
+            const btn = document.getElementById('goBtn');
+
+            // חוק הברזל: הסמן תמיד בסוף השורה (למניעת קפיצות בסמסונג S24)
+            function keepCursorAtEnd(el) {
+                setTimeout(() => {
+                    const pos = el.value.length;
+                    el.setSelectionRange(pos, pos);
+                }, 0);
+            }
+
+            function executeZolCheckSearch() {
+                const query = inputField.value.trim();
+                if (!query) return;
+
+                const lowQuery = query.toLowerCase();
+
+                // 1. ניתוב קנאביס/פארם (חיפוש בארץ)
+                if (PHARM_DB.some(term => lowQuery.includes(term))) {
+                    window.open(`https://www.isracann.com/search?q=${encodeURIComponent(query)}`, '_blank');
+                    window.open(`https://www.stockabis.com/?s=${encodeURIComponent(query)}`, '_blank');
+                } 
+                // 2. ניתוב מוצרי חשמל (חיפוש השוואתי בארץ)
+                else if (ELEC_DB.some(term => lowQuery.includes(term))) {
+                    window.open(`https://www.zap.co.il/search.aspx?keyword=${encodeURIComponent(query)}`, '_blank');
+                } 
+                // 3. ניתוב כללי - ישראל + אלי אקספרס (הכל כלול)
+                else {
+                    // חיפוש גלובלי בגוגל שכולל השוואה לארץ ולחו"ל
+                    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}+מחיר+זול+בארץ+ובחו"ל`, '_blank');
+                    // פתיחה ישירה של עלי אקספרס כפי שביקשת
+                    window.open(`https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(query)}`, '_blank');
                 }
             }
-            wrapper.style.display = found ? 'block' : 'none';
-        }
 
-        function hideSuggestions() { document.getElementById('suggestions-wrapper').style.display = 'none'; }
+            // הצמדת אירועים
+            inputField.addEventListener('input', (e) => keepCursorAtEnd(e.target));
+            inputField.addEventListener('focus', (e) => keepCursorAtEnd(e.target));
+            
+            inputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') executeZolCheckSearch();
+            });
 
-        async function search() {
-            const q = document.getElementById('q').value;
-            const resDiv = document.getElementById('results');
-            hideSuggestions();
-            if(!q) return;
-            resDiv.innerHTML = "<p>בודק מחירים בזול צ'ק...</p>";
-            try {
-                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}`);
-                const d = await r.json();
-                resDiv.innerHTML = "";
-                if(d.shopping_results) {
-                    let results = d.shopping_results;
-                    const searchWords = q.toLowerCase().split(/\s+/).filter(w => w.length > 1);
-                    results = results.filter(item => {
-                        const t = item.title.toLowerCase();
-                        return searchWords.every(word => t.includes(word));
-                    });
-                    results.sort((a, b) => a.extracted_price - b.extracted_price);
-                    results.forEach((item, index) => {
-                        const store = item.source || 'כללי';
-                        const link = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
-                        const box = document.createElement('div');
-                        box.className = 'product-box' + (index === 0 ? ' cheapest' : '');
-                        box.innerHTML = `
-                            ${index === 0 ? '<span class="cheapest-tag">המחיר המשתלם ביותר</span>' : ''}
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <img src="${item.thumbnail || ''}" style="width:35px; height:35px; object-fit:contain;">
-                                <span>חנות: ${store}</span>
-                            </div>
-                            <strong style="display:block; margin:10px 0;">${item.title}</strong>
-                            <span class="price">₪${item.extracted_price}</span>
-                            <div class="actions">
-                                <button class="btn-action btn-copy" onclick="doGlobalCopy(this, '${link.replace(/'/g, "\\'")}')">העתק לינק</button>
-                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
-                            </div>`;
-                        resDiv.appendChild(box);
-                    });
-                } else resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>";
-            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; }
-        }
-
-        async function doGlobalCopy(btn, text) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            const old = btn.innerText;
-            btn.innerText = "✓ הועתק!";
-            btn.style.background = "#2ecc71";
-            setTimeout(() => { btn.innerText = old; btn.style.background = "#34495e"; }, 2000);
-        }
+            btn.addEventListener('click', executeZolCheckSearch);
+        })();
     </script>
 </body>
 </html>
