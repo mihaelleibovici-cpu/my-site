@@ -4,95 +4,262 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>זול צ'ק - מיכאל</title>
+    
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 140px; }
-        .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; text-align: center; }
-        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .brands-bar { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; margin-bottom: 10px; white-space: nowrap; min-height: 60px; scrollbar-width: none; }
-        .brand-chip { background: #fff; color: #3b82f6; padding: 10px 20px; border-radius: 25px; font-size: 14px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid #3b82f6; }
-        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
-        .best-deal { border: 2px solid #f1c40f; background: #fffdf0; transform: scale(1.02); }
-        .price { font-weight: bold; font-size: 24px; color: #3b82f6; display: block; margin: 5px 0; }
-        .footer-fixed { position: fixed; bottom: 0; width: 100%; left: 0; z-index: 1000; }
-        .paypal-bar { background: #ffc439; padding: 12px; border-top: 2px solid #edb120; }
-        .paypal-btn { color: #003087; text-decoration: none; font-weight: bold; font-size: 16px; display: block; }
-        .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; font-weight: bold; font-size: 15px; }
+        body { 
+            font-family: sans-serif; 
+            background: #f4f4f4; 
+            direction: rtl; 
+            text-align: center; 
+            margin: 0; 
+            padding-bottom: 140px; 
+        }
+
+        .header { 
+            background: #3b82f6; 
+            color: white; 
+            padding: 40px; 
+            border-bottom-left-radius: 30px; 
+            border-bottom-right-radius: 30px; 
+        }
+
+        .container { 
+            padding: 20px; 
+            max-width: 450px; 
+            margin: -40px auto 0; 
+        }
+
+        .card { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            margin-bottom: 20px; 
+        }
+
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            outline: none; 
+            text-align: center; 
+        }
+
+        button { 
+            width: 100%; 
+            background: #3b82f6; 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 16px; 
+        }
+
+        .brands-bar { 
+            display: flex; 
+            gap: 10px; 
+            overflow-x: auto; 
+            padding: 15px 5px; 
+            margin-bottom: 10px; 
+            white-space: nowrap; 
+            min-height: 60px; 
+            scrollbar-width: none; 
+        }
+
+        .brand-chip { 
+            background: #fff; 
+            color: #3b82f6; 
+            padding: 10px 20px; 
+            border-radius: 25px; 
+            font-size: 14px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            border: 2px solid #3b82f6; 
+        }
+
+        .product-box { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 15px; 
+            margin-top: 15px; 
+            text-align: right; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            border: 1px solid #eee; 
+            position: relative; 
+        }
+
+        .best-deal { 
+            border: 2px solid #f1c40f; 
+            background: #fffdf0; 
+            transform: scale(1.02); 
+        }
+
+        .price { 
+            font-weight: bold; 
+            font-size: 24px; 
+            color: #3b82f6; 
+            display: block; 
+            margin: 5px 0; 
+        }
+
+        .footer-fixed { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            left: 0; 
+            z-index: 1000; 
+        }
+
+        .paypal-bar { 
+            background: #ffc439; 
+            padding: 12px; 
+            border-top: 2px solid #edb120; 
+        }
+
+        .paypal-btn { 
+            color: #003087; 
+            text-decoration: none; 
+            font-weight: bold; 
+            font-size: 16px; 
+            display: block; 
+        }
+
+        .footer-orange-bar { 
+            background: #ff8c00; 
+            color: white; 
+            padding: 12px; 
+            font-weight: bold; 
+            font-size: 15px; 
+        }
     </style>
 </head>
 <body>
-    <div class="header"><h1>זול צ'ק</h1><p>נתוני אמת - השוואה מדויקת</p></div>
+    <div class="header">
+        <h1>זול צ'ק</h1>
+        <p>נתוני אמת - השוואה מדויקת</p>
+    </div>
+
     <div class="container">
-        <div class="card"><input type="text" id="q" placeholder="" oninput="handleInput()"><button onclick="performSearch()">חפש עכשיו</button></div>
+        <div class="card">
+            <input type="text" id="q" placeholder="" oninput="handleInput()">
+            <button onclick="performSearch()">חפש עכשיו</button>
+        </div>
         <div id="brands" class="brands-bar"></div>
         <div id="results"></div>
     </div>
+
     <div class="footer-fixed">
-        <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/iareah" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a></div>
-        <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק</div>
+        <div class="paypal-bar">
+            <a href="https://www.paypal.com/paypalme/iareah" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a>
+        </div>
+        <div class="footer-orange-bar">
+            © כל הזכויות שמורות למיכאל - זול צ'ק
+        </div>
     </div>
+
     <script>
         let allResults = [];
         let timer;
+
         function handleInput() {
             const q = document.getElementById('q').value;
-            if(!q) { document.getElementById('brands').innerHTML = ""; document.getElementById('results').innerHTML = ""; return; }
+            if (!q) {
+                document.getElementById('brands').innerHTML = "";
+                document.getElementById('results').innerHTML = "";
+                allResults = [];
+                return;
+            }
             clearTimeout(timer);
             timer = setTimeout(performSearch, 600);
         }
+
         async function performSearch() {
             const q = document.getElementById('q').value;
-            if(!q) return;
+            if (!q) return;
+
+            const resDiv = document.getElementById('results');
+            resDiv.innerHTML = "<p>מעדכן נתונים בזמן אמת...</p>";
+
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}&t=${Date.now()}`);
                 const d = await r.json();
-                if(d.shopping_results) {
-                    allResults = d.shopping_results.filter(i => {
-                        // פילטר אמינות קשוח: מקרר/שואב/טלוויזיה לא יכולים לעלות פחות מ-100 ש"ח
-                        const price = i.extracted_price || 0;
-                        if((q.includes('מקרר') || q.includes('טלוויזיה') || q.includes('שואב')) && price < 150) return false;
+
+                if (d.shopping_results) {
+                    allResults = d.shopping_results.filter(item => {
+                        const price = item.extracted_price || 0;
+                        if ((q.includes('מקרר') || q.includes('טלוויזיה') || q.includes('שואב')) && price < 150) {
+                            return false;
+                        }
                         return true;
                     });
                     renderBrands(allResults);
                     renderResults(allResults);
                 }
-            } catch(e) { console.log("error"); }
+            } catch (e) {
+                resDiv.innerHTML = "<p>שגיאה בעדכון הנתונים.</p>";
+            }
         }
+
         function renderBrands(items) {
             const bDiv = document.getElementById('brands');
             bDiv.innerHTML = "";
             const commonBrands = ["LG", "SAMSUNG", "DYSON", "SONY", "SHARP", "BOSCH", "BEKO", "HAIER", "XIAOMI", "APPLE", "NIKE", "SHARK"];
             let foundBrands = new Set();
+
             items.forEach(item => {
                 const title = item.title.toUpperCase();
-                commonBrands.forEach(b => { if(title.includes(b)) foundBrands.add(b); });
+                commonBrands.forEach(b => {
+                    if (title.includes(b)) foundBrands.add(b);
+                });
             });
+
             foundBrands.forEach(b => {
                 const btn = document.createElement('button');
-                btn.className = 'brand-chip'; btn.innerText = b;
+                btn.className = 'brand-chip';
+                btn.innerText = b;
                 btn.onclick = () => renderResults(allResults.filter(i => i.title.toUpperCase().includes(b)));
                 bDiv.appendChild(btn);
             });
         }
+
         function renderResults(items) {
             const rDiv = document.getElementById('results');
             rDiv.innerHTML = "";
             items.sort((a, b) => a.extracted_price - b.extracted_price);
+
             items.forEach((item, index) => {
                 const link = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
                 const box = document.createElement('div');
                 box.className = `product-box ${index === 0 ? 'best-deal' : ''}`;
-                box.innerHTML = `<strong>${item.source}</strong><p style="font-size:14px;">${item.title}</p><span class="price">₪${item.extracted_price}</span><div style="display:flex; gap:10px; margin-top:10px;"><button style="flex:1; padding:10px; border-radius:8px; background:#34495e; color:white; border:none;" onclick="copyText('${link}')">העתק לינק</button><a href="${link}" target="_blank" style="flex:1; padding:10px; border-radius:8px; background:#3b82f6; color:white; text-decoration:none; text-align:center;">עבור לאתר</a></div>`;
+                
+                box.innerHTML = `
+                    <strong>${item.source}</strong>
+                    <p style="font-size:14px;">${item.title}</p>
+                    <span class="price">₪${item.extracted_price}</span>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button style="flex:1; padding:10px; border-radius:8px; background:#34495e; color:white; border:none;" onclick="copyText('${link}')">העתק לינק</button>
+                        <a href="${link}" target="_blank" style="flex:1; padding:10px; border-radius:8px; background:#3b82f6; color:white; text-decoration:none; text-align:center;">עבור לאתר</a>
+                    </div>
+                `;
                 rDiv.appendChild(box);
             });
         }
+
         function copyText(t) {
             const e = document.createElement('textarea');
-            e.value = t; document.body.appendChild(e);
-            e.select(); document.execCommand('copy');
-            document.body.removeChild(e); alert("הלינק הועתק!");
+            e.value = t;
+            document.body.appendChild(e);
+            e.select();
+            document.execCommand('copy');
+            document.body.removeChild(e);
+            alert("הלינק הועתק!");
         }
     </script>
 </body>
