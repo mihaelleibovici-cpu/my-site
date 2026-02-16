@@ -26,7 +26,7 @@
     <div class="header"><h1>זול צ'ק</h1><p>השוואת מחירים חכמה</p></div>
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="" oninput="liveSearch()">
+            <input type="text" id="q" placeholder="" oninput="handleInput()">
             <button onclick="performSearch()">חפש עכשיו</button>
         </div>
         <div id="brands" class="brands-bar"></div>
@@ -40,14 +40,15 @@
         let allResults = [];
         let timer;
 
-        function liveSearch() {
-            clearTimeout(timer);
+        function handleInput() {
             const q = document.getElementById('q').value;
             if(!q) {
                 document.getElementById('brands').innerHTML = "";
+                document.getElementById('results').innerHTML = "";
+                allResults = [];
                 return;
             }
-            // מחכה חצי שנייה אחרי ההקלדה כדי לא להעמיס על השרת
+            clearTimeout(timer);
             timer = setTimeout(performSearch, 500);
         }
 
@@ -65,20 +66,36 @@
                     renderBrands(allResults);
                     renderResults(allResults);
                 }
-            } catch(e) { console.log("error fetching"); }
+            } catch(e) { console.log("search error"); }
         }
 
         function renderBrands(items) {
             const bDiv = document.getElementById('brands');
             bDiv.innerHTML = "";
-            const brands = [...new Set(items.map(i => i.source))].filter(b => b).slice(0, 10);
-            brands.forEach(b => {
-                const btn = document.createElement('button');
-                btn.className = 'brand-chip';
-                btn.innerText = b;
-                btn.onclick = () => renderResults(allResults.filter(i => i.source === b));
-                bDiv.appendChild(btn);
+            // רשימת מותגים מובילים לזיהוי (LG, סמסונג וכו')
+            const commonBrands = ["LG", "Samsung", "Dyson", "Sony", "Sharp", "Bosch", "Beko", "Haier", "Whirlpool", "Xiaomi", "Apple", "Nike", "Adidas"];
+            let foundBrands = new Set();
+            
+            items.forEach(item => {
+                const title = item.title.toUpperCase();
+                commonBrands.forEach(b => {
+                    if(title.includes(b.toUpperCase())) foundBrands.add(b);
+                });
+                // מוסיף גם את המילה הראשונה כשם מותג אפשרי למותגים פחות מוכרים
+                const firstWord = item.title.split(' ')[0];
+                if(firstWord.length > 2) foundBrands.add(firstWord);
             });
+
+            const brandsArray = Array.from(foundBrands).slice(0, 10);
+            if(brandsArray.length > 0) {
+                brandsArray.forEach(b => {
+                    const btn = document.createElement('button');
+                    btn.className = 'brand-chip';
+                    btn.innerText = b;
+                    btn.onclick = () => renderResults(allResults.filter(i => i.title.toUpperCase().includes(b.toUpperCase())));
+                    bDiv.appendChild(btn);
+                });
+            }
         }
 
         function renderResults(items) {
