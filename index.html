@@ -10,9 +10,16 @@
         .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); position: relative; }
         input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 5px; box-sizing: border-box; font-size: 16px; outline: none; text-align: right; direction: rtl; }
-        #suggestions { position: absolute; background: white; width: calc(100% - 50px); border: 1px solid #ddd; border-radius: 10px; z-index: 1000; display: none; text-align: right; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; }
-        .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 14px; }
-        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        
+        /* עיצוב תפריט צף שלא חוסם את הכפתור */
+        #suggestions-wrapper { position: absolute; background: white; width: calc(100% - 50px); border: 1px solid #ddd; border-radius: 10px; z-index: 1000; display: none; text-align: right; box-shadow: 0 5px 15px rgba(0,0,0,0.2); right: 25px; top: 75px; }
+        .suggestions-header { background: #f8f9fa; padding: 5px 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0; }
+        .close-suggestions { cursor: pointer; color: #ff4444; font-weight: bold; padding: 5px; font-size: 18px; }
+        #suggestions-list { max-height: 180px; overflow-y: auto; }
+        .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 15px; }
+        .suggestion-item:active { background: #e0f0ff; }
+
+        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; position: relative; z-index: 1; }
         .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid #eee; position: relative; }
         .cheapest { border: 2px solid #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
         .cheapest-tag { background: #3b82f6; color: white; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; position: absolute; top: -10px; left: 15px; }
@@ -32,7 +39,13 @@
     <div class="container">
         <div class="card">
             <input type="text" id="q" placeholder="מה תרצה לקנות?" autocomplete="off" oninput="showSuggestions(this.value)">
-            <div id="suggestions"></div>
+            <div id="suggestions-wrapper">
+                <div class="suggestions-header">
+                    <span style="font-size: 12px; color: #666;">הצעות מותגים:</span>
+                    <span class="close-suggestions" onclick="hideSuggestions()">✕</span>
+                </div>
+                <div id="suggestions-list"></div>
+            </div>
             <button onclick="search()">חפש עכשיו</button>
         </div>
         <div id="results"></div>
@@ -49,9 +62,10 @@
         };
 
         function showSuggestions(val) {
-            const container = document.getElementById('suggestions');
-            container.innerHTML = '';
-            if (!val) { container.style.display = 'none'; return; }
+            const wrapper = document.getElementById('suggestions-wrapper');
+            const list = document.getElementById('suggestions-list');
+            list.innerHTML = '';
+            if (!val) { wrapper.style.display = 'none'; return; }
             let found = false;
             for (let key in brands) {
                 if (val.includes(key)) {
@@ -62,26 +76,28 @@
                         div.onclick = () => {
                             const input = document.getElementById('q');
                             input.value = key + " " + brand + " ";
-                            container.style.display = 'none';
                             input.focus();
                             setTimeout(() => {
                                 const len = input.value.length;
                                 input.setSelectionRange(len, len);
                             }, 50);
                         };
-                        container.appendChild(div);
+                        list.appendChild(div);
                     });
                     found = true;
                 }
             }
-            container.style.display = found ? 'block' : 'none';
+            wrapper.style.display = found ? 'block' : 'none';
         }
+
+        function hideSuggestions() { document.getElementById('suggestions-wrapper').style.display = 'none'; }
 
         async function search() {
             const q = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
+            hideSuggestions();
             if(!q) return;
-            resDiv.innerHTML = "<p>בודק מחירים...</p>";
+            resDiv.innerHTML = "<p>בודק מחירים בזול צ'ק...</p>";
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}`);
                 const d = await r.json();
@@ -118,22 +134,16 @@
         }
 
         async function doGlobalCopy(btn, text) {
-            // ניקוי והעתקה מאובטחת לכל דפדפן
             const textArea = document.createElement("textarea");
             textArea.value = text;
             document.body.appendChild(textArea);
             textArea.select();
-            textArea.setSelectionRange(0, 99999);
-            try {
-                document.execCommand('copy');
-                const old = btn.innerText;
-                btn.innerText = "✓ הועתק!";
-                btn.style.background = "#2ecc71";
-                setTimeout(() => { btn.innerText = old; btn.style.background = "#34495e"; }, 2000);
-            } catch (err) {
-                console.error('Copy failed');
-            }
+            document.execCommand('copy');
             document.body.removeChild(textArea);
+            const old = btn.innerText;
+            btn.innerText = "✓ הועתק!";
+            btn.style.background = "#2ecc71";
+            setTimeout(() => { btn.innerText = old; btn.style.background = "#34495e"; }, 2000);
         }
     </script>
 </body>
