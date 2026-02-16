@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-    <div class="header"><h1>זול צ'ק</h1><p>השוואת מחירים חכמה</p></div>
+    <div class="header"><h1>זול צ'ק</h1><p>נתוני אמת בלבד</p></div>
     <div class="container">
         <div class="card">
             <input type="text" id="q" placeholder="" oninput="handleInput()">
@@ -49,50 +49,49 @@
                 return;
             }
             clearTimeout(timer);
-            timer = setTimeout(performSearch, 500);
+            timer = setTimeout(performSearch, 600);
         }
 
         async function performSearch() {
             const q = document.getElementById('q').value;
             if(!q) return;
+            const resDiv = document.getElementById('results');
+            resDiv.innerHTML = "<p>מושך מחירים מעודכנים מהחנויות...</p>";
+            
             try {
-                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}`);
+                // הוספת מזהה ייחודי כדי למנוע נתונים ישנים (Cache Busting)
+                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}&t=${Date.now()}`);
                 const d = await r.json();
                 if(d.shopping_results) {
                     allResults = d.shopping_results.filter(i => {
-                        if((q.includes('מקרר') || q.includes('טלוויזיה')) && i.extracted_price < 500) return false;
+                        if((q.includes('מקרר') || q.includes('טלוויזיה') || q.includes('שואב')) && i.extracted_price < 100) return false;
                         return true;
                     });
                     renderBrands(allResults);
                     renderResults(allResults);
                 }
-            } catch(e) { console.log("search error"); }
+            } catch(e) { resDiv.innerHTML = "<p>שגיאה בעדכון הנתונים.</p>"; }
         }
 
         function renderBrands(items) {
             const bDiv = document.getElementById('brands');
             bDiv.innerHTML = "";
-            // רשימת מותגים מובילים לזיהוי (LG, סמסונג וכו')
-            const commonBrands = ["LG", "Samsung", "Dyson", "Sony", "Sharp", "Bosch", "Beko", "Haier", "Whirlpool", "Xiaomi", "Apple", "Nike", "Adidas"];
+            const commonBrands = ["LG", "SAMSUNG", "DYSON", "SONY", "SHARP", "BOSCH", "BEKO", "HAIER", "XIAOMI", "APPLE", "NIKE", "SHARK"];
             let foundBrands = new Set();
             
             items.forEach(item => {
                 const title = item.title.toUpperCase();
                 commonBrands.forEach(b => {
-                    if(title.includes(b.toUpperCase())) foundBrands.add(b);
+                    if(title.includes(b)) foundBrands.add(b);
                 });
-                // מוסיף גם את המילה הראשונה כשם מותג אפשרי למותגים פחות מוכרים
-                const firstWord = item.title.split(' ')[0];
-                if(firstWord.length > 2) foundBrands.add(firstWord);
             });
 
-            const brandsArray = Array.from(foundBrands).slice(0, 10);
-            if(brandsArray.length > 0) {
-                brandsArray.forEach(b => {
+            if(foundBrands.size > 0) {
+                foundBrands.forEach(b => {
                     const btn = document.createElement('button');
                     btn.className = 'brand-chip';
                     btn.innerText = b;
-                    btn.onclick = () => renderResults(allResults.filter(i => i.title.toUpperCase().includes(b.toUpperCase())));
+                    btn.onclick = () => renderResults(allResults.filter(i => i.title.toUpperCase().includes(b)));
                     bDiv.appendChild(btn);
                 });
             }
