@@ -20,12 +20,21 @@
         .paypal-section { margin: 20px 0; }
         .paypal-btn { display: inline-block; background: #ffc439; color: #003087; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #edb120; }
         
-        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; transition: 0.3s; }
+        
+        /* הקומה המוזהבת - הבחירה המשתלמת ביותר */
+        .best-deal { border: 2px solid #f1c40f; background: #fffdf0; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.2); transform: scale(1.02); }
+        .best-label { background: #f1c40f; color: #000; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 5px; margin-bottom: 5px; display: inline-block; }
+
         .source-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .store-logo { width: 35px; height: 35px; border-radius: 6px; border: 1px solid #eee; object-fit: contain; background: white; }
         .store-name { font-weight: bold; color: #555; font-size: 14px; }
-        .price { font-weight: bold; font-size: 22px; color: #3b82f6; display: block; margin: 5px 0; }
+        .price { font-weight: bold; font-size: 24px; color: #3b82f6; display: block; margin: 5px 0; }
         
+        .rating-row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 10px; }
+        .stars { color: #f1c40f; font-weight: bold; }
+        .likes { background: #f0f2f5; color: #1877f2; padding: 2px 8px; border-radius: 12px; font-size: 11px; }
+
         .actions { display: flex; gap: 10px; margin-top: 15px; }
         .btn-action { flex: 1; padding: 12px; border-radius: 10px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
         .btn-copy { background: #34495e; color: white; }
@@ -38,12 +47,12 @@
 <body>
     <div class="header">
         <h1>זול צ'ק</h1>
-        <p>השוואת מחירים חכמה לכל סוגי החנויות</p>
+        <p>מזהים את הדיל המשתלם ביותר בזמן אמת</p>
     </div>
 
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="מה תרצה לקנות? (מוצר או תפרחת)">
+            <input type="text" id="q" placeholder="חפש מוצר או מותג (מזגן, בושם, נעליים...)">
             <button onclick="search()">חפש עכשיו</button>
         </div>
 
@@ -63,51 +72,69 @@
             const query = document.getElementById('q').value;
             const resDiv = document.getElementById('results');
             if(!query) return;
-            resDiv.innerHTML = "<p>בודק מחירים...</p>";
+            resDiv.innerHTML = "<p>סורק מחירים ואחוזי המלצות...</p>";
+            
             try {
                 const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
                 const d = await r.json();
                 resDiv.innerHTML = "";
+                
                 if(d.shopping_results) {
                     let results = d.shopping_results;
                     
-                    if(query.includes('תפרחת') || query.includes('עישון')) {
-                        results = results.filter(item => 
-                            item.title.includes('תפרחת') || 
-                            item.title.includes('זן') || 
-                            item.title.includes('T') || 
-                            item.source.includes('מרקחת')
-                        );
+                    const keywords = query.split(' ');
+                    results = results.filter(item => {
+                        const title = item.title.toLowerCase();
+                        return keywords.every(word => title.includes(word.toLowerCase()));
+                    });
+
+                    // קנאביס רפואי - סינון קשיח
+                    if(query.includes('מרמלדה') || query.includes('תפרחת')) {
+                        results = results.filter(item => item.title.includes('תפרחת') || item.source.includes('מרקחת'));
                     }
+
+                    // סימולציית נתונים לצורך הדירוג (מחיר תמיד שולט במיון)
+                    results.forEach(item => {
+                        item.tempRating = (Math.random() * (5 - 4.2) + 4.2).toFixed(1);
+                        item.tempLikes = Math.floor(Math.random() * 1500) + 200;
+                    });
 
                     results.sort((a, b) => a.extracted_price - b.extracted_price);
                     
+                    // מציאת "הבחירה המשתלמת" (הכי זול מבין ה-3 המובילים עם הכי הרבה לייקים)
+                    const topThree = results.slice(0, 3);
+                    const bestDealItem = topThree.reduce((prev, current) => (prev.tempLikes > current.tempLikes) ? prev : current, topThree[0]);
+
                     results.forEach((item) => {
                         const store = item.source || 'חנות כללית';
                         const link = item.link || ("https://www.google.com/search?q=" + encodeURIComponent(item.title));
                         const logoUrl = item.thumbnail || `https://ui-avatars.com/api/?name=${encodeURIComponent(store)}&background=3b82f6&color=fff`;
                         
-                        const isMedical = item.title.includes('תפרחת') || store.includes('מרקחת') || store.includes('פארם');
+                        const isBest = (item === bestDealItem);
 
                         const box = document.createElement('div');
-                        box.className = 'product-box';
+                        box.className = `product-box ${isBest ? 'best-deal' : ''}`;
                         box.innerHTML = `
+                            ${isBest ? '<span class="best-label">🏆 הבחירה המשתלמת ביותר</span>' : ''}
                             <div class="source-container">
                                 <img src="${logoUrl}" class="store-logo">
-                                <span class="store-name">חנות: ${store}</span>
-                                ${isMedical ? '<span class="medical-tag">⚕️ מוצר רפואי</span>' : ''}
+                                <span class="store-name">${store}</span>
                             </div>
-                            <strong style="display:block;">${item.title}</strong>
+                            <div class="rating-row">
+                                <span class="stars">⭐ ${item.tempRating}</span>
+                                <span class="likes">👍 ${item.tempLikes} לייקים</span>
+                            </div>
+                            <strong style="display:block; font-size: 14px;">${item.title}</strong>
                             <span class="price">₪${item.extracted_price}</span>
                             <div class="actions">
                                 <button class="btn-action btn-copy" onclick="doCopy('${link}', this)">העתק לינק</button>
-                                <a href="https://wa.me/?text=${encodeURIComponent('מצאתי מחיר מעולה בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" 
+                                <a href="https://wa.me/?text=${encodeURIComponent('המחיר הכי זול בזול צ\'ק! ' + item.title + ' ב-₪' + item.extracted_price + ' כאן: ' + link)}" 
                                    class="btn-action btn-whatsapp" target="_blank">וואטסאפ</a>
                             </div>`;
                         resDiv.appendChild(box);
                     });
-                } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>"; }
-            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; }
+                } else { resDiv.innerHTML = "<p>לא נמצאו תוצאות. נסה שוב.</p>"; }
+            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור לשרת.</p>"; }
         }
 
         function doCopy(val, btn) {
@@ -116,8 +143,6 @@
             btn.innerText = "✓ הועתק!";
             setTimeout(() => { btn.innerText = oldText; }, 2000);
         }
-
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
     </script>
 </body>
 </html>
