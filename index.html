@@ -5,17 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>זול צ'ק - מיכאל</title>
     <style>
+        /* העיצוב המנצח של אתמול בלילה */
         body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
         .blue-header { background-color: #4a86e8; width: 100%; height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; border-radius: 0 0 50px 50px; position: relative; }
         .logo-main { font-size: 80px; font-weight: bold; margin-bottom: 10px; }
         .sub-main { font-size: 20px; font-weight: normal; margin-bottom: 40px; text-align: center; width: 85%; }
-        
-        .search-card { background: white; width: 90%; max-width: 450px; border-radius: 25px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: -80px; z-index: 10; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; position: relative; margin-bottom: 20px; }
-        input[type="text"] { width: 100%; padding: 15px; font-size: 20px; border: 1px solid #ddd; border-radius: 15px; outline: none; margin-bottom: 20px; text-align: center; }
-        .btn-search { width: 100%; padding: 18px; font-size: 24px; font-weight: bold; border-radius: 15px; background-color: #4a86e8; color: white; border: none; cursor: pointer; }
 
+        .search-card { background: white; width: 90%; max-width: 450px; border-radius: 25px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: -80px; z-index: 10; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; position: relative; margin-bottom: 20px; }
+        
+        input[type="text"] { width: 100%; padding: 15px; font-size: 20px; border: 1px solid #ddd; border-radius: 15px; outline: none; margin-bottom: 20px; text-align: center; }
+        
+        .btn-search { width: 100%; padding: 18px; font-size: 24px; font-weight: bold; border-radius: 15px; background-color: #4a86e8; color: white; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(74, 134, 232, 0.3); }
+
+        /* ריבועי התוצאות מהמבנה התקין */
         #resultsWrapper { width: 90%; max-width: 450px; margin-top: 10px; display: none; }
         .result-card { background: white; border: 2px solid #28a745; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        
+        .product-title { font-size: 22px; font-weight: bold; color: #000; margin-bottom: 10px; text-align: right; }
         .price-text { font-size: 36px; font-weight: bold; color: #4a86e8; text-align: right; margin-bottom: 20px; display: block; }
         
         .card-buttons { display: flex; gap: 10px; }
@@ -28,11 +35,12 @@
     </style>
 </head>
 <body>
+
     <div class="blue-header">
         <div class="logo-main">זול צ'ק</div>
         <div class="sub-main">השוואת מחירים חכמה לכל סוגי החנויות</div>
     </div>
-    
+
     <div class="search-card">
         <input type="text" id="mainInput" placeholder="מה תרצה לקנות?">
         <button class="btn-search" id="searchBtn">חפש עכשיו</button>
@@ -66,7 +74,7 @@
                 document.getElementById('resultsList').innerHTML = `
                     <div class="result-card">
                         <div style="font-weight:bold; margin-bottom:10px; color:#555;">חנות: BULLmarket</div>
-                        <div style="font-size:22px; margin-bottom:10px; font-weight:bold;">${q}</div>
+                        <div class="product-title">${q}</div>
                         <span class="price-text">₪12.9</span>
                         <div class="card-buttons">
                             <a href="https://wa.me/" target="_blank" class="btn-action btn-wa">וואטסאפ</a>
