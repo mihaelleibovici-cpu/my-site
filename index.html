@@ -10,13 +10,12 @@
         .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; }
+        /* שורת חיפוש נקייה לגמרי */
+        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; text-align: center; }
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
         
-        /* שורת מותגים מלוטשת */
         .brands-bar { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; margin-bottom: 10px; white-space: nowrap; -webkit-overflow-scrolling: touch; min-height: 50px; scrollbar-width: none; }
-        .brand-chip { background: #fff; color: #3b82f6; padding: 10px 20px; border-radius: 25px; font-size: 14px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid #3b82f6; transition: 0.2s; }
-        .brand-chip:active { background: #3b82f6; color: white; transform: scale(0.95); }
+        .brand-chip { background: #fff; color: #3b82f6; padding: 10px 20px; border-radius: 25px; font-size: 14px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid #3b82f6; }
 
         .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
         .best-deal { border: 2px solid #f1c40f; background: #fffdf0; transform: scale(1.02); z-index: 10; }
@@ -33,12 +32,12 @@
 <body>
     <div class="header">
         <h1>זול צ'ק</h1>
-        <p>כל המותגים, כל המוצרים - המחיר הכי זול</p>
+        <p>השוואת מחירים חכמה</p>
     </div>
 
     <div class="container">
         <div class="card">
-            <input type="text" id="q" placeholder="מה תרצה לקנות? (בושם, מקרר, נעליים...)">
+            <input type="text" id="q" placeholder="">
             <button onclick="search()">חפש עכשיו</button>
         </div>
 
@@ -59,7 +58,7 @@
             const brandsDiv = document.getElementById('brands');
             if(!query) return;
             
-            resDiv.innerHTML = "<p>סורק מחירים ומאמת נתונים...</p>";
+            resDiv.innerHTML = "<p>מאתר מחירים ומותגים...</p>";
             brandsDiv.innerHTML = "";
 
             try {
@@ -69,27 +68,18 @@
                 if(d.shopping_results && d.shopping_results.length > 0) {
                     allResults = d.shopping_results;
                     
-                    // סינון "רהיטים" בחיפוש מוצרי חשמל
+                    // מניעת רעשים (טלוויזיה / מקרר)
                     if(query.includes('טלוויזיה') || query.includes('מקרר')) {
-                        allResults = allResults.filter(item => 
-                            !item.title.includes('מזנון') && 
-                            !item.title.includes('שידה')
-                        );
-                    }
-
-                    // סינון מפרט (מספרים כמו אינץ' או מ"ל)
-                    const matchNum = query.match(/\d+/);
-                    if(matchNum) {
-                        allResults = allResults.filter(item => item.title.includes(matchNum[0]));
+                        allResults = allResults.filter(item => !item.title.includes('מזנון') && !item.title.includes('שידה'));
                     }
 
                     renderBrands(allResults);
                     renderResults(allResults);
                 } else {
-                    resDiv.innerHTML = "<p>לא נמצאו תוצאות. נסה חיפוש אחר.</p>";
+                    resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>";
                 }
             } catch(e) { 
-                resDiv.innerHTML = "<p>שגיאה בתקשורת עם השרת. נסה שוב בעוד רגע.</p>"; 
+                resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; 
             }
         }
 
@@ -98,22 +88,20 @@
             const brands = [...new Set(items.map(i => i.source))].filter(b => b).slice(0, 10);
             
             if(brands.length > 0) {
-                const allBtn = createBrandChip("הכל", () => renderResults(allResults));
+                const allBtn = document.createElement('button');
+                allBtn.className = 'brand-chip';
+                allBtn.innerText = "הכל";
+                allBtn.onclick = () => renderResults(allResults);
                 brandsDiv.appendChild(allBtn);
 
                 brands.forEach(brand => {
-                    const btn = createBrandChip(brand, () => renderResults(allResults.filter(i => i.source === brand)));
+                    const btn = document.createElement('button');
+                    btn.className = 'brand-chip';
+                    btn.innerText = brand;
+                    btn.onclick = () => renderResults(allResults.filter(i => i.source === brand));
                     brandsDiv.appendChild(btn);
                 });
             }
-        }
-
-        function createBrandChip(text, onClick) {
-            const btn = document.createElement('button');
-            btn.className = 'brand-chip';
-            btn.innerText = text;
-            btn.onclick = onClick;
-            return btn;
         }
 
         function renderResults(items) {
@@ -122,9 +110,8 @@
             items.sort((a, b) => (a.extracted_price || 0) - (b.extracted_price || 0));
 
             items.forEach((item, index) => {
-                const isBest = index === 0 && items.length > 1;
+                const isBest = index === 0;
                 const likes = Math.floor(Math.random() * 800) + 150;
-                // וידוא שהלינק תקין
                 const finalLink = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
                 
                 const box = document.createElement('div');
@@ -138,10 +125,10 @@
                     <div class="like-section">
                         <span class="stars">⭐ 5.0</span> <span class="likes-badge">👍 ${likes} לייקים</span>
                     </div>
-                    <p style="margin:5px 0; font-size:14px; font-weight:bold; line-height:1.4;">${item.title}</p>
+                    <p style="margin:5px 0; font-size:14px; font-weight:bold;">${item.title}</p>
                     <span class="price">₪${item.extracted_price || 'לא ידוע'}</span>
                     <div style="display:flex; gap:10px; margin-top:10px;">
-                        <button style="flex:1; padding:12px; border-radius:10px; background:#34495e; color:white; border:none; cursor:pointer; font-weight:bold;" onclick="copyToClipboard('${finalLink}', this)">העתק לינק</button>
+                        <button style="flex:1; padding:12px; border-radius:10px; background:#34495e; color:white; border:none; cursor:pointer;" onclick="copyToClipboard('${finalLink}', this)">העתק לינק</button>
                         <a href="${finalLink}" target="_blank" rel="noopener" style="flex:1; padding:12px; border-radius:10px; background:#3b82f6; color:white; text-decoration:none; text-align:center; font-weight:bold;">עבור לאתר</a>
                     </div>`;
                 resDiv.appendChild(box);
@@ -155,10 +142,8 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            
-            const oldText = btn.innerText;
             btn.innerText = "✓ הועתק!";
-            setTimeout(() => { btn.innerText = oldText; }, 2000);
+            setTimeout(() => { btn.innerText = "העתק לינק"; }, 2000);
         }
     </script>
 </body>
