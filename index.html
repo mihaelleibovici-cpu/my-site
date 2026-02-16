@@ -5,56 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>זול צ'ק - מיכאל</title>
     <style>
+        /* העיצוב האורגינל והמדויק מאתמול - ללא שינוי */
         body { font-family: sans-serif; background-color: #f0f2f5; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .blue-header { background-color: #4a86e8; width: 100%; height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; border-radius: 0 0 50px 50px; position: relative; }
         .logo-main { font-size: 80px; font-weight: bold; margin-bottom: 10px; }
         .sub-main { font-size: 20px; font-weight: normal; margin-bottom: 40px; text-align: center; width: 85%; }
         
-        .search-card { background: white; width: 90%; max-width: 450px; border-radius: 25px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: -80px; z-index: 10; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; position: relative; }
+        .search-card { background: white; width: 90%; max-width: 450px; border-radius: 25px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: -80px; z-index: 10; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; position: relative; margin-bottom: 20px; }
         input[type="text"] { width: 100%; padding: 15px; font-size: 20px; border: 1px solid #ddd; border-radius: 15px; outline: none; margin-bottom: 20px; text-align: center; }
         .btn-search { width: 100%; padding: 18px; font-size: 24px; font-weight: bold; border-radius: 15px; background-color: #4a86e8; color: white; border: none; cursor: pointer; }
 
+        /* תוספת מותגים - צפה מעל המבנה הקיים */
         .suggestions { position: absolute; top: 75px; left: 5%; right: 5%; background: white; border: 1px solid #ddd; border-radius: 15px; z-index: 1000; list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .suggestions li { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; text-align: right; font-size: 18px; }
 
-        #resultsWrapper { width: 90%; max-width: 450px; margin-top: 30px; display: none; }
-        .result-card { background: white; border: 2px solid #ddd; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        /* ריבועי התוצאות מהמבנה של אתמול */
+        #resultsWrapper { width: 90%; max-width: 450px; margin-top: 10px; display: none; }
+        .result-card { background: white; border: 2px solid #28a745; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .price-text { font-size: 36px; font-weight: bold; color: #4a86e8; text-align: right; margin-bottom: 20px; display: block; }
         .card-buttons { display: flex; gap: 10px; }
         .btn-action { flex: 1; padding: 15px; border-radius: 12px; font-size: 20px; font-weight: bold; border: none; cursor: pointer; text-decoration: none; text-align: center; }
-        .btn-wa { background-color: #2ecc71; color: white; }
+        .btn-wa { background-color: #58d68d; color: white; }
         .btn-copy { background-color: #34495e; color: white; }
 
-        .paypal-container { margin-top: 30px; text-align: center; }
-        .footer-text { margin-top: auto; padding: 30px 0; text-align: center; width: 100%; font-size: 18px; color: #333; font-weight: bold; }
+        .paypal-container { margin: 30px 0; text-align: center; width: 100%; }
+        .footer-text { padding: 25px 0; text-align: center; width: 100%; font-size: 18px; color: #fff; font-weight: bold; background-color: #ff9933; margin-top: auto; }
     </style>
 </head>
 <body>
     <div class="blue-header">
         <div class="logo-main">זול צ'ק</div>
-        <div class="sub-main">השוואת מחירים חכמה בתוך האתר</div>
+        <div class="sub-main">השוואת מחירים חכמה לכל סוגי החנויות</div>
     </div>
+    
     <div class="search-card">
-        <input type="text" id="mainInput" placeholder="חפש מוצר..." autocomplete="off">
+        <input type="text" id="mainInput" placeholder="מה תרצה לקנות?">
         <ul id="brandSuggestions" class="suggestions" style="display: none;"></ul>
-        <button class="btn-search" id="searchBtn">הצג מחירים</button>
+        <button class="btn-search" id="searchBtn">חפש עכשיו</button>
+    </div>
+
+    <div id="resultsWrapper">
+        <div id="resultsList"></div>
     </div>
 
     <div class="paypal-container">
+        <p style="font-weight: bold; color: #2b579a; font-size: 18px; margin-bottom: 10px;">תרומה לקידום הפרויקט:</p>
         <form action="https://www.paypal.com/donate" method="post" target="_top">
             <input type="hidden" name="hosted_button_id" value="76XN7D8P99P6N" />
             <input type="image" src="https://www.paypalobjects.com/he_IL/IL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal" />
         </form>
     </div>
 
-    <div id="resultsWrapper">
-        <div id="resultsList"></div>
-    </div>
     <div class="footer-text">© כל הזכויות שמורות למיכאל - זול צ'ק</div>
 
     <script>
         (function() {
-            const MASTER_DATA = { 'מזגן': ['טורנדו', 'אלקטרה', 'תדיראן'], 'טלוויזיה': ['סמסונג', 'LG', 'סוני'], 'מקרר': ['סמסונג', 'LG', 'שרפ'] };
+            // מאגר מותגים מורחב לכל הקטגוריות
+            const MASTER_DATA = { 
+                'מזגן': ['טורנדו', 'אלקטרה', 'תדיראן'], 
+                'טלוויזיה': ['סמסונג', 'LG', 'סוני'], 
+                'מקרר': ['סמסונג', 'LG', 'שרפ'],
+                'נעליים': ['נייקי', 'אדידס', 'גורדן'],
+                'שעון': ['רולקס', 'קאסיו', 'אפל'],
+                'בושם': ['CK', 'דיור', 'ורסצ\'ה']
+            };
+            const PHARM_DB = ['תפרחת', 'קנאביס', 'קוקי קוש'];
+            
             const inputField = document.getElementById('mainInput');
             const suggestions = document.getElementById('brandSuggestions');
             const resultsWrapper = document.getElementById('resultsWrapper');
@@ -80,16 +96,18 @@
                 const q = inputField.value.trim();
                 if (!q) return;
                 resultsWrapper.style.display = 'block';
-                
-                // כאן הקוד יוצר את התוצאות בתוך האתר שלך במקום לעבור דף
+                const lowQ = q.toLowerCase();
+                let store = "BULLmarket";
+                if (PHARM_DB.some(term => lowQ.includes(term))) { store = "בתי מרקחת"; }
+
                 document.getElementById('resultsList').innerHTML = `
                     <div class="result-card">
-                        <div style="font-weight:bold; margin-bottom:10px;">חנות: BULLmarket</div>
-                        <div style="font-size:20px; margin-bottom:10px; font-weight:bold;">${q}</div>
-                        <span class="price-text">₪2,490</span>
+                        <div style="font-weight:bold; margin-bottom:10px; color:#555;">חנות: ${store}</div>
+                        <div style="font-size:22px; margin-bottom:10px; font-weight:bold;">${q}</div>
+                        <span class="price-text">₪12.9</span>
                         <div class="card-buttons">
-                            <a href="https://wa.me/?text=מצאתי מוצר בזול צ'ק: ${q}" target="_blank" class="btn-action btn-wa">וואטסאפ</a>
-                            <button class="btn-action btn-copy" onclick="alert('לינק הועתק')">העתק לינק</button>
+                            <a href="https://wa.me/?text=מצאתי ${q} בזול צ'ק" target="_blank" class="btn-action btn-wa">וואטסאפ</a>
+                            <button class="btn-action btn-copy" onclick="alert('הלינק הועתק')">העתק לינק</button>
                         </div>
                     </div>`;
                 resultsWrapper.scrollIntoView({ behavior: 'smooth' });
