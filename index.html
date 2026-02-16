@@ -6,11 +6,10 @@
     <title>זול צ'ק - מיכאל</title>
     
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 80px; }
+        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 130px; }
         .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        /* שורת חיפוש נקייה לגמרי */
         input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; text-align: center; }
         button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
         
@@ -18,21 +17,24 @@
         .brand-chip { background: #fff; color: #3b82f6; padding: 10px 20px; border-radius: 25px; font-size: 14px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid #3b82f6; }
 
         .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
-        .best-deal { border: 2px solid #f1c40f; background: #fffdf0; transform: scale(1.02); z-index: 10; }
+        .best-deal { border: 2px solid #f1c40f; background: #fffdf0; transform: scale(1.02); }
         .best-label { background: #f1c40f; color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 5px; }
 
         .price { font-weight: bold; font-size: 24px; color: #3b82f6; display: block; margin: 5px 0; }
-        .footer-orange-bar { background: #ff8c00; color: white; padding: 15px; font-weight: bold; font-size: 16px; position: fixed; bottom: 0; width: 100%; left: 0; z-index: 100; }
         
+        .footer-fixed { position: fixed; bottom: 0; width: 100%; left: 0; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+        .paypal-bar { background: #ffc439; padding: 12px; border-top: 2px solid #edb120; }
+        .paypal-btn { color: #003087; text-decoration: none; font-weight: bold; font-size: 16px; display: block; }
+        .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; font-weight: bold; font-size: 15px; border-top: 1px solid rgba(0,0,0,0.1); }
+        
+        .used-warning { color: #d32f2f; font-size: 11px; font-weight: bold; background: #ffebee; padding: 2px 6px; border-radius: 4px; margin-right: 5px; }
         .like-section { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; font-size: 13px; }
-        .stars { color: #f39c12; }
-        .likes-badge { background: #e7f3ff; color: #1877f2; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>זול צ'ק</h1>
-        <p>השוואת מחירים חכמה</p>
+        <p>השוואת מחירים חכמה בזמן אמת</p>
     </div>
 
     <div class="container">
@@ -40,13 +42,17 @@
             <input type="text" id="q" placeholder="">
             <button onclick="search()">חפש עכשיו</button>
         </div>
-
         <div id="brands" class="brands-bar"></div>
         <div id="results"></div>
     </div>
 
-    <div class="footer-orange-bar">
-        © כל הזכויות שמורות למיכאל - זול צ'ק
+    <div class="footer-fixed">
+        <div class="paypal-bar">
+            <a href="https://www.paypal.com/paypalme/iareah" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a>
+        </div>
+        <div class="footer-orange-bar">
+            © כל הזכויות שמורות למיכאל - זול צ'ק
+        </div>
     </div>
 
     <script>
@@ -58,7 +64,7 @@
             const brandsDiv = document.getElementById('brands');
             if(!query) return;
             
-            resDiv.innerHTML = "<p>מאתר מחירים ומותגים...</p>";
+            resDiv.innerHTML = "<p>בודק נתונים ומסנן מחירים...</p>";
             brandsDiv.innerHTML = "";
 
             try {
@@ -68,25 +74,23 @@
                 if(d.shopping_results && d.shopping_results.length > 0) {
                     allResults = d.shopping_results;
                     
-                    // מניעת רעשים (טלוויזיה / מקרר)
-                    if(query.includes('טלוויזיה') || query.includes('מקרר')) {
-                        allResults = allResults.filter(item => !item.title.includes('מזנון') && !item.title.includes('שידה'));
+                    // מסנן אמינות למוצרי חשמל/מקררים
+                    const expensiveTerms = ['מקרר', 'טלוויזיה', 'מזגן'];
+                    if(expensiveTerms.some(t => query.includes(t))) {
+                        allResults = allResults.filter(item => (item.extracted_price || 0) > 50);
                     }
 
                     renderBrands(allResults);
                     renderResults(allResults);
                 } else {
-                    resDiv.innerHTML = "<p>לא נמצאו תוצאות.</p>";
+                    resDiv.innerHTML = "<p>לא נמצאו תוצאות אמינות.</p>";
                 }
-            } catch(e) { 
-                resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; 
-            }
+            } catch(e) { resDiv.innerHTML = "<p>שגיאה בחיבור.</p>"; }
         }
 
         function renderBrands(items) {
             const brandsDiv = document.getElementById('brands');
             const brands = [...new Set(items.map(i => i.source))].filter(b => b).slice(0, 10);
-            
             if(brands.length > 0) {
                 const allBtn = document.createElement('button');
                 allBtn.className = 'brand-chip';
@@ -111,9 +115,12 @@
 
             items.forEach((item, index) => {
                 const isBest = index === 0;
-                const likes = Math.floor(Math.random() * 800) + 150;
+                const likes = Math.floor(Math.random() * 500) + 200;
                 const finalLink = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
                 
+                // בדיקת יד שנייה
+                const isUsed = item.title.includes('יד שנייה') || item.title.includes('משומש') || item.title.includes('מתצוגה');
+
                 const box = document.createElement('div');
                 box.className = `product-box ${isBest ? 'best-deal' : ''}`;
                 box.innerHTML = `
@@ -121,23 +128,22 @@
                     <div style="display:flex; align-items:center; gap:10px;">
                         <img src="${item.thumbnail || ''}" style="width:40px; height:40px; object-fit:contain;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/263/263142.png'">
                         <strong>${item.source}</strong>
+                        ${isUsed ? '<span class="used-warning">❌ יד שנייה</span>' : ''}
                     </div>
-                    <div class="like-section">
-                        <span class="stars">⭐ 5.0</span> <span class="likes-badge">👍 ${likes} לייקים</span>
-                    </div>
+                    <div class="like-section">⭐ 5.0 | 👍 ${likes} לייקים</div>
                     <p style="margin:5px 0; font-size:14px; font-weight:bold;">${item.title}</p>
                     <span class="price">₪${item.extracted_price || 'לא ידוע'}</span>
                     <div style="display:flex; gap:10px; margin-top:10px;">
-                        <button style="flex:1; padding:12px; border-radius:10px; background:#34495e; color:white; border:none; cursor:pointer;" onclick="copyToClipboard('${finalLink}', this)">העתק לינק</button>
+                        <button style="flex:1; padding:12px; border-radius:10px; background:#34495e; color:white; border:none; cursor:pointer;" onclick="copyLink('${finalLink}', this)">העתק לינק</button>
                         <a href="${finalLink}" target="_blank" rel="noopener" style="flex:1; padding:12px; border-radius:10px; background:#3b82f6; color:white; text-decoration:none; text-align:center; font-weight:bold;">עבור לאתר</a>
                     </div>`;
                 resDiv.appendChild(box);
             });
         }
 
-        function copyToClipboard(text, btn) {
+        function copyLink(url, btn) {
             const el = document.createElement('textarea');
-            el.value = text;
+            el.value = url;
             document.body.appendChild(el);
             el.select();
             document.execCommand('copy');
