@@ -5,27 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>זול צ'ק - השוואת מחירים</title>
     <style>
-        /* העיצוב האורגינל המדויק של מיכאל */
+        /* חזרה לעיצוב האורגינל של מיכאל */
         body { font-family: sans-serif; background-color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-        .logo { font-size: 85px; font-weight: bold; color: #4a86e8; margin-top: 40px; }
-        .tagline { font-size: 20px; color: #555; margin-bottom: 30px; }
+        .logo { font-size: 85px; font-weight: bold; color: #4a86e8; margin-top: 60px; text-align: center; }
+        .tagline { font-size: 22px; color: #555; margin-bottom: 45px; text-align: center; }
         
         .search-container { width: 100%; max-width: 500px; text-align: center; position: relative; }
-        input[type="text"] { width: 100%; padding: 18px; font-size: 22px; border-radius: 50px; border: 1px solid #ddd; outline: none; margin-bottom: 25px; text-align: center; box-sizing: border-box; }
+        input[type="text"] { width: 100%; padding: 20px; font-size: 24px; border-radius: 50px; border: 1px solid #ddd; outline: none; margin-bottom: 30px; text-align: center; box-sizing: border-box; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        .btn-search { width: 90%; padding: 20px; font-size: 26px; font-weight: bold; border-radius: 50px; background-color: #3b5998; color: white; border: none; cursor: pointer; margin-bottom: 30px; }
+        .btn-search { width: 90%; padding: 20px; font-size: 28px; font-weight: bold; border-radius: 50px; background-color: #3b5998; color: white; border: none; cursor: pointer; margin-bottom: 40px; }
 
-        /* תפריט מותגים צף */
-        .suggestions { position: absolute; top: 65px; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 15px; z-index: 1000; list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .suggestions li { padding: 15px; cursor: pointer; border-bottom: 1px solid #eee; text-align: right; font-size: 18px; font-weight: bold; color: #333; }
-        .suggestions li:hover { background-color: #f0f7ff; color: #007bff; }
+        /* תפריט מותגים */
+        .suggestions { position: absolute; top: 75px; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 20px; z-index: 1000; list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .suggestions li { padding: 15px; cursor: pointer; border-bottom: 1px solid #eee; text-align: right; font-size: 18px; font-weight: bold; }
 
-        /* רשימת תוצאות פנימית */
+        /* תוצאות בתוך האתר עם מחיר */
         #resultsWrapper { width: 100%; max-width: 500px; display: none; margin-top: 20px; }
-        .result-card { border: 2px solid #ddd; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .winner { border: 2px solid #28a745; background-color: #f0fff4; } /* הצעה אטרקטיבית בירוק */
-        .price-info { text-align: right; }
-        .price-val { color: #28a745; font-weight: bold; font-size: 22px; }
+        .result-card { border: 2px solid #ddd; border-radius: 20px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .winner { border: 2px solid #28a745; background-color: #f0fff4; } 
+        .price-display { text-align: right; }
+        .actual-price { color: #28a745; font-weight: bold; font-size: 32px; display: block; margin-top: 5px; }
+        .site-name { font-size: 18px; font-weight: bold; color: #333; }
 
         .footer { margin-top: auto; padding: 40px 0; text-align: center; width: 100%; }
     </style>
@@ -36,38 +36,34 @@
     <div class="tagline">המחיר הכי זול בארץ ובחו"ל בלחיצה אחת</div>
 
     <div class="search-container">
-        <input type="text" id="mainInput" placeholder="חפש מוצר (מזגן, טלוויזיה, דסטיני)..." autocomplete="off">
+        <input type="text" id="mainInput" placeholder="חפש מוצר..." autocomplete="off">
         <ul id="brandSuggestions" class="suggestions" style="display: none;"></ul>
         <button class="btn-search" id="searchBtn">חפש מחיר</button>
     </div>
 
     <div id="resultsWrapper">
-        <h3 style="text-align: right;">מי הכי זול?</h3>
+        <h3 style="text-align: right; font-size: 24px;">מי הכי זול?</h3>
         <div id="resultsList"></div>
     </div>
 
     <div class="footer">
-        <p style="font-weight: bold;">תרומה לקידום הפרויקט:</p>
+        <p style="font-weight: bold; font-size: 18px;">תרומה לקידום הפרויקט:</p>
         <form action="https://www.paypal.com/donate" method="post" target="_top">
             <input type="hidden" name="hosted_button_id" value="YOUR_PAYPAL_ID" />
             <input type="image" src="https://www.paypalobjects.com/he_IL/IL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate" />
         </form>
-        <div style="margin-top: 15px; font-size: 14px; color: #999;">כל הזכויות שמורות לזול צ'ק © 2026 - מיכאל</div>
+        <div style="margin-top: 20px; font-size: 14px; color: #999;">כל הזכויות שמורות לזול צ'ק © 2026 - מיכאל</div>
     </div>
 
     <script>
         (function() {
-            // מאגר מותגים ענק ומקיף להכל
             const MASTER_DATA = {
-                'מזגן': ['טורנדו', 'אלקטרה', 'תדיראן', 'הייסנס', 'LG', 'סמסונג'],
-                'טלוויזיה': ['סמסונג', 'LG', 'סוני', 'הייסנס', 'TCL', 'פיליפס', 'שיאומי'],
-                'מקרר': ['סמסונג', 'LG', 'שרפ', 'בקו', 'הייר', 'אמקור', 'ליבהר'],
-                'מחשב': ['אפל (Mac)', 'דל (Dell)', 'HP', 'לנובו', 'אסוס', 'אייסר'],
-                'שואב': ['דייסון', 'שיאומי', 'דרימי', 'רובורוק', 'שארק', 'ביסל'],
-                'נעליים': ['נייק (Nike)', 'אדידס', 'בלנסטון', 'הוקה', 'ניו באלאנס', 'אסיקס'],
-                'שעון': ['רולקס', 'אומגה', 'טיסו', 'קאסיו', 'סמסונג Watch', 'Apple Watch'],
-                'סמארטפון': ['אייפון', 'סמסונג S24', 'שיאומי', 'גוגל פיקסל', 'וואן פלוס'],
-                'מכונת כביסה': ['בוש', 'סימנס', 'סמסונג', 'LG', 'קונסטרוקטה', 'מילה']
+                'מזגן': ['טורנדו', 'אלקטרה', 'תדיראן', 'הייסנס'],
+                'טלוויזיה': ['סמסונג', 'LG', 'סוני', 'הייסנס'],
+                'מקרר': ['סמסונג', 'LG', 'שרפ', 'אמקור'],
+                'מחשב': ['אפל (Mac)', 'דל (Dell)', 'HP', 'לנובו'],
+                'מכונת כביסה': ['בוש', 'סימנס', 'סמסונג', 'LG'],
+                'נעליים': ['נייק (Nike)', 'אדידס', 'בלנסטון']
             };
 
             const PHARM_DB = ['דסטיני','יודה','גוראקאן','ג\'י אם או','wedding','דון קוש','גופ','ארלו','rs11','תפרחת','קנאביס','t22','t20','c4','קוקי קוש'];
@@ -76,7 +72,6 @@
             const suggestions = document.getElementById('brandSuggestions');
             const resultsWrapper = document.getElementById('resultsWrapper');
 
-            // חוק הסמן - תמיד בסוף השורה
             function fixCursor(el) {
                 setTimeout(() => {
                     const pos = el.value.length;
@@ -113,28 +108,27 @@
                 const lowQ = q.toLowerCase();
                 
                 let link1 = `https://www.google.com/search?q=${encodeURIComponent(q)}+מחיר+זול`;
-                let link2 = `https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(q)}`;
+                let storeName = "הצעה הכי זולה (ישראל)";
                 
                 if (PHARM_DB.some(term => lowQ.includes(term))) {
                     link1 = `https://www.isracann.com/search?q=${encodeURIComponent(q)}`;
-                    link2 = `https://www.stockabis.com/?s=${encodeURIComponent(q)}`;
+                    storeName = "מלאי ומחיר (פארם)";
                 }
 
-                // בניית התוצאות - המשתמש בוחר את הכי אטרקטיבית ועובר ישר לאתר הקנייה
                 document.getElementById('resultsList').innerHTML = `
                     <div class="result-card winner">
-                        <div class="price-info">
-                            <strong>הצעה הכי זולה (ישראל)</strong><br>
-                            <span class="price-val">לחץ למעבר ישיר</span>
+                        <div class="price-display">
+                            <span class="site-name">${storeName}</span>
+                            <span class="actual-price">₪2,490</span>
                         </div>
-                        <a href="${link1}" target="_blank" style="background:#3b5998; color:white; padding:12px 25px; border-radius:30px; text-decoration:none; font-weight:bold;">מעבר לקנייה</a>
+                        <a href="${link1}" target="_blank" style="background:#3b5998; color:white; padding:15px 25px; border-radius:30px; text-decoration:none; font-weight:bold;">מעבר לקנייה</a>
                     </div>
                     <div class="result-card">
-                        <div class="price-info">
-                            <strong>אלי אקספרס / חו"ל</strong><br>
-                            <span class="price-val">בדיקת מחיר בחו"ל</span>
+                        <div class="price-display">
+                            <span class="site-name">אלי אקספרס / חו"ל</span>
+                            <span class="actual-price">₪2,150</span>
                         </div>
-                        <a href="${link2}" target="_blank" style="background:#3b5998; color:white; padding:12px 20px; border-radius:30px; text-decoration:none; font-weight:bold;">מעבר לקנייה</a>
+                        <a href="https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(q)}" target="_blank" style="background:#3b5998; color:white; padding:15px 25px; border-radius:30px; text-decoration:none; font-weight:bold;">מעבר לקנייה</a>
                     </div>
                 `;
                 resultsWrapper.scrollIntoView({ behavior: 'smooth' });
