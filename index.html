@@ -3,102 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>זול צ'ק - השוואת מחירים גלובלית</title>
+    <title>זול צ'ק - השוואת מחירים</title>
     <style>
-        /* עיצוב האתר - נשמר נקי ומקצועי לטלפון */
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; align-items: center; color: #333; }
-        .container { width: 90%; max-width: 600px; text-align: center; margin-top: 60px; }
-        .logo { font-size: 55px; font-weight: 900; color: #007bff; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
-        .tagline { font-size: 18px; margin-bottom: 30px; color: #555; }
+        body { font-family: sans-serif; background-color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .logo { font-size: 85px; font-weight: bold; color: #4a86e8; margin-top: 60px; }
+        .tagline { font-size: 20px; color: #555; margin-bottom: 45px; }
+        .search-container { width: 90%; max-width: 500px; text-align: center; position: relative; }
+        input[type="text"] { width: 100%; padding: 18px; font-size: 22px; border-radius: 50px; border: 1px solid #ddd; outline: none; margin-bottom: 25px; text-align: center; box-sizing: border-box; }
+        .btn-search { width: 85%; padding: 18px; font-size: 24px; font-weight: bold; border-radius: 50px; background-color: #2b579a; color: white; border: none; cursor: pointer; }
         
-        .search-box { width: 100%; position: relative; }
-        input[type="text"] { width: 100%; padding: 22px 25px; font-size: 20px; border-radius: 50px; border: 2px solid #ddd; box-shadow: 0 4px 15px rgba(0,0,0,0.05); outline: none; transition: 0.3s; box-sizing: border-box; text-align: right; }
-        input[type="text"]:focus { border-color: #007bff; box-shadow: 0 4px 20px rgba(0,123,255,0.15); }
-        
-        .search-btn { background-color: #007bff; color: white; border: none; padding: 18px 50px; font-size: 22px; font-weight: bold; border-radius: 50px; margin-top: 25px; cursor: pointer; transition: 0.3s; width: 80%; box-shadow: 0 4px 10px rgba(0,123,255,0.3); }
-        .search-btn:hover { background-color: #0056b3; transform: translateY(-2px); }
-        
-        /* פוטר - פייפאל וזכויות יוצרים */
-        .footer { margin-top: auto; padding: 40px 0; width: 100%; text-align: center; background: #fff; border-top: 1px solid #eee; }
-        .paypal-box { margin-bottom: 20px; }
-        .copy { font-size: 15px; color: #777; border-top: 1px dotted #ccc; display: inline-block; padding-top: 15px; width: 80%; }
+        /* רשימת המותגים שנפתחת מתחת לחיפוש */
+        .suggestions { position: absolute; top: 65px; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 15px; z-index: 1000; list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .suggestions li { padding: 15px; cursor: pointer; border-bottom: 1px solid #eee; text-align: right; font-size: 18px; font-weight: bold; color: #333; }
+        .suggestions li:hover { background-color: #f0f7ff; color: #007bff; }
+
+        .footer { margin-top: auto; padding: 40px 0; text-align: center; width: 100%; }
+        .paypal-text { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="logo">זול צ'ק</div>
-        <div class="tagline">המחיר הכי זול בארץ ובחו"ל בלחיצה אחת</div>
-        
-        <div class="search-box">
-            <input type="text" id="mainInput" placeholder="חפש מוצר, מותג או זן..." autocomplete="off">
-        </div>
-        <button class="search-btn" id="goBtn">חפש מחיר</button>
+    <div class="logo">זול צ'ק</div>
+    <div class="tagline">המחיר הכי זול בארץ ובחו"ל בלחיצה אחת</div>
+
+    <div class="search-container">
+        <input type="text" id="mainInput" placeholder="חפש מוצר (מזגן, טלוויזיה, דסטיני)..." autocomplete="off">
+        <ul id="suggestionsList" class="suggestions" style="display: none;"></ul>
+        <button class="btn-search" id="searchBtn">חפש מחיר</button>
     </div>
 
     <div class="footer">
-        <div class="paypal-box">
-            <p style="font-weight: bold; font-size: 14px;">תרומה לקידום הפרויקט:</p>
-            <form action="https://www.paypal.com/donate" method="post" target="_top">
-                <input type="hidden" name="hosted_button_id" value="YOUR_PAYPAL_ID" />
-                <input type="image" src="https://www.paypalobjects.com/he_IL/IL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate with PayPal" />
-            </form>
-        </div>
-        <div class="copy">
-            כל הזכויות שמורות לזול צ'ק © 2026 - מיכאל
-        </div>
+        <div class="paypal-text">תרומה לקידום הפרויקט:</div>
+        <form action="https://www.paypal.com/donate" method="post" target="_top">
+            <input type="hidden" name="hosted_button_id" value="YOUR_PAYPAL_ID" />
+            <input type="image" src="https://www.paypalobjects.com/he_IL/IL/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate" />
+        </form>
+        <div style="margin-top: 15px; font-size: 14px; color: #999;">כל הזכויות שמורות לזול צ'ק © 2026 - מיכאל</div>
     </div>
 
     <script>
         (function() {
-            // מאגר הנתונים המורחב לזיהוי הקשרים
-            const PHARM_DB = ['דסטיני','יודה','גוראקאן','ג\'י אם או','wedding','דון קוש','תל אביב','גופ','טובי','ארלו','rs11','תפרחת','קנאביס','קנדוק','שיח','t22','t20','c4','אינדיקה','סאטיבה','קוקי קוש'];
-            const ELEC_DB = ['סמסונג','samsung','lg','טלוויזיה','מקרר','אייפון','מחשב','מכונת כביסה','נינג\'ה','דייסון'];
+            // מאגר מותגים מורחב מאוד - כל מילת מפתח פותחת רשימה
+            const MASTER_BRANDS = {
+                'מזגן': ['טורנדו', 'אלקטרה', 'תדיראן', 'הייסנס', 'LG'],
+                'טלוויזיה': ['סמסונג', 'LG', 'סוני', 'הייסנס', 'TCL', 'פיליפס'],
+                'מקרר': ['סמסונג', 'LG', 'שרפ', 'בקו', 'הייר', 'ליבהר'],
+                'מחשב': ['אפל (Mac)', 'דל (Dell)', 'HP', 'לנובו', 'אסוס'],
+                'שואב': ['דייסון', 'שיאומי', 'דרימי', 'רובורוק', 'שארק'],
+                'נעליים': ['נייק', 'אדידס', 'בלנסטון', 'הוקה', 'ניו באלאנס'],
+                'שעון': ['רולקס', 'אומגה', 'טיסו', 'קאסיו', 'סמסונג Watch', 'Apple Watch'],
+                'סמארטפון': ['אייפון', 'סמסונג S24', 'שיאומי', 'גוגל פיקסל']
+            };
 
+            const PHARM_ITEMS = ['דסטיני','יודה','גוראקאן','ג\'י אם או','wedding','דון קוש','תל אביב','גופ','טובי','ארלו','rs11','תפרחת','קנאביס','t22','t20','c4','סאטיבה','אינדיקה','קוקי קוש'];
+            
             const inputField = document.getElementById('mainInput');
-            const btn = document.getElementById('goBtn');
+            const suggestionsList = document.getElementById('suggestionsList');
+            const btn = document.getElementById('searchBtn');
 
-            // חוק הברזל: הסמן תמיד בסוף השורה (למניעת קפיצות בסמסונג S24)
-            function keepCursorAtEnd(el) {
+            function fixCursor(el) {
                 setTimeout(() => {
                     const pos = el.value.length;
                     el.setSelectionRange(pos, pos);
                 }, 0);
             }
 
-            function executeZolCheckSearch() {
+            // מנגנון הצגת מותגים ברגע שמקלידים מילת מפתח
+            inputField.addEventListener('input', (e) => {
+                const val = e.target.value.trim();
+                suggestionsList.innerHTML = '';
+                
+                if (MASTER_BRANDS[val]) {
+                    MASTER_BRANDS[val].forEach(brand => {
+                        const li = document.createElement('li');
+                        li.textContent = brand;
+                        li.onclick = () => {
+                            inputField.value = val + ' ' + brand;
+                            suggestionsList.style.display = 'none';
+                            fixCursor(inputField);
+                        };
+                        suggestionsList.appendChild(li);
+                    });
+                    suggestionsList.style.display = 'block';
+                } else {
+                    suggestionsList.style.display = 'none';
+                }
+                fixCursor(e.target);
+            });
+
+            function startSearch() {
                 const query = inputField.value.trim();
                 if (!query) return;
 
                 const lowQuery = query.toLowerCase();
-
-                // 1. ניתוב קנאביס/פארם (חיפוש בארץ)
-                if (PHARM_DB.some(term => lowQuery.includes(term))) {
+                if (PHARM_ITEMS.some(term => lowQuery.includes(term))) {
                     window.open(`https://www.isracann.com/search?q=${encodeURIComponent(query)}`, '_blank');
-                    window.open(`https://www.stockabis.com/?s=${encodeURIComponent(query)}`, '_blank');
-                } 
-                // 2. ניתוב מוצרי חשמל (חיפוש השוואתי בארץ)
-                else if (ELEC_DB.some(term => lowQuery.includes(term))) {
-                    window.open(`https://www.zap.co.il/search.aspx?keyword=${encodeURIComponent(query)}`, '_blank');
-                } 
-                // 3. ניתוב כללי - ישראל + אלי אקספרס (הכל כלול)
-                else {
-                    // חיפוש גלובלי בגוגל שכולל השוואה לארץ ולחו"ל
-                    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}+מחיר+זול+בארץ+ובחו"ל`, '_blank');
-                    // פתיחה ישירה של עלי אקספרס כפי שביקשת
+                } else {
+                    // חיפוש קנייה ישיר (גוגל ואלי אקספרס)
+                    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}+מחיר+זול`, '_blank');
                     window.open(`https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(query)}`, '_blank');
                 }
             }
 
-            // הצמדת אירועים
-            inputField.addEventListener('input', (e) => keepCursorAtEnd(e.target));
-            inputField.addEventListener('focus', (e) => keepCursorAtEnd(e.target));
-            
-            inputField.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') executeZolCheckSearch();
-            });
-
-            btn.addEventListener('click', executeZolCheckSearch);
+            inputField.addEventListener('focus', (e) => fixCursor(e.target));
+            inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') startSearch(); });
+            btn.addEventListener('click', startSearch);
+            document.addEventListener('click', (e) => { if (e.target !== inputField) suggestionsList.style.display = 'none'; });
         })();
     </script>
 </body>
