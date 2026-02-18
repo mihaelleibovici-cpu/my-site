@@ -72,7 +72,7 @@
 <script>
     let currentTab = 'smoke';
     const allData = {
-        'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש", "לומניר", "ג'לאטו", "אוריגינל גרילה", "סופר למון הייז"],
+        'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"],
         'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל", "שמן אלסקה", "שמן ארז", "שמן תכלת"],
         'vape': ["Mighty", "Pax", "Volcano", "Crafty", "עט אידוי"],
         'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג"]
@@ -95,7 +95,15 @@
         const list = document.getElementById('autocompleteList');
         list.innerHTML = "";
         if (!val) { list.style.display = "none"; return; }
-        const filtered = allData[currentTab].filter(s => s.includes(val));
+        
+        let filtered;
+        // מילת מפתח להצגת כל הרשימה
+        if (val === "ת'") {
+            filtered = allData[currentTab];
+        } else {
+            filtered = allData[currentTab].filter(s => s.includes(val));
+        }
+
         if (filtered.length > 0) {
             list.style.display = "block";
             filtered.forEach(s => {
