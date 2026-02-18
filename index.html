@@ -88,7 +88,6 @@
         if (!val) { list.style.display = "none"; return; }
         
         let filtered;
-        // האות ת או המילה שמן פותחות את כל הרשימה של הלשונית הנוכחית
         if (val === "ת" || val === "שמן") {
             filtered = allData[currentTab];
         } else {
@@ -101,7 +100,11 @@
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.innerText = s;
-                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
+                item.onclick = () => { 
+                    document.getElementById('q').value = s; 
+                    list.style.display = "none"; 
+                    handleSearch(s); 
+                };
                 list.appendChild(item);
             });
         } else { list.style.display = "none"; }
