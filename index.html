@@ -18,8 +18,8 @@
         input[type="text"] { 
             width: 100%; 
             padding: 16px; 
-            padding-right: 45px; /* רווח לרענון בצד ימין */
-            padding-left: 45px;  /* רווח לאיקס בצד שמאל */
+            padding-right: 45px; /* מקום לרענון בימין */
+            padding-left: 45px;  /* מקום לאיקס בשמאל */
             border-radius: 12px; 
             border: 1px solid #333; 
             font-size: 18px; 
@@ -35,9 +35,7 @@
         input::-webkit-search-results-button,
         input::-webkit-search-results-decoration { display: none; }
 
-        /* כפתור רענון בצד ימין */
         .refresh-btn { position: absolute; right: 12px; font-size: 22px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
-        /* כפתור X למחיקה בצד שמאל */
         .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
 
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
