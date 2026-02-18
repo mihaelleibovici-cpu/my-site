@@ -16,19 +16,17 @@
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
 
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
-        
-        /* החזרת המבנה המקורי של שורת החיפוש */
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; }
         
+        /* שלד נעול: שורת חיפוש עם איקס ורענון פנימי */
         input[type="search"] { 
-            width: 100%; padding: 16px; padding-left: 50px; /* רווח לרענון */
+            width: 100%; padding: 16px; padding-left: 45px;
             border-radius: 12px; border: 1px solid #333; 
             font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; 
         }
 
-        /* כפתור רענון בתוך שורת החיפוש כפי שביקשת */
         .refresh-inside {
-            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
             background: none; border: none; font-size: 22px; color: #888; cursor: pointer; z-index: 10;
         }
 
@@ -78,7 +76,7 @@
         'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"],
         'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל", "שמן פול ספקטרום", "שמן אלסקה", "שמן ארז", "שמן תכלת"],
         'vape': ["Mighty", "Pax", "Volcano", "Crafty", "עט אידוי"],
-        'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג"]
+        'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג", "קונוסים"]
     };
 
     function setTab(tab, el) {
@@ -88,12 +86,14 @@
         document.getElementById('q').value = "";
         document.getElementById('autocompleteList').style.display = "none";
         document.getElementById('results').innerHTML = "";
+        // אם זה מבצעים - תריץ חיפוש אוטומטי מיד
+        if (tab === 'sales') handleSearch("מבצע קנאביס תוקף");
     }
 
     function onInput(val) {
         const list = document.getElementById('autocompleteList');
         list.innerHTML = "";
-        if (!val) { list.style.display = "none"; document.getElementById('results').innerHTML = ""; return; }
+        if (!val) { list.style.display = "none"; return; }
         
         const filtered = allData[currentTab] ? allData[currentTab].filter(s => s.startsWith(val) || s.includes(val) || (val === 'ת' && currentTab === 'smoke')) : [];
 
@@ -112,7 +112,7 @@
             });
         } else { 
             list.style.display = "none";
-            if (val.length > 1) handleSearch(val); 
+            if (val.length > 2) handleSearch(val); 
         }
     }
 
@@ -122,20 +122,18 @@
         if (!userInput && currentTab !== 'sales') return;
 
         let query = userInput;
-        // מנוע "חפירה" מעודכן להבאת תוצאות אמת
-        if (currentTab === 'smoke') query += " קנאביס רפואי מלאי חנויות";
-        else if (currentTab === 'oil') query += " שמן קנאביס רפואי למכירה";
-        else if (currentTab === 'acc') query += " אביזרי עישון";
-        else if (currentTab === 'sales') query = "מבצע קנאביס תוקף קצר";
+        if (currentTab === 'smoke') query += " קנאביס רפואי במלאי";
+        else if (currentTab === 'oil') query += " שמן קנאביס רפואי אונליין";
+        else if (currentTab === 'sales') query = "קנאביס מבצע תוקף קצר";
 
-        resDiv.innerHTML = "<p style='text-align:center;'>מעדכן מלאי...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>מושך תוצאות אמת מהפארם...</p>";
 
         try {
             const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
             const d = await r.json();
             renderResults(d.shopping_results || []);
         } catch (e) { 
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור למלאי. נסה לרענן.</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>לא הצלחתי למשוך נתונים. נסה שוב בעוד רגע.</p>";
         }
     }
 
@@ -148,13 +146,15 @@
             const title = item.title.toLowerCase();
             if (blacklist.some(word => title.includes(word))) return false;
             
+            // תנאים להצגת תוצאה - חייב להיות קשור לעולם הקנאביס או אביזרים
+            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20") || title.includes("מבצע") || title.includes("נייר") || title.includes("קונוס");
+            
             if (currentTab === 'acc') return true; 
-            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20") || title.includes("מבצע") || title.includes("נייר") || title.includes("גריינדר");
             return isMedical;
         });
 
         if (filtered.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי פנוי. נסה לרענן או לבחור זן אחר.</p>";
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצאו תוצאות מלאי. נסה שם אחר או רענן.</p>";
             return;
         }
 
