@@ -4,38 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>זול צ'ק - קנאביס רפואי</title>
-    
     <style>
         :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; }
         body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 220px; direction: rtl; }
         .header { padding: 20px 15px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
         .header h1 { color: var(--main-green); font-size: 28px; margin: 0; }
-        
         .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
         .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
-
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; }
-        
-        input[type="search"] { 
-            width: 100%; padding: 16px; padding-right: 45px; padding-left: 40px;
-            border-radius: 12px; border: 1px solid #333; 
-            font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; 
-        }
-
-        .refresh-inside {
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; font-size: 22px; color: #888; cursor: pointer; z-index: 10;
-        }
-
+        input[type="search"] { width: 100%; padding: 16px; padding-right: 45px; padding-left: 40px; border-radius: 12px; border: 1px solid #333; font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; }
+        .refresh-inside { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 22px; color: #888; cursor: pointer; z-index: 10; }
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.6); display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
-
         .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
         .store-name { color: var(--gold); font-size: 13px; font-weight: bold; }
         .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
-        
         .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 2000; display: flex; flex-direction: column; }
         .disclaimer-bar { background: rgba(0,0,0,0.9); color: #888; font-size: 11px; padding: 10px; text-align: center; border-top: 1px solid #333; }
         .paypal-bar { background: #ffc439; padding: 12px; text-align: center; }
@@ -43,48 +28,35 @@
     </style>
 </head>
 <body>
-
-<div class="header"><h1>זול צ'ק - קנאביס</h1></div>
-
-<div class="tabs-container">
-    <div class="tab active" onclick="setTab('smoke', this)">תפרחת</div>
-    <div class="tab" onclick="setTab('oil', this)">שמן רפואי</div>
-    <div class="tab" onclick="setTab('vape', this)">אידוי</div>
-    <div class="tab" onclick="setTab('acc', this)">אביזרים</div>
-    <div class="tab" onclick="setTab('sales', this)">מבצעי תוקף</div>
-</div>
-
-<div class="container">
-    <div class="search-wrapper">
-        <input type="search" id="q" placeholder="" oninput="onInput(this.value)" inputmode="search">
-        <button class="refresh-inside" onclick="handleSearch()" title="רענן מלאי">↻</button>
-        <div id="autocompleteList" class="autocomplete-list"></div>
+    <div class="header"><h1>זול צ'ק - קנאביס</h1></div>
+    <div class="tabs-container">
+        <div class="tab active" onclick="setTab('smoke', this)">תפרחת</div>
+        <div class="tab" onclick="setTab('oil', this)">שמן רפואי</div>
+        <div class="tab" onclick="setTab('vape', this)">אידוי</div>
+        <div class="tab" onclick="setTab('acc', this)">אביזרים</div>
+        <div class="tab" onclick="setTab('sales', this)">מבצעי תוקף</div>
     </div>
-    <div id="results"></div>
-</div>
-
-<div class="footer-fixed">
-    <div class="disclaimer-bar"><strong>תנאי שימוש:</strong> המידע נמשך מאתרי אונליין ובאחריותם. האתר אינו מוכר קנאביס. רכישה בכפוף לרישיון תקף.</div>
-    <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/iareah" target="_blank" style="color:#003087; text-decoration:none; font-weight:bold;">תמיכה בפרויקט - פייפאל</a></div>
-    <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק 2026</div>
-</div>
+    <div class="container">
+        <div class="search-wrapper">
+            <input type="search" id="q" placeholder="חפש זן או מוצר..." oninput="onInput(this.value)" inputmode="search">
+            <button class="refresh-inside" onclick="handleSearch()" title="רענן מלאי">↻</button>
+            <div id="autocompleteList" class="autocomplete-list"></div>
+        </div>
+        <div id="results"></div>
+    </div>
+    <div class="footer-fixed">
+        <div class="disclaimer-bar"><strong>תנאי שימוש:</strong> המידע נמשך מאתרי אונליין ובאחריותם. האתר אינו מוכר קנאביס.</div>
+        <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/iareah" target="_blank" style="color:#003087; text-decoration:none; font-weight:bold;">תמיכה בפרויקט - פייפאל</a></div>
+        <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק 2026</div>
+    </div>
 
 <script>
     let currentTab = 'smoke';
-    const internalTranslator = {
-        "אלסקה": "Alaska", "תכלת": "Techelet", "מרמלדה": "Marmelada", "ארז": "Erez", 
-        "אבידקל": "Avidekel", "פיקאסו": "Picasso", "בלאק": "Black", "PK": "PK", 
-        "GMO": "GMO", "RS11": "RS11", "וודינג סי קיי": "Wedding CK", "קוקי קוש": "Cookie Kush",
-        "סנסי": "Sensi", "מיריקל": "Miracle", "דסטיני": "Destiny", "יודה": "Yoda", 
-        "ג'וראקאן": "Jurakan", "ספייס סי קיי": "Space CK", "דון קוש": "Don Kush",
-        "קונוסים": "Cones", "ניירות גלגול": "Rolling Papers"
-    };
-
     const allData = {
         'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"],
-        'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל", "שמן פול ספקטרום", "שמן אלסקה", "שמן ארז", "שמן תכלת"],
+        'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל", "שמן אלסקה", "שמן ארז", "שמן תכלת"],
         'vape': ["Mighty", "Pax", "Volcano", "Crafty", "עט אידוי"],
-        'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג", "קונוסים"]
+        'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג"]
     };
 
     function setTab(tab, el) {
@@ -99,9 +71,9 @@
     function onInput(val) {
         const list = document.getElementById('autocompleteList');
         list.innerHTML = "";
-        if (!val) { list.style.display = "none"; document.getElementById('results').innerHTML = ""; return; }
-        const filtered = allData[currentTab] ? allData[currentTab].filter(s => s.startsWith(val) || s.includes(val) || (val === 'ת' && currentTab === 'smoke')) : [];
-        if (filtered.length > 0 && currentTab !== 'sales') {
+        if (!val) { list.style.display = "none"; return; }
+        const filtered = allData[currentTab].filter(s => s.includes(val));
+        if (filtered.length > 0) {
             list.style.display = "block";
             filtered.forEach(s => {
                 const item = document.createElement('div');
@@ -110,62 +82,41 @@
                 item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
                 list.appendChild(item);
             });
-        } else { list.style.display = "none"; if (val.length > 2) handleSearch(val); }
+        } else { list.style.display = "none"; }
     }
 
     async function handleSearch(manualQuery) {
         const userInput = manualQuery !== undefined ? manualQuery : document.getElementById('q').value;
         const resDiv = document.getElementById('results');
-        if (!userInput && currentTab !== 'sales') return;
+        if (!userInput) return;
 
-        let eng = internalTranslator[userInput] || "";
-        // פקודת חדירה ממוקדת: חיפוש רק בתוך שרתי פארם מורשים
-        let query = `${userInput} ${eng} קנאביס רפואי (site:super-pharm.co.il OR site:be-pharm.co.il OR site:drugstore.co.il OR site:panaxia.co.il)`;
-
-        resDiv.innerHTML = "<p style='text-align:center;'>חודר לשרתי המלאי (זמן אמת)...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>בודק מלאי בזמן אמת...</p>";
 
         try {
-            // שימוש בפרמטר שופינג להבאת מחירים אמיתיים
-            const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&type=shopping&nocache=${Date.now()}`);
+            // הקריאה ל-API הפנימי שמשתמש במפתח הסודי מהכספת ב-Vercel
+            const response = await fetch(`/api/search?q=${encodeURIComponent(userInput + ' קנאביס רפואי מלאי בתי מרקחת מחיר')}`);
             const data = await response.json();
-            renderResults(data.shopping_results || data.results || []);
+            renderResults(data.shopping_results || []);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחדירה לשרת. נסה לרענן.</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור לשרת.</p>";
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        
-        // חסימת כל אתר שלא קשור לפארם
-        const allowedSources = ["super-pharm", "be-pharm", "drugstore", "pharm", "בית מרקחת", "be", "פארם", "פנאקיה"];
-
-        const filtered = items.filter(item => {
-            const title = item.title ? item.title.toLowerCase() : "";
-            const source = item.source ? item.source.toLowerCase() : "";
-            
-            // בדיקה אם המקור מופיע ברשימה המורשית
-            const isAuthorized = allowedSources.some(s => source.includes(s) || title.includes(s));
-            const hasPrice = item.extracted_price || item.price;
-            
-            if (currentTab === 'acc') return hasPrice;
-            return isAuthorized && hasPrice;
-        });
-
-        if (filtered.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי חי בשרתי הפארם. נסה זן אחר או רענן.</p>";
+        if (items.length === 0) {
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין כרגע.</p>";
             return;
         }
-
-        filtered.sort((a, b) => (a.extracted_price || 0) - (b.extracted_price || 0)).forEach(item => {
+        items.forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
-                <div class="store-name">${item.source || "בית מרקחת מורשה"}</div>
+                <div class="store-name">${item.source || "בית מרקחת"}</div>
                 <div style="margin:8px 0; font-weight:bold;">${item.title}</div>
-                <div class="price">₪${item.extracted_price || item.price || "בדיקה באתר"}</div>
-                <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">בדיקת מלאי ורכישה</a>
+                <div class="price">₪${item.extracted_price || item.price || "---"}</div>
+                <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה ובדיקת מלאי</a>
             `;
             rDiv.appendChild(card);
         });
