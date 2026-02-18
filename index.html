@@ -3,144 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>זול צ'ק - מיכאל</title>
+    <title>זול צ'ק - קנאביס רפואי</title>
     
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; margin: 0; padding-bottom: 140px; }
-        .header { background: #3b82f6; color: white; padding: 40px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .container { padding: 20px; max-width: 450px; margin: -40px auto 0; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; font-size: 16px; outline: none; text-align: center; }
-        button { width: 100%; background: #3b82f6; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        :root { --main-green: #4caf50; --gold: #d4af37; --sale-red: #ff4d4d; }
         
-        .brands-bar { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; margin-bottom: 10px; white-space: nowrap; min-height: 60px; scrollbar-width: none; }
-        .brand-chip { background: #fff; color: #3b82f6; padding: 10px 20px; border-radius: 25px; font-size: 14px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid #3b82f6; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background: #0d0d0d; 
+            background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1536500152107-01ab1422f932?q=80');
+            background-size: cover; background-attachment: fixed;
+            color: white; margin: 0; direction: rtl; padding-bottom: 160px;
+        }
 
-        .product-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
-        .best-deal { border: 2px solid #f1c40f; background: #fffdf0; transform: scale(1.02); }
-        .price { font-weight: bold; font-size: 24px; color: #3b82f6; display: block; margin: 5px 0; }
+        .header { padding: 25px 15px; text-align: center; }
+        .header h1 { color: var(--main-green); font-size: 32px; margin: 0; text-shadow: 0 2px 10px rgba(76,175,80,0.3); }
+
+        .tabs-container { 
+            display: flex; background: rgba(255,255,255,0.05); 
+            backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .tab { 
+            flex: 1; padding: 15px 5px; text-align: center; cursor: pointer; 
+            font-weight: bold; font-size: 14px; transition: 0.2s; color: #aaa;
+        }
+        .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76,175,80,0.1); }
+
+        .container { padding: 15px; max-width: 480px; margin: 0 auto; }
         
-        .footer-fixed { position: fixed; bottom: 0; width: 100%; left: 0; z-index: 1000; }
-        .paypal-bar { background: #ffc439; padding: 12px; border-top: 2px solid #edb120; }
-        .paypal-btn { color: #003087; text-decoration: none; font-weight: bold; font-size: 16px; display: block; }
-        .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; font-weight: bold; font-size: 15px; }
-    </style>
-</head>
-<body>
-    <div class="header"><h1>זול צ'ק</h1><p>נתוני אמת - השוואה מדויקת</p></div>
-    <div class="container">
-        <div class="card">
-            <input type="text" id="q" placeholder="" oninput="handleInput()">
-            <button onclick="performSearch()">חפש עכשיו</button>
-        </div>
-        <div id="brands" class="brands-bar"></div>
-        <div id="results"></div>
-    </div>
-    <div class="footer-fixed">
-        <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/iareah" class="paypal-btn" target="_blank">תמיכה בפייפאל - זול צ'ק</a></div>
-        <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק</div>
-    </div>
-
-    <script>
-        let allResults = [];
-        let timer;
-        const cannabisStrains = ["מרמלדה", "תכלת", "פיקאסו", "בלאק", "גורילה", "אלסקה", "ארז", "אבידקל", "סנסי"];
-        const commonBrands = ["LG", "SAMSUNG", "DYSON", "SONY", "SHARP", "BOSCH", "BEKO", "HAIER", "XIAOMI", "APPLE", "NIKE", "SHARK"];
-
-        function handleInput() {
-            const q = document.getElementById('q').value;
-            if (!q) {
-                document.getElementById('brands').innerHTML = "";
-                document.getElementById('results').innerHTML = "";
-                return;
-            }
-            clearTimeout(timer);
-            timer = setTimeout(performSearch, 600);
+        .search-box { margin: 10px 0 20px; }
+        input { 
+            width: 100%; padding: 16px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); 
+            font-size: 18px; text-align: center; background: rgba(255,255,255,0.95); color: #000;
+            outline: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        async function performSearch(customQuery = null) {
-            const q = customQuery || document.getElementById('q').value;
-            if (!q) return;
+        .product-card { 
+            background: rgba(255,255,255,0.07); border-radius: 18px; padding: 18px; 
+            margin-bottom: 15px; border: 1px solid rgba(212, 175, 55, 0.15);
+            position: relative; overflow: hidden; animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-            try {
-                const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(q)}&t=${Date.now()}`);
-                const d = await r.json();
-
-                if (d.shopping_results) {
-                    allResults = d.shopping_results.filter(item => {
-                        const title = item.title.toUpperCase();
-                        const price = item.extracted_price || 0;
-                        const originalQ = document.getElementById('q').value;
-
-                        if ((originalQ.includes('קנאביס') || originalQ.includes('תפרחת')) && 
-                            (title.includes('ציור') || title.includes('קנבס') || title.includes('בד') || title.includes('קוניאק') || price < 50)) {
-                            return false;
-                        }
-                        if ((originalQ.includes('מקרר') || originalQ.includes('טלוויזיה')) && price < 200) return false;
-                        return price > 0;
-                    });
-                    renderBrands(allResults, document.getElementById('q').value);
-                    renderResults(allResults);
-                }
-            } catch (e) { console.log("error"); }
+        .sale-badge { 
+            position: absolute; top: 0; left: 0; background: var(--sale-red); 
+            color: white; padding: 4px 12px; border-bottom-right-radius: 12px; font-size: 11px; font-weight: bold;
         }
 
-        function renderBrands(items, q) {
-            const bDiv = document.getElementById('brands');
-            bDiv.innerHTML = "";
-            let foundFilters = new Set();
-
-            if (q.includes('קנאביס') || q.includes('תפרחת')) {
-                cannabisStrains.forEach(strain => foundFilters.add(strain));
-            } else {
-                items.forEach(item => {
-                    const title = item.title.toUpperCase();
-                    commonBrands.forEach(b => { if (title.includes(b)) foundFilters.add(b); });
-                });
-            }
-
-            foundFilters.forEach(f => {
-                const btn = document.createElement('button');
-                btn.className = 'brand-chip';
-                btn.innerText = f;
-                btn.onclick = () => {
-                    if (cannabisStrains.includes(f)) {
-                        performSearch(f + " תפרחת קנאביס");
-                    } else {
-                        renderResults(allResults.filter(i => i.title.toUpperCase().includes(f.toUpperCase())));
-                    }
-                };
-                bDiv.appendChild(btn);
-            });
-        }
-
-        function renderResults(items) {
-            const rDiv = document.getElementById('results');
-            rDiv.innerHTML = "";
-            items.sort((a, b) => a.extracted_price - b.extracted_price);
-
-            items.forEach((item, index) => {
-                const link = item.link || "https://www.google.com/search?q=" + encodeURIComponent(item.title);
-                const box = document.createElement('div');
-                box.className = `product-box ${index === 0 ? 'best-deal' : ''}`;
-                box.innerHTML = `
-                    <strong>${item.source}</strong>
-                    <p style="font-size:14px; font-weight:bold;">${item.title}</p>
-                    <span class="price">₪${item.extracted_price}</span>
-                    <div style="display:flex; gap:10px; margin-top:10px;">
-                        <button style="flex:1; padding:10px; border-radius:8px; background:#34495e; color:white; border:none; cursor:pointer;" onclick="copyText('${link}')">העתק לינק</button>
-                        <a href="${link}" target="_blank" style="flex:1; padding:10px; border-radius:8px; background:#3b82f6; color:white; text-decoration:none; text-align:center;">עבור לאתר</a>
-                    </div>`;
-                rDiv.appendChild(box);
-            });
-        }
-
-        function copyText(t) {
-            const e = document.createElement('textarea');
-            e.value = t; document.body.appendChild(e);
-            e.select(); document.execCommand('copy');
-            document.body.removeChild(e); alert("הלינק הועתק!");
-        }
-    </script>
-</body>
-</html>
+        .store-name { color: var(--gold); font-size: 12px; font-weight: bold; letter-spacing: 0.5px; }
+        .product-title { margin: 8px 0; font-size: 16px; line-height: 1.4; color: #eee; }
+        .price { font-size: 26px; color: var(--main-green); font-weight:
