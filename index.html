@@ -97,10 +97,11 @@
         if (!val) { list.style.display = "none"; return; }
         
         let filtered;
-        // מילת מפתח להצגת כל הרשימה
+        // מילת מפתח ת' פותחת את כל הרשימה ללא סינון
         if (val === "ת'") {
             filtered = allData[currentTab];
         } else {
+            // סינון רגיל לפי מה שכתבת
             filtered = allData[currentTab].filter(s => s.includes(val));
         }
 
@@ -110,19 +111,27 @@
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.innerText = s;
-                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
+                item.onclick = () => { 
+                    document.getElementById('q').value = s; 
+                    list.style.display = "none"; 
+                    handleSearch(s); 
+                };
                 list.appendChild(item);
             });
-        } else { list.style.display = "none"; }
+        } else { 
+            list.style.display = "none"; 
+        }
     }
 
     async function handleSearch(query) {
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
-        if (!searchInput) return;
+        if (!searchInput || searchInput === "ת'") return;
+        
         resDiv.innerHTML = "<p style='text-align:center;'>בודק מלאי בזמן אמת...</p>";
         try {
             const response = await fetch(`/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי מחיר')}`);
+            if (!response.ok) throw new Error();
             const data = await response.json();
             renderResults(data.shopping_results || []);
         } catch (e) {
