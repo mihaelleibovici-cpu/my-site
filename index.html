@@ -6,8 +6,8 @@
     <title>זול צ'ק - קנאביס רפואי</title>
     
     <style>
-        :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; --sale-red: #ff4d4d; }
-        body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; direction: rtl; padding-bottom: 220px; }
+        :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; }
+        body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 220px; direction: rtl; }
         .header { padding: 20px 15px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
         .header h1 { color: var(--main-green); font-size: 28px; margin: 0; }
         
@@ -36,7 +36,7 @@
 
 <div class="header"><h1>זול צ'ק - קנאביס</h1></div>
 
-<div class="tabs-container" id="tabBar">
+<div class="tabs-container">
     <div class="tab active" onclick="setTab('smoke', this)">תפרחת</div>
     <div class="tab" onclick="setTab('oil', this)">שמן רפואי</div>
     <div class="tab" onclick="setTab('vape', this)">אידוי</div>
@@ -46,7 +46,7 @@
 
 <div class="container">
     <div class="search-wrapper">
-        <input type="search" id="q" placeholder="הקש אות ראשונה..." oninput="onInput(this.value)" inputmode="search">
+        <input type="search" id="q" placeholder="הקש אות (למשל 'א')..." oninput="onInput(this.value)" inputmode="search">
         <div id="autocompleteList" class="autocomplete-list"></div>
     </div>
     <div id="results"></div>
@@ -60,12 +60,12 @@
 
 <script>
     let currentTab = 'smoke';
-    // רשימה ענקית של שמות - בדיוק מה שביקשת בתמונה 1
+    // הקטלוג הישראלי המלא - מה שבאמת מחפשים בארץ
     const allData = {
-        'smoke': ["תכלת", "אלסקה", "מרמלדה", "פיקאסו", "ארז", "אבידקל", "PK", "T24", "T28", "T20", "RS11", "GMO", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "בלאק", "גורילה", "סאוור דיזל", "בלו דרים", "אמנזיה הייז", "ספייס סי קיי", "דון קוש", "תל אביב", "ג'ופ", "טובי", "ארלו"],
-        'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן T15/C3", "שמן אבידקל", "שמן אלסקה", "שמן ארז", "שמן תכלת", "שמן פול ספקטרום", "שמן אינדיקה", "שמן סאטיבה"],
-        'vape': ["Mighty", "Pax", "Volcano", "Crafty", "Mighty Plus", "Pax 3", "עט אידוי", "וופורייזר"],
-        'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מכונת גלגול", "מגש גלגול"]
+        'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש", "לונדון", "פריז", "ברצלונה", "רומא", "ניו יורק", "אמסטרדם"],
+        'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל", "שמן פול ספקטרום", "שמן אינדיקה", "שמן סאטיבה", "שמן אלסקה", "שמן ארז"],
+        'vape': ["Mighty", "Pax", "Volcano", "Crafty", "עט אידוי"],
+        'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים"]
     };
 
     function setTab(tab, el) {
@@ -75,7 +75,7 @@
         document.getElementById('q').value = "";
         document.getElementById('autocompleteList').style.display = "none";
         document.getElementById('results').innerHTML = "";
-        if(tab === 'sales') handleSearch("מבצע קנאביס תוקף קצר");
+        if(tab === 'sales') handleSearch("מבצע קנאביס תוקף");
     }
 
     function onInput(val) {
@@ -83,7 +83,7 @@
         list.innerHTML = "";
         if (!val || currentTab === 'sales') { list.style.display = "none"; return; }
         
-        const filtered = allData[currentTab].filter(s => s.toLowerCase().includes(val.toLowerCase()));
+        const filtered = allData[currentTab].filter(s => s.startsWith(val) || s.includes(val));
         if (filtered.length > 0) {
             list.style.display = "block";
             filtered.forEach(s => {
@@ -102,12 +102,11 @@
         if (!userInput && currentTab !== 'sales') return;
 
         let query = userInput;
-        // חיפושים מעמיקים יותר - תמונה 2 ו-3
-        if (currentTab === 'smoke') query += " תפרחת קנאביס רפואי מלאי בתי מרקחת";
-        else if (currentTab === 'oil') query += " שמן קנאביס רפואי מלאי אונליין";
+        if (currentTab === 'smoke') query += " תפרחת קנאביס רפואי מלאי";
+        else if (currentTab === 'oil') query += " שמן קנאביס רפואי מלאי";
         else if (currentTab === 'sales') query = "מבצע קנאביס רפואי תוקף קצר";
 
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי מעמיק...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי פארם מעמיק...</p>";
 
         try {
             const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
@@ -119,19 +118,16 @@
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        // רשימת חסימה אגרסיבית - למנוע את מה שראית בתמונה 2
-        const blacklist = ["שמן מנוע", "בוקסר", "תחתון", "חולצה", "קבנוס", "מזון", "חטיף", "תנור", "רכב", "גלגל", "מנוע"];
+        const blacklist = ["שמן מנוע", "בוקסר", "תחתון", "חולצה", "קבנוס", "מזון", "תנור", "רכב"];
 
         const filtered = items.filter(item => {
             const title = item.title.toLowerCase();
-            // סינון אכזרי: חייב להכיל מונח רפואי
-            const medicalMatch = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("c2") || title.includes("c1") || title.includes("מבצע") || title.includes("תוקף");
+            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("מבצע");
             const blacklisted = blacklist.some(word => title.includes(word));
             
-            if (currentTab === 'smoke') return medicalMatch && !blacklisted && !title.includes("שמן");
-            if (currentTab === 'oil') return medicalMatch && !blacklisted && !title.includes("תפרחת") && !title.includes("מנוע");
-            if (currentTab === 'sales') return medicalMatch && !blacklisted && (title.includes("מבצע") || title.includes("תוקף"));
-            return medicalMatch && !blacklisted;
+            if (currentTab === 'smoke') return isMedical && !blacklisted && !title.includes("שמן");
+            if (currentTab === 'oil') return isMedical && !blacklisted && !title.includes("תפרחת");
+            return isMedical && !blacklisted;
         });
 
         if (filtered.length === 0) {
