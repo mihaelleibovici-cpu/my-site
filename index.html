@@ -71,18 +71,8 @@
 
 <script>
     let currentTab = 'smoke';
-    
-    // מילון תרגום פנימי לחיפוש בלבד
-    const translationMap = {
-        "אלסקה": "Alaska", "תכלת": "Techelet", "מרמלדה": "Marmelada", "ארז": "Erez", 
-        "אבידקל": "Avidekel", "פיקאסו": "Picasso", "בלאק": "Black", "PK": "PK", 
-        "GMO": "GMO", "RS11": "RS11", "וודינג סי קיי": "Wedding CK", "קוקי קוש": "Cookie Kush",
-        "סנסי": "Sensi", "מיריקל": "Miracle", "דסטיני": "Destiny", "יודה": "Yoda", 
-        "ג'וראקאן": "Jurakan", "ספייס סי קיי": "Space CK", "דון קוש": "Don Kush",
-        "קונוסים": "Cones", "ניירות גלגול": "Rolling Papers"
-    };
+    const translationMap = { "אלסקה": "Alaska", "תכלת": "Techelet", "מרמלדה": "Marmelada", "ארז": "Erez", "אבידקל": "Avidekel", "פיקאסו": "Picasso", "בלאק": "Black", "PK": "PK", "GMO": "GMO", "RS11": "RS11", "וודינג סי קיי": "Wedding CK", "קוקי קוש": "Cookie Kush", "סנסי": "Sensi", "מיריקל": "Miracle", "דסטיני": "Destiny", "יודה": "Yoda", "ג'וראקאן": "Jurakan", "ספייס סי קיי": "Space CK", "דון קוש": "Don Kush", "קונוסים": "Cones", "ניירות גלגול": "Rolling Papers" };
 
-    // רשימה מלאה בעברית כפי שהייתה
     const allData = {
         'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"],
         'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל", "שמן פול ספקטרום", "שמן אלסקה", "שמן ארז", "שמן תכלת"],
@@ -97,33 +87,24 @@
         document.getElementById('q').value = "";
         document.getElementById('autocompleteList').style.display = "none";
         document.getElementById('results').innerHTML = "";
-        if (tab === 'sales') handleSearch("מבצע קנאביס");
+        if (tab === 'sales') handleSearch("מבצע קנאביס תוקף");
     }
 
     function onInput(val) {
         const list = document.getElementById('autocompleteList');
         list.innerHTML = "";
         if (!val) { list.style.display = "none"; document.getElementById('results').innerHTML = ""; return; }
-        
         const filtered = allData[currentTab] ? allData[currentTab].filter(s => s.startsWith(val) || s.includes(val) || (val === 'ת' && currentTab === 'smoke')) : [];
-
-        if (filtered.length > 0 && currentTab !== 'sales' && currentTab !== 'acc') {
+        if (filtered.length > 0 && currentTab !== 'sales') {
             list.style.display = "block";
             filtered.forEach(s => {
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.innerText = s;
-                item.onclick = () => { 
-                    document.getElementById('q').value = s; 
-                    list.style.display = "none"; 
-                    handleSearch(s); 
-                };
+                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
                 list.appendChild(item);
             });
-        } else { 
-            list.style.display = "none";
-            if (val.length > 1) handleSearch(val); 
-        }
+        } else { list.style.display = "none"; if (val.length > 2) handleSearch(val); }
     }
 
     async function handleSearch(manualQuery) {
@@ -132,50 +113,54 @@
         if (!userInput && currentTab !== 'sales') return;
 
         let englishTerm = translationMap[userInput] || "";
-        let query = userInput;
+        // שאילתה ממוקדת קמעונאות (חדירה למאגרי פארם)
+        let query = `${userInput} ${englishTerm} פארם מלאי`;
 
-        if (currentTab === 'smoke') {
-            query = `תפרחת ${userInput} ${englishTerm} קנאביס רפואי מלאי`;
-        } else if (currentTab === 'oil') {
-            query = `${userInput} Medical Cannabis Oil T20 T10`;
-        } else if (currentTab === 'acc') {
-            query = `${userInput} ${englishTerm} אביזרי עישון חנות`;
-        } else if (currentTab === 'sales') {
-            query = "מבצעי קנאביס רפואי תוקף קצר";
-        }
-
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי משולב...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>שואב נתוני מלאי ומחירים מהפארם...</p>";
 
         try {
-            const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
-            const d = await r.json();
-            renderResults(d.shopping_results || d.results || []);
-        } catch (e) { 
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור. נסה לרענן.</p>";
+            // הוספת &engine=google_shopping למנוע החיפוש (בשרת) כדי לעקוף תוצאות אינטרנט רגילות
+            const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
+            const data = await response.json();
+            
+            // המשאבה לוקחת גם תוצאות שופינג וגם תוצאות אורגניות כדי לא לפספס כלום
+            const combinedResults = [
+                ...(data.shopping_results || []),
+                ...(data.results || [])
+            ];
+            
+            renderResults(combinedResults);
+        } catch (e) {
+            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור למשאבת המידע. נסה לרענן.</p>";
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        const blacklist = ["בוקסר", "תחתון", "חולצה", "קבנוס", "מזון", "תנור", "רכב"];
 
-        const filtered = items.filter(item => {
-            const title = item.title ? item.title.toLowerCase() : "";
-            if (currentTab === 'acc') return true; 
-            return title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("מבצע") || title.includes("cannabis");
-        });
-
-        if (filtered.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין. נסה לרענן או לבחור שם אחר.</p>";
+        if (items.length === 0) {
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין. נסה שם אחר.</p>";
             return;
         }
+
+        // הסרת כפילויות וסינון מוצרי לוואי לא קשורים
+        const seen = new Set();
+        const filtered = items.filter(item => {
+            const title = item.title ? item.title.toLowerCase() : "";
+            const isDuplicate = seen.has(title);
+            seen.add(title);
+            
+            if (currentTab === 'acc') return !isDuplicate;
+            const isRelevant = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20");
+            return isRelevant && !isDuplicate;
+        });
 
         filtered.sort((a, b) => (a.extracted_price || 0) - (b.extracted_price || 0)).forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
-            const price = item.extracted_price || item.price || "בדיקה באתר";
-            const source = item.source || item.merchant || "חנות אונליין";
+            const price = item.extracted_price || item.price || "בדיקת מחיר";
+            const source = item.source || "בית מרקחת / פארם";
             
             card.innerHTML = `
                 <div class="store-name">${source}</div>
