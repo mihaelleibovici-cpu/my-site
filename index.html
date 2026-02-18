@@ -119,61 +119,52 @@
         if (!userInput && currentTab !== 'sales') return;
 
         let eng = internalTranslator[userInput] || "";
-        // מנוע חדירה - פקודה שחוסמת את KSP ושואבת רק מבתי מרקחת
-        let query = `${userInput} ${eng} קנאביס רפואי מלאי בית מרקחת פארם -KSP -ivory -מחשבים`;
+        let query = `${userInput} ${eng} קנאביס רפואי מלאי פארם -KSP -ivory -מחשבים`;
 
-        resDiv.innerHTML = "<p style='text-align:center;'>חודר לשרתי המלאי של בתי המרקחת...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>חודר לשרתי המלאי (זמן אמת)...</p>";
 
         try {
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
             const data = await response.json();
             renderResults(data.shopping_results || data.results || []);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחדירה לשרתים. נסה רענן.</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחדירה לשרתים.</p>";
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        
-        // חסימה אבסולוטית של אתרים לא רלוונטיים ומוצרים לא קשורים
-        const forbiddenSites = ["ksp.co.il", "ivory.co.il", "terminalx.com", "zara.com", "asos.com"];
-        const blacklist = ["חולצה", "מחשב", "מקלדת", "עכבר", "תיק", "נעליים", "מגבת"];
+        const forbiddenSites = ["ksp.co.il", "ivory.co.il"];
+        const blacklist = ["חולצה", "מחשב", "מקלדת", "עכבר"];
 
         const filtered = items.filter(item => {
             const title = item.title ? item.title.toLowerCase() : "";
-            const source = item.source ? item.source.toLowerCase() : "";
             const link = item.link ? item.link.toLowerCase() : "";
+            const source = item.source ? item.source.toLowerCase() : "";
             
-            // 1. האם האתר אסור?
             if (forbiddenSites.some(site => link.includes(site))) return false;
-            // 2. האם המוצר אסור?
             if (blacklist.some(word => title.includes(word))) return false;
             
-            // 3. חובה שיהיה קשר לעולם הפארם
-            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t20") || title.includes("t15");
-            const isPharm = source.includes("pharm") || source.includes("פארם") || source.includes("בית מרקחת") || source.includes("be") || source.includes("שור טבצ'ניק") || source.includes("פנאקיה");
+            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t20");
+            const isPharm = source.includes("pharm") || source.includes("פארם") || source.includes("בית מרקחת") || source.includes("be");
             
             if (currentTab === 'acc') return true;
             return isMedical || isPharm;
         });
 
         if (filtered.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי תואם בשרתי הפארם. נסה זן אחר.</p>";
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין. נסה שוב.</p>";
             return;
         }
 
         filtered.sort((a, b) => (a.extracted_price || 0) - (b.extracted_price || 0)).forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
-            const price = item.extracted_price || item.price || "למחיר לחץ";
-            const source = item.source || "בית מרקחת מורשה";
-            
             card.innerHTML = `
-                <div class="store-name">${source}</div>
+                <div class="store-name">${item.source || "בית מרקחת מורשה"}</div>
                 <div style="margin:8px 0; font-weight:bold;">${item.title}</div>
-                <div class="price">₪${price}</div>
+                <div class="price">₪${item.extracted_price || item.price || "למחיר לחץ"}</div>
                 <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">בדיקת מלאי ורכישה</a>
             `;
             rDiv.appendChild(card);
