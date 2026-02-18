@@ -71,7 +71,16 @@
 
 <script>
     let currentTab = 'smoke';
-    const translationMap = { "אלסקה": "Alaska", "תכלת": "Techelet", "מרמלדה": "Marmelada", "ארז": "Erez", "אבידקל": "Avidekel", "פיקאסו": "Picasso", "בלאק": "Black", "PK": "PK", "GMO": "GMO", "RS11": "RS11", "וודינג סי קיי": "Wedding CK", "קוקי קוש": "Cookie Kush", "סנסי": "Sensi", "מיריקל": "Miracle", "דסטיני": "Destiny", "יודה": "Yoda", "ג'וראקאן": "Jurakan", "ספייס סי קיי": "Space CK", "דון קוש": "Don Kush", "קונוסים": "Cones", "ניירות גלגול": "Rolling Papers" };
+    
+    // מנוע תרגום פנימי לחיפוש בקודקוד בלבד
+    const internalTranslator = {
+        "אלסקה": "Alaska", "תכלת": "Techelet", "מרמלדה": "Marmelada", "ארז": "Erez", 
+        "אבידקל": "Avidekel", "פיקאסו": "Picasso", "בלאק": "Black", "PK": "PK", 
+        "GMO": "GMO", "RS11": "RS11", "וודינג סי קיי": "Wedding CK", "קוקי קוש": "Cookie Kush",
+        "סנסי": "Sensi", "מיריקל": "Miracle", "דסטיני": "Destiny", "יודה": "Yoda", 
+        "ג'וראקאן": "Jurakan", "ספייס סי קיי": "Space CK", "דון קוש": "Don Kush",
+        "קונוסים": "Cones", "ניירות גלגול": "Rolling Papers"
+    };
 
     const allData = {
         'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"],
@@ -112,53 +121,51 @@
         const resDiv = document.getElementById('results');
         if (!userInput && currentTab !== 'sales') return;
 
-        let englishTerm = translationMap[userInput] || "";
-        // חדירה למאגרי בתי מרקחת בלבד - הוספת פקודת site: לחיפוש ממוקד
-        let query = `${userInput} ${englishTerm} מלאי בית מרקחת פארם pharm`;
+        // המנוע הפנימי מוסיף את השם באנגלית לחיפוש בלבד
+        let eng = internalTranslator[userInput] || "";
+        let query = `${userInput} ${eng} מלאי בית מרקחת פארם -חולצה -בגד`;
 
-        resDiv.innerHTML = "<p style='text-align:center;'>חודר למלאי בתי מרקחת (זמן אמת)...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>חודר למאגרי המלאי של בתי המרקחת...</p>";
 
         try {
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
             const data = await response.json();
             renderResults(data.shopping_results || data.results || []);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחדירה לשרתים. נסה לרענן.</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחדירה לשרת. נסה רענן.</p>";
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-
-        // רשימת חסימה אגרסיבית לבגדים ומוצרים לא רלוונטיים
-        const blacklist = ["חולצה", "מגבת", "תיק", "נעליים", "מכנסיים", "בוקסר", "תחתון", "שמלה", "קבנוס", "מזון", "רכב"];
+        
+        // סינון חסימה של מוצרים לא רלוונטיים
+        const blacklist = ["חולצה", "מגבת", "תיק", "נעליים", "מכנסיים", "בוקסר", "תחתון"];
 
         const filtered = items.filter(item => {
             const title = item.title ? item.title.toLowerCase() : "";
             const source = item.source ? item.source.toLowerCase() : "";
             
-            // בדיקה אם המילה מופיעה ברשימת החסימה
             if (blacklist.some(word => title.includes(word))) return false;
             
-            // בתפרחת ושמן - חובה שיהיה קשר רפואי או מקור פארם
             if (currentTab === 'smoke' || currentTab === 'oil') {
-                const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20");
-                const isPharmSource = source.includes("pharm") || source.includes("פארם") || source.includes("פארמה") || source.includes("בית מרקחת") || source.includes("be");
-                return isMedical || isPharmSource;
+                const isMed = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20");
+                const isSource = source.includes("pharm") || source.includes("פארם") || source.includes("בית מרקחת") || source.includes("be");
+                return isMed || isSource;
             }
             return true;
         });
 
         if (filtered.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי רפואי תואם בבתי המרקחת. נסה זן אחר.</p>";
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי רפואי זמין. נסה שם אחר.</p>";
             return;
         }
 
         filtered.sort((a, b) => (a.extracted_price || 0) - (b.extracted_price || 0)).forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
-            const price = item.extracted_price || item.price || "למחיר לחץ";
+            const price = item.extracted_price || item.price || "בדיקה באתר";
             const source = item.source || "בית מרקחת מורשה";
             
             card.innerHTML = `
