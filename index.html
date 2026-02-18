@@ -16,19 +16,10 @@
         
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; display: flex; align-items: center; }
         input[type="text"] { 
-            width: 100%; 
-            padding: 16px; 
-            padding-right: 45px; 
-            padding-left: 45px;  
-            border-radius: 12px; 
-            border: 1px solid #333; 
-            font-size: 18px; 
-            text-align: center; 
-            background: #fff; 
-            color: #000; 
-            outline: none; 
-            box-sizing: border-box;
-            -webkit-appearance: none;
+            width: 100%; padding: 16px; padding-right: 45px; padding-left: 45px;  
+            border-radius: 12px; border: 1px solid #333; font-size: 18px; 
+            text-align: center; background: #fff; color: #000; outline: none; 
+            box-sizing: border-box; -webkit-appearance: none;
         }
         input::-webkit-search-decoration, input::-webkit-search-cancel-button, input::-webkit-search-results-button, input::-webkit-search-results-decoration { display: none; }
 
@@ -97,11 +88,10 @@
         if (!val) { list.style.display = "none"; return; }
         
         let filtered;
-        // מילת מפתח ת' פותחת את כל הרשימה ללא סינון
-        if (val === "ת'") {
+        // האות ת או המילה שמן פותחות את כל הרשימה של הלשונית הנוכחית
+        if (val === "ת" || val === "שמן") {
             filtered = allData[currentTab];
         } else {
-            // סינון רגיל לפי מה שכתבת
             filtered = allData[currentTab].filter(s => s.includes(val));
         }
 
@@ -111,22 +101,16 @@
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.innerText = s;
-                item.onclick = () => { 
-                    document.getElementById('q').value = s; 
-                    list.style.display = "none"; 
-                    handleSearch(s); 
-                };
+                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
                 list.appendChild(item);
             });
-        } else { 
-            list.style.display = "none"; 
-        }
+        } else { list.style.display = "none"; }
     }
 
     async function handleSearch(query) {
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
-        if (!searchInput || searchInput === "ת'") return;
+        if (!searchInput || searchInput === "ת") return;
         
         resDiv.innerHTML = "<p style='text-align:center;'>בודק מלאי בזמן אמת...</p>";
         try {
