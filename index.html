@@ -18,7 +18,6 @@
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; }
         
-        /* שורת חיפוש לבנה וריקה לגמרי */
         input[type="search"] { 
             width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #333; 
             font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; 
@@ -69,7 +68,7 @@
         'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"],
         'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל", "שמן פול ספקטרום", "שמן אלסקה", "שמן ארז", "שמן תכלת"],
         'vape': ["Mighty", "Pax", "Volcano", "Crafty", "עט אידוי"],
-        'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג", "וופורייזר"]
+        'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג"]
     };
 
     function setTab(tab, el) {
@@ -86,12 +85,8 @@
         list.innerHTML = "";
         if (!val) { list.style.display = "none"; return; }
         
-        // תיקון לאות ת' של תפרחת
-        const filtered = allData[currentTab].filter(s => 
-            s.startsWith(val) || 
-            s.includes(val) ||
-            (val === 'ת' && currentTab === 'smoke') // אם הקיש ת' בתפרחת - תפתח הכל
-        );
+        // יסודות: אות ראשונה פותחת את הרשימה המלאה
+        const filtered = allData[currentTab].filter(s => s.startsWith(val) || s.includes(val) || (val === 'ת' && currentTab === 'smoke'));
 
         if (filtered.length > 0 && currentTab !== 'sales') {
             list.style.display = "block";
@@ -118,10 +113,13 @@
         if (!userInput && currentTab !== 'sales') return;
 
         let query = userInput;
-        if (currentTab === 'smoke') query += " קנאביס רפואי מלאי";
-        else if (currentTab === 'oil') query += " שמן קנאביס רפואי";
-        
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי אונליין...</p>";
+        // מנוע "חפירה" מעמיק - התמקדות במלאי בתי מרקחת
+        if (currentTab === 'smoke') query += " קנאביס רפואי מלאי בתי מרקחת ישראל";
+        else if (currentTab === 'oil') query += " שמן קנאביס רפואי מלאי פארם";
+        else if (currentTab === 'sales') query = "מבצע קנאביס תוקף קצר פארם";
+        else if (userInput.includes("עישון")) query = userInput + " אביזרי עישון פארם";
+
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי אונליין מעמיק...</p>";
 
         try {
             const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
@@ -133,18 +131,21 @@
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        const blacklist = ["בוקסר", "תחתון", "חולצה", "קבנוס", "מזון", "תנור", "רכב"];
+        const blacklist = ["בוקסר", "תחתון", "חולצה", "קבנוס", "מזון", "תנור", "רכב", "גלגל", "מנוע"];
 
         const filtered = items.filter(item => {
             const title = item.title.toLowerCase();
             if (blacklist.some(word => title.includes(word))) return false;
-            // אביזרים וכלי עישון - תמיד לאשר
-            if (currentTab === 'acc' || title.includes("עישון") || title.includes("נייר") || title.includes("גריינדר")) return true;
-            return title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("מבצע");
+            
+            // בודק התאמה מעמיקה לעולם הקנאביס
+            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20") || title.includes("נייר") || title.includes("מבצע");
+            
+            if (currentTab === 'acc') return true; // אביזרים חופשיים יותר
+            return isMedical;
         });
 
         if (filtered.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצאו תוצאות. נסה חיפוש אחר.</p>";
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין. נסה שם אחר.</p>";
             return;
         }
 
