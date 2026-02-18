@@ -6,51 +6,128 @@
     <title>זול צ'ק - קנאביס רפואי</title>
     
     <style>
-        :root { --main-green: #4caf50; --gold: #d4af37; --sale-red: #ff4d4d; }
+        :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; }
         
         body { 
             font-family: system-ui, -apple-system, sans-serif; 
-            background: #0d0d0d; 
-            background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1536500152107-01ab1422f932?q=80');
-            background-size: cover; background-attachment: fixed;
+            background-color: var(--bg-dark);
             color: white; margin: 0; direction: rtl; padding-bottom: 160px;
+            min-height: 100vh;
         }
 
-        .header { padding: 25px 15px; text-align: center; }
-        .header h1 { color: var(--main-green); font-size: 32px; margin: 0; text-shadow: 0 2px 10px rgba(76,175,80,0.3); }
+        .header { padding: 30px 15px; text-align: center; background: linear-gradient(to bottom, #1a1a1a, var(--bg-dark)); }
+        .header h1 { color: var(--main-green); font-size: 35px; margin: 0; }
 
         .tabs-container { 
-            display: flex; background: rgba(255,255,255,0.05); 
-            backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 100;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; background: #1a1a1a; 
+            position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid #333;
         }
         .tab { 
             flex: 1; padding: 15px 5px; text-align: center; cursor: pointer; 
-            font-weight: bold; font-size: 14px; transition: 0.2s; color: #aaa;
+            font-weight: bold; font-size: 14px; color: #888;
         }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76,175,80,0.1); }
 
-        .container { padding: 15px; max-width: 480px; margin: 0 auto; }
+        .container { padding: 15px; max-width: 480px; margin: 0 auto; position: relative; z-index: 10; }
         
-        .search-box { margin: 10px 0 20px; }
+        .search-box { margin-bottom: 20px; }
         input { 
-            width: 100%; padding: 16px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); 
-            font-size: 18px; text-align: center; background: rgba(255,255,255,0.95); color: #000;
-            outline: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #333; 
+            font-size: 18px; text-align: center; background: #fff; color: #000;
+            outline: none; box-sizing: border-box;
         }
 
         .product-card { 
-            background: rgba(255,255,255,0.07); border-radius: 18px; padding: 18px; 
-            margin-bottom: 15px; border: 1px solid rgba(212, 175, 55, 0.15);
-            position: relative; overflow: hidden; animation: fadeIn 0.3s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .sale-badge { 
-            position: absolute; top: 0; left: 0; background: var(--sale-red); 
-            color: white; padding: 4px 12px; border-bottom-right-radius: 12px; font-size: 11px; font-weight: bold;
+            background: #1e1e1e; border-radius: 15px; padding: 18px; 
+            margin-bottom: 15px; border: 1px solid #333;
         }
 
-        .store-name { color: var(--gold); font-size: 12px; font-weight: bold; letter-spacing: 0.5px; }
-        .product-title { margin: 8px 0; font-size: 16px; line-height: 1.4; color: #eee; }
-        .price { font-size: 26px; color: var(--main-green); font-weight:
+        .store-name { color: var(--gold); font-size: 13px; font-weight: bold; }
+        .product-title { margin: 8px 0; font-size: 16px; color: #fff; }
+        .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
+
+        .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 2000; }
+        .paypal-bar { background: #ffc439; padding: 12px; text-align: center; }
+        .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>זול צ'ק</h1>
+    <p>השוואת מחירי קנאביס רפואי</p>
+</div>
+
+<div class="tabs-container">
+    <div class="tab active" onclick="setTab('medical', this)">טיפול</div>
+    <div class="tab" onclick="setTab('accessories', this)">אביזרים</div>
+    <div class="tab" onclick="setTab('sales', this)">מבצעי תוקף</div>
+</div>
+
+<div class="container">
+    <div class="search-box">
+        <input type="search" id="q" placeholder="חפש זן או שמן..." oninput="handleSearch()" inputmode="search">
+    </div>
+    <div id="results"></div>
+</div>
+
+<div class="footer-fixed">
+    <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/iareah" target="_blank" style="color:#003087; text-decoration:none; font-weight:bold;">תמיכה בפרויקט - זול צ'ק</a></div>
+    <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק</div>
+</div>
+
+<script>
+    let currentTab = 'medical';
+
+    function setTab(tab, el) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('results').innerHTML = "";
+        handleSearch();
+    }
+
+    async function handleSearch() {
+        const q = document.getElementById('q').value;
+        const resDiv = document.getElementById('results');
+        
+        if (!q && currentTab !== 'sales') {
+            resDiv.innerHTML = "";
+            return;
+        }
+
+        let query = q;
+        if (currentTab === 'medical') query += " קנאביס רפואי";
+        if (currentTab === 'sales') query = "מבצע קנאביס תוקף קצר";
+
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי...</p>";
+
+        try {
+            const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
+            const d = await r.json();
+            renderResults(d.shopping_results || []);
+        } catch (e) {
+            resDiv.innerHTML = "<p>שגיאה בטעינה</p>";
+        }
+    }
+
+    function renderResults(items) {
+        const rDiv = document.getElementById('results');
+        rDiv.innerHTML = "";
+        
+        items.filter(i => i.extracted_price > 20).forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="store-name">${item.source}</div>
+                <div class="product-title">${item.title}</div>
+                <div class="price">₪${item.extracted_price}</div>
+                <a href="${item.link}" target="_blank" style="display:block; margin-top:10px; background:var(--main-green); color:white; text-decoration:none; padding:10px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
+            `;
+            rDiv.appendChild(card);
+        });
+    }
+</script>
+</body>
+</html>
