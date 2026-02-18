@@ -7,46 +7,23 @@
     
     <style>
         :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; }
+        body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; direction: rtl; padding-bottom: 160px; }
+        .header { padding: 20px 15px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
+        .header h1 { color: var(--main-green); font-size: 28px; margin: 0; }
         
-        body { 
-            font-family: system-ui, -apple-system, sans-serif; 
-            background-color: var(--bg-dark);
-            color: white; margin: 0; direction: rtl; padding-bottom: 160px;
-            min-height: 100vh;
-        }
-
-        .header { padding: 30px 15px; text-align: center; background: linear-gradient(to bottom, #1a1a1a, var(--bg-dark)); }
-        .header h1 { color: var(--main-green); font-size: 35px; margin: 0; }
-
-        .tabs-container { 
-            display: flex; background: #1a1a1a; 
-            position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid #333;
-        }
-        .tab { 
-            flex: 1; padding: 15px 5px; text-align: center; cursor: pointer; 
-            font-weight: bold; font-size: 14px; color: #888;
-        }
+        .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76,175,80,0.1); }
 
-        .container { padding: 15px; max-width: 480px; margin: 0 auto; position: relative; z-index: 10; }
-        
-        .search-box { margin-bottom: 20px; }
-        input { 
-            width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #333; 
-            font-size: 18px; text-align: center; background: #fff; color: #000;
-            outline: none; box-sizing: border-box;
-        }
+        .container { padding: 15px; max-width: 480px; margin: 0 auto; }
+        input { width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #333; font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; margin-bottom: 15px; }
 
-        .product-card { 
-            background: #1e1e1e; border-radius: 15px; padding: 18px; 
-            margin-bottom: 15px; border: 1px solid #333;
-        }
-
+        .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-bottom: 15px; border: 1px solid #333; position: relative; }
         .store-name { color: var(--gold); font-size: 13px; font-weight: bold; }
-        .product-title { margin: 8px 0; font-size: 16px; color: #fff; }
+        .product-title { margin: 8px 0; font-size: 16px; color: #fff; font-weight: 500; }
         .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
-
+        
         .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 2000; }
         .paypal-bar { background: #ffc439; padding: 12px; text-align: center; }
         .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; text-align: center; font-weight: bold; }
@@ -56,19 +33,19 @@
 
 <div class="header">
     <h1>זול צ'ק</h1>
-    <p>השוואת מחירי קנאביס רפואי</p>
+    <p style="margin:5px 0; font-size:14px;">השוואת מחירים - הפרדה מוחלטת</p>
 </div>
 
 <div class="tabs-container">
-    <div class="tab active" onclick="setTab('medical', this)">טיפול</div>
-    <div class="tab" onclick="setTab('accessories', this)">אביזרים</div>
+    <div class="tab active" onclick="setTab('smoke', this)">תפרחת</div>
+    <div class="tab" onclick="setTab('oil', this)">שמן</div>
+    <div class="tab" onclick="setTab('vape', this)">אידוי</div>
+    <div class="tab" onclick="setTab('acc', this)">אביזרים</div>
     <div class="tab" onclick="setTab('sales', this)">מבצעי תוקף</div>
 </div>
 
 <div class="container">
-    <div class="search-box">
-        <input type="search" id="q" placeholder="חפש זן או שמן..." oninput="handleSearch()" inputmode="search">
-    </div>
+    <input type="search" id="q" placeholder="חפש מוצר..." oninput="handleSearch()" inputmode="search">
     <div id="results"></div>
 </div>
 
@@ -78,13 +55,22 @@
 </div>
 
 <script>
-    let currentTab = 'medical';
+    let currentTab = 'smoke';
 
     function setTab(tab, el) {
         currentTab = tab;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
         document.getElementById('results').innerHTML = "";
+        
+        const placeholders = {
+            'smoke': 'חפש זן תפרחת...',
+            'oil': 'חפש שמן קנאביס...',
+            'vape': 'חפש מכשיר אידוי...',
+            'acc': 'חפש ניירות, גריינדר...',
+            'sales': 'חפש מבצעים פעילים...'
+        };
+        document.getElementById('q').placeholder = placeholders[tab];
         handleSearch();
     }
 
@@ -92,38 +78,69 @@
         const q = document.getElementById('q').value;
         const resDiv = document.getElementById('results');
         
-        if (!q && currentTab !== 'sales') {
-            resDiv.innerHTML = "";
-            return;
-        }
-
         let query = q;
-        if (currentTab === 'medical') query += " קנאביס רפואי";
-        if (currentTab === 'sales') query = "מבצע קנאביס תוקף קצר";
+        // שאילתה ממוקדת כדי להכריח את המנוע להביא תוצאות נכונות
+        if (currentTab === 'smoke') query += " תפרחת קנאביס";
+        else if (currentTab === 'oil') query += " שמן קנאביס";
+        else if (currentTab === 'vape') query += " מכשיר אידוי וופורייזר";
+        else if (currentTab === 'acc') query += " אביזרי עישון";
+        else if (currentTab === 'sales') query = (q ? q + " " : "") + "מבצע קנאביס תוקף";
 
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי...</p>";
+        if (!q && currentTab !== 'sales') { resDiv.innerHTML = ""; return; }
+
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק לפי קטגוריה...</p>";
 
         try {
             const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
             const d = await r.json();
             renderResults(d.shopping_results || []);
-        } catch (e) {
-            resDiv.innerHTML = "<p>שגיאה בטעינה</p>";
-        }
+        } catch (e) { resDiv.innerHTML = "<p>שגיאה בחיבור</p>"; }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
         
-        items.filter(i => i.extracted_price > 20).forEach(item => {
+        const blacklist = ["תנור", "בוקסר", "חולצה", "מארז", "נעלי", "תחתון", "גרביים", "מקרר", "מייבש"];
+
+        const filtered = items.filter(item => {
+            const title = item.title.toLowerCase();
+            const isBlacklisted = blacklist.some(word => title.includes(word));
+            if (isBlacklisted) return false;
+
+            // הפרדה מוחלטת - בדיקה שהמוצר מתאים רק ללשונית שלו
+            if (currentTab === 'smoke') {
+                return (title.includes("תפרחת") || title.includes("t20") || title.includes("t15")) && !title.includes("שמן");
+            }
+            if (currentTab === 'oil') {
+                return title.includes("שמן") && !title.includes("תפרחת");
+            }
+            if (currentTab === 'vape') {
+                return title.includes("אידוי") || title.includes("וופורייזר") || title.includes("עט");
+            }
+            if (currentTab === 'acc') {
+                const accWords = ["נייר", "גריינדר", "מצת", "פילטר", "מגש", "באנג", "וופורייזר"];
+                return accWords.some(w => title.includes(w)) && !title.includes("t20");
+            }
+            if (currentTab === 'sales') {
+                return title.includes("מבצע") || title.includes("תוקף");
+            }
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצאו תוצאות שתואמות בדיוק לקטגוריה זו.</p>";
+            return;
+        }
+
+        filtered.sort((a, b) => a.extracted_price - b.extracted_price).forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
                 <div class="store-name">${item.source}</div>
                 <div class="product-title">${item.title}</div>
                 <div class="price">₪${item.extracted_price}</div>
-                <a href="${item.link}" target="_blank" style="display:block; margin-top:10px; background:var(--main-green); color:white; text-decoration:none; padding:10px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
+                <a href="${item.link}" target="_blank" style="display:block; margin-top:10px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה במלאי</a>
             `;
             rDiv.appendChild(card);
         });
