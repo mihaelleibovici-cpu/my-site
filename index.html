@@ -16,11 +16,17 @@
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
 
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
-        .search-wrapper { position: relative; width: 100%; margin-top: 10px; }
+        .search-wrapper { position: relative; width: 100%; margin-top: 10px; display: flex; align-items: center; gap: 8px; }
         
         input[type="search"] { 
-            width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #333; 
+            flex: 1; padding: 16px; border-radius: 12px; border: 1px solid #333; 
             font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; 
+        }
+
+        /* כפתור רענון חכם - צמוד לחיפוש */
+        .refresh-btn { 
+            background: var(--main-green); color: white; border: none; border-radius: 12px; 
+            padding: 14px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;
         }
 
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.6); display: none; border: 1px solid #ccc; }
@@ -51,6 +57,7 @@
 <div class="container">
     <div class="search-wrapper">
         <input type="search" id="q" placeholder="" oninput="onInput(this.value)" inputmode="search">
+        <button class="refresh-btn" onclick="handleSearch()" title="רענן מלאי">↻</button>
         <div id="autocompleteList" class="autocomplete-list"></div>
     </div>
     <div id="results"></div>
@@ -83,9 +90,9 @@
     function onInput(val) {
         const list = document.getElementById('autocompleteList');
         list.innerHTML = "";
-        if (!val) { list.style.display = "none"; return; }
+        if (!val) { list.style.display = "none"; document.getElementById('results').innerHTML = ""; return; }
         
-        const filtered = allData[currentTab].filter(s => s.startsWith(val) || s.includes(val) || (val === 'ת' && currentTab === 'smoke'));
+        const filtered = allData[currentTab] ? allData[currentTab].filter(s => s.startsWith(val) || s.includes(val) || (val === 'ת' && currentTab === 'smoke')) : [];
 
         if (filtered.length > 0 && currentTab !== 'sales' && currentTab !== 'acc') {
             list.style.display = "block";
@@ -112,19 +119,24 @@
         if (!userInput && currentTab !== 'sales') return;
 
         let query = userInput;
-        // שיפור שאילתות החיפוש להבאת מקסימום תוצאות אונליין
-        if (currentTab === 'smoke') query += " קנאביס רפואי מלאי בתי מרקחת ישראל";
-        else if (currentTab === 'oil') query += " שמן קנאביס רפואי מלאי פארם";
-        else if (currentTab === 'acc') query += " אביזרי עישון למכירה";
-        else if (currentTab === 'sales') query = "מבצע קנאביס תוקף קצר פארם";
+        if (currentTab === 'smoke') query += " קנאביס רפואי מלאי בתי מרקחת";
+        else if (currentTab === 'oil') query += " שמן קנאביס רפואי מלאי";
+        else if (currentTab === 'acc') query += " אביזרים למכירה";
+        else if (currentTab === 'sales') query = "מבצע קנאביס תוקף קצר";
 
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי אונליין מעמיק...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>מעדכן מלאי בזמן אמת...</p>";
 
         try {
+            // הוספת nocache קריטית כדי למנוע את "שגיאת החיבור" ולהביא נתונים חדשים
             const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
+            if (!r.ok) throw new Error();
             const d = await r.json();
             renderResults(d.shopping_results || []);
-        } catch (e) { resDiv.innerHTML = "<p>שגיאה בחיבור לשרת</p>"; }
+        } catch (e) { 
+            resDiv.innerHTML = "<p style='text-align:center; color:orange;'>מנסה חיבור חוזר למלאי...</p>";
+            // ניסיון שני אוטומטי במקרה של תקלה
+            setTimeout(() => handleSearch(userInput), 2000);
+        }
     }
 
     function renderResults(items) {
@@ -137,20 +149,19 @@
             if (blacklist.some(word => title.includes(word))) return false;
             
             if (currentTab === 'acc') return true; 
-            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20") || title.includes("מבצע");
+            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20") || title.includes("מבצע") || title.includes("נייר");
             return isMedical;
         });
 
         if (filtered.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצאו תוצאות מלאי. נסה חיפוש אחר.</p>";
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי פנוי כרגע. נסה שוב או רענן.</p>";
             return;
         }
 
         filtered.sort((a, b) => a.extracted_price - b.extracted_price).forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
-            // ניקוי הלינק מתווים שגורמים לשגיאה (תיקון תמונה 3)
-            const cleanLink = item.link.split('&')[0] || item.link;
+            const cleanLink = item.link.split('&')[0];
             
             card.innerHTML = `
                 <div class="store-name">${item.source}</div>
