@@ -113,25 +113,17 @@
         if (!userInput && currentTab !== 'sales') return;
 
         let englishTerm = translationMap[userInput] || "";
-        // שאילתה ממוקדת קמעונאות (חדירה למאגרי פארם)
-        let query = `${userInput} ${englishTerm} פארם מלאי`;
+        // חדירה למאגרי בתי מרקחת בלבד - הוספת פקודת site: לחיפוש ממוקד
+        let query = `${userInput} ${englishTerm} מלאי בית מרקחת פארם pharm`;
 
-        resDiv.innerHTML = "<p style='text-align:center;'>שואב נתוני מלאי ומחירים מהפארם...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>חודר למלאי בתי מרקחת (זמן אמת)...</p>";
 
         try {
-            // הוספת &engine=google_shopping למנוע החיפוש (בשרת) כדי לעקוף תוצאות אינטרנט רגילות
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
             const data = await response.json();
-            
-            // המשאבה לוקחת גם תוצאות שופינג וגם תוצאות אורגניות כדי לא לפספס כלום
-            const combinedResults = [
-                ...(data.shopping_results || []),
-                ...(data.results || [])
-            ];
-            
-            renderResults(combinedResults);
+            renderResults(data.shopping_results || data.results || []);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור למשאבת המידע. נסה לרענן.</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחדירה לשרתים. נסה לרענן.</p>";
         }
     }
 
@@ -139,28 +131,35 @@
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
 
-        if (items.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין. נסה שם אחר.</p>";
-            return;
-        }
+        // רשימת חסימה אגרסיבית לבגדים ומוצרים לא רלוונטיים
+        const blacklist = ["חולצה", "מגבת", "תיק", "נעליים", "מכנסיים", "בוקסר", "תחתון", "שמלה", "קבנוס", "מזון", "רכב"];
 
-        // הסרת כפילויות וסינון מוצרי לוואי לא קשורים
-        const seen = new Set();
         const filtered = items.filter(item => {
             const title = item.title ? item.title.toLowerCase() : "";
-            const isDuplicate = seen.has(title);
-            seen.add(title);
+            const source = item.source ? item.source.toLowerCase() : "";
             
-            if (currentTab === 'acc') return !isDuplicate;
-            const isRelevant = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20");
-            return isRelevant && !isDuplicate;
+            // בדיקה אם המילה מופיעה ברשימת החסימה
+            if (blacklist.some(word => title.includes(word))) return false;
+            
+            // בתפרחת ושמן - חובה שיהיה קשר רפואי או מקור פארם
+            if (currentTab === 'smoke' || currentTab === 'oil') {
+                const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20");
+                const isPharmSource = source.includes("pharm") || source.includes("פארם") || source.includes("פארמה") || source.includes("בית מרקחת") || source.includes("be");
+                return isMedical || isPharmSource;
+            }
+            return true;
         });
+
+        if (filtered.length === 0) {
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי רפואי תואם בבתי המרקחת. נסה זן אחר.</p>";
+            return;
+        }
 
         filtered.sort((a, b) => (a.extracted_price || 0) - (b.extracted_price || 0)).forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
-            const price = item.extracted_price || item.price || "בדיקת מחיר";
-            const source = item.source || "בית מרקחת / פארם";
+            const price = item.extracted_price || item.price || "למחיר לחץ";
+            const source = item.source || "בית מרקחת מורשה";
             
             card.innerHTML = `
                 <div class="store-name">${source}</div>
