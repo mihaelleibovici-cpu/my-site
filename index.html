@@ -71,8 +71,6 @@
 
 <script>
     let currentTab = 'smoke';
-    
-    // מנוע תרגום פנימי לחיפוש בקודקוד בלבד
     const internalTranslator = {
         "אלסקה": "Alaska", "תכלת": "Techelet", "מרמלדה": "Marmelada", "ארז": "Erez", 
         "אבידקל": "Avidekel", "פיקאסו": "Picasso", "בלאק": "Black", "PK": "PK", 
@@ -96,7 +94,6 @@
         document.getElementById('q').value = "";
         document.getElementById('autocompleteList').style.display = "none";
         document.getElementById('results').innerHTML = "";
-        if (tab === 'sales') handleSearch("מבצע קנאביס תוקף");
     }
 
     function onInput(val) {
@@ -121,11 +118,11 @@
         const resDiv = document.getElementById('results');
         if (!userInput && currentTab !== 'sales') return;
 
-        // המנוע הפנימי מוסיף את השם באנגלית לחיפוש בלבד
         let eng = internalTranslator[userInput] || "";
-        let query = `${userInput} ${eng} מלאי בית מרקחת פארם -חולצה -בגד`;
+        // פקודת חדירה ממוקדת: חיפוש רק בתוך בתי מרקחת ופארם, סינון בגדים
+        let query = `${userInput} ${eng} קנאביס רפואי מלאי פארם -חולצה -בגדים -נעליים`;
 
-        resDiv.innerHTML = "<p style='text-align:center;'>חודר למאגרי המלאי של בתי המרקחת...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>חודר לשרתי המלאי של בתי המרקחת...</p>";
 
         try {
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
@@ -139,26 +136,21 @@
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        
-        // סינון חסימה של מוצרים לא רלוונטיים
-        const blacklist = ["חולצה", "מגבת", "תיק", "נעליים", "מכנסיים", "בוקסר", "תחתון"];
 
         const filtered = items.filter(item => {
             const title = item.title ? item.title.toLowerCase() : "";
             const source = item.source ? item.source.toLowerCase() : "";
             
-            if (blacklist.some(word => title.includes(word))) return false;
+            // תנאי חדירה: רק אם זה מוצר רפואי או ממקור פארם מובהק
+            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20");
+            const isPharm = source.includes("pharm") || source.includes("פארם") || source.includes("בית מרקחת") || source.includes("be") || source.includes("פנאקיה");
             
-            if (currentTab === 'smoke' || currentTab === 'oil') {
-                const isMed = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20");
-                const isSource = source.includes("pharm") || source.includes("פארם") || source.includes("בית מרקחת") || source.includes("be");
-                return isMed || isSource;
-            }
-            return true;
+            if (currentTab === 'acc') return true;
+            return isMedical || isPharm;
         });
 
         if (filtered.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי רפואי זמין. נסה שם אחר.</p>";
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי רפואי זמין בבתי המרקחת. נסה זן אחר.</p>";
             return;
         }
 
@@ -166,7 +158,7 @@
             const card = document.createElement('div');
             card.className = 'product-card';
             const price = item.extracted_price || item.price || "בדיקה באתר";
-            const source = item.source || "בית מרקחת מורשה";
+            const source = item.source || "בית מרקחת";
             
             card.innerHTML = `
                 <div class="store-name">${source}</div>
