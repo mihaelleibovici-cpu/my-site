@@ -14,12 +14,12 @@
         .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
         .tabs-container::-webkit-scrollbar { display: none; }
         .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
-        .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76,175,80,0.1); }
+        .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
 
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
         input { width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #333; font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; margin-bottom: 15px; }
 
-        .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-bottom: 15px; border: 1px solid #333; position: relative; }
+        .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-bottom: 15px; border: 1px solid #333; position: relative; border-right: 4px solid var(--main-green); }
         .store-name { color: var(--gold); font-size: 13px; font-weight: bold; }
         .product-title { margin: 8px 0; font-size: 16px; color: #fff; font-weight: 500; }
         .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
@@ -33,7 +33,7 @@
 
 <div class="header">
     <h1>זול צ'ק</h1>
-    <p style="margin:5px 0; font-size:14px;">השוואת מחירים - הפרדה מוחלטת</p>
+    <p style="margin:5px 0; font-size:14px;">חיפוש מלאי רפואי בלבד</p>
 </div>
 
 <div class="tabs-container">
@@ -45,7 +45,7 @@
 </div>
 
 <div class="container">
-    <input type="search" id="q" placeholder="חפש מוצר..." oninput="handleSearch()" inputmode="search">
+    <input type="search" id="q" placeholder="חפש במלאי בתי המרקחת..." oninput="handleSearch()" inputmode="search">
     <div id="results"></div>
 </div>
 
@@ -62,36 +62,27 @@
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
         document.getElementById('results').innerHTML = "";
-        
-        const placeholders = {
-            'smoke': 'חפש זן תפרחת...',
-            'oil': 'חפש שמן קנאביס...',
-            'vape': 'חפש מכשיר אידוי...',
-            'acc': 'חפש ניירות, גריינדר...',
-            'sales': 'חפש מבצעים פעילים...'
-        };
-        document.getElementById('q').placeholder = placeholders[tab];
         handleSearch();
     }
 
     async function handleSearch() {
-        const q = document.getElementById('q').value;
+        const userInput = document.getElementById('q').value;
         const resDiv = document.getElementById('results');
         
-        let query = q;
-        // שאילתה ממוקדת כדי להכריח את המנוע להביא תוצאות נכונות
-        if (currentTab === 'smoke') query += " תפרחת קנאביס";
-        else if (currentTab === 'oil') query += " שמן קנאביס";
-        else if (currentTab === 'vape') query += " מכשיר אידוי וופורייזר";
-        else if (currentTab === 'acc') query += " אביזרי עישון";
-        else if (currentTab === 'sales') query = (q ? q + " " : "") + "מבצע קנאביס תוקף";
+        // הגדרת מילות מפתח קשיחות לכל קטגוריה
+        let query = userInput;
+        if (currentTab === 'smoke') query += " קנאביס רפואי תפרחת פארם T20 T15 T24";
+        else if (currentTab === 'oil') query += " שמן קנאביס רפואי פארם C10 C20";
+        else if (currentTab === 'vape') query += " וופורייזר אידוי קנאביס";
+        else if (currentTab === 'acc') query += " ניירות גלגול גריינדר אביזרי עישון";
+        else if (currentTab === 'sales') query += " קנאביס רפואי מבצע תוקף קצר";
 
-        if (!q && currentTab !== 'sales') { resDiv.innerHTML = ""; return; }
+        if (!userInput && currentTab !== 'sales') { resDiv.innerHTML = ""; return; }
 
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק לפי קטגוריה...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי רפואי בלבד...</p>";
 
         try {
-            const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}`);
+            const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&t=${Date.now()}`);
             const d = await r.json();
             renderResults(d.shopping_results || []);
         } catch (e) { resDiv.innerHTML = "<p>שגיאה בחיבור</p>"; }
@@ -101,35 +92,21 @@
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
         
-        const blacklist = ["תנור", "בוקסר", "חולצה", "מארז", "נעלי", "תחתון", "גרביים", "מקרר", "מייבש"];
+        // סינון אכזרי - רשימה שחורה של כל מה שאינו קנאביס
+        const blacklist = ["תנור", "בוקסר", "חולצה", "תחתון", "נעלי", "מקרר", "מייבש", "שמן מנוע", "מארז", "חלבון", "אבקת", "מיטה", "ספה", "טלוויזיה"];
 
         const filtered = items.filter(item => {
             const title = item.title.toLowerCase();
             const isBlacklisted = blacklist.some(word => title.includes(word));
             if (isBlacklisted) return false;
 
-            // הפרדה מוחלטת - בדיקה שהמוצר מתאים רק ללשונית שלו
-            if (currentTab === 'smoke') {
-                return (title.includes("תפרחת") || title.includes("t20") || title.includes("t15")) && !title.includes("שמן");
-            }
-            if (currentTab === 'oil') {
-                return title.includes("שמן") && !title.includes("תפרחת");
-            }
-            if (currentTab === 'vape') {
-                return title.includes("אידוי") || title.includes("וופורייזר") || title.includes("עט");
-            }
-            if (currentTab === 'acc') {
-                const accWords = ["נייר", "גריינדר", "מצת", "פילטר", "מגש", "באנג", "וופורייזר"];
-                return accWords.some(w => title.includes(w)) && !title.includes("t20");
-            }
-            if (currentTab === 'sales') {
-                return title.includes("מבצע") || title.includes("תוקף");
-            }
-            return true;
+            // רק תוצאות עם מונחים רפואיים או מילים רלוונטיות יעברו
+            const medicalTerms = ["תפרחת", "שמן", "קנאביס", "אידוי", "וופורייזר", "גריינדר", "ניירות", "t20", "t15", "t24", "c10", "c20"];
+            return medicalTerms.some(term => title.includes(term));
         });
 
         if (filtered.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצאו תוצאות שתואמות בדיוק לקטגוריה זו.</p>";
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי תואם. נסה חיפוש אחר.</p>";
             return;
         }
 
@@ -140,11 +117,14 @@
                 <div class="store-name">${item.source}</div>
                 <div class="product-title">${item.title}</div>
                 <div class="price">₪${item.extracted_price}</div>
-                <a href="${item.link}" target="_blank" style="display:block; margin-top:10px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה במלאי</a>
+                <a href="${item.link}" target="_blank" style="display:block; margin-top:10px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">למעבר למלאי</a>
             `;
             rDiv.appendChild(card);
         });
     }
+
+    // טעינה ראשונית
+    if (currentTab === 'sales') handleSearch();
 </script>
 </body>
 </html>
