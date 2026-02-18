@@ -13,7 +13,6 @@
         .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
-        
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; display: flex; align-items: center; }
         input[type="text"] { 
             width: 100%; padding: 16px; padding-right: 45px; padding-left: 45px;  
@@ -21,11 +20,8 @@
             text-align: center; background: #fff; color: #000; outline: none; 
             box-sizing: border-box; -webkit-appearance: none;
         }
-        input::-webkit-search-decoration, input::-webkit-search-cancel-button, input::-webkit-search-results-button, input::-webkit-search-results-decoration { display: none; }
-
         .refresh-btn { position: absolute; right: 12px; font-size: 22px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
         .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
-
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
         .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
@@ -85,26 +81,21 @@
     function onInput(val) {
         const list = document.getElementById('autocompleteList');
         list.innerHTML = "";
-        if (!val) { list.style.display = "none"; return; }
-        
+        const cleanVal = val.trim();
+        if (!cleanVal) { list.style.display = "none"; return; }
         let filtered;
-        if (val === "ת" || val === "שמן") {
+        if (cleanVal === "ת" || cleanVal === "שמן") {
             filtered = allData[currentTab];
         } else {
-            filtered = allData[currentTab].filter(s => s.includes(val));
+            filtered = allData[currentTab].filter(s => s.includes(cleanVal));
         }
-
         if (filtered.length > 0) {
             list.style.display = "block";
             filtered.forEach(s => {
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.innerText = s;
-                item.onclick = () => { 
-                    document.getElementById('q').value = s; 
-                    list.style.display = "none"; 
-                    handleSearch(s); 
-                };
+                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
                 list.appendChild(item);
             });
         } else { list.style.display = "none"; }
@@ -113,11 +104,13 @@
     async function handleSearch(query) {
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
-        if (!searchInput || searchInput === "ת") return;
-        
+        if (!searchInput || searchInput.trim() === "ת") return;
         resDiv.innerHTML = "<p style='text-align:center;'>בודק מלאי בזמן אמת...</p>";
         try {
-            const response = await fetch(`/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי מחיר')}`);
+            const response = await fetch(`/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי מחיר')}`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
             if (!response.ok) throw new Error();
             const data = await response.json();
             renderResults(data.shopping_results || []);
