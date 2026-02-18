@@ -18,7 +18,7 @@
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; }
         
-        /* שורת חיפוש לבנה, נקייה עם איקס מובנה (type="search") */
+        /* שורת חיפוש נקייה ולבנה לגמרי */
         input[type="search"] { 
             width: 100%; 
             padding: 16px; 
@@ -30,7 +30,6 @@
             color: #000; 
             outline: none; 
             box-sizing: border-box; 
-            -webkit-appearance: searchfield; 
         }
 
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.6); display: none; border: 1px solid #ccc; }
@@ -60,19 +59,15 @@
 
 <div class="container">
     <div class="search-wrapper">
-        <input type="search" id="q" placeholder="הקש אות..." oninput="onInput(this.value)" inputmode="search">
+        <input type="search" id="q" placeholder="" oninput="onInput(this.value)" inputmode="search">
         <div id="autocompleteList" class="autocomplete-list"></div>
     </div>
     <div id="results"></div>
 </div>
 
 <div class="footer-fixed">
-    <div class="disclaimer-bar">
-        <strong>תנאי שימוש:</strong> המידע נמשך מאתרי אונליין ובאחריותם. האתר אינו מוכר קנאביס. רכישה בכפוף לרישיון תקף.
-    </div>
-    <div class="paypal-bar">
-        <a href="https://www.paypal.com/paypalme/iareah" target="_blank" style="color:#003087; text-decoration:none; font-weight:bold;">תמיכה בפרויקט - פייפאל</a>
-    </div>
+    <div class="disclaimer-bar"><strong>תנאי שימוש:</strong> המידע נמשך מאתרי אונליין ובאחריותם. האתר אינו מוכר קנאביס. רכישה בכפוף לרישיון תקף.</div>
+    <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/iareah" target="_blank" style="color:#003087; text-decoration:none; font-weight:bold;">תמיכה בפרויקט - פייפאל</a></div>
     <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק 2026</div>
 </div>
 
@@ -92,15 +87,27 @@
         document.getElementById('q').value = "";
         document.getElementById('autocompleteList').style.display = "none";
         document.getElementById('results').innerHTML = "";
-        if(tab === 'sales') handleSearch("מבצע קנאביס תוקף");
     }
 
     function onInput(val) {
         const list = document.getElementById('autocompleteList');
         list.innerHTML = "";
-        if (!val) { list.style.display = "none"; document.getElementById('results').innerHTML = ""; return; }
-        if (currentTab === 'sales') return;
         
+        // אם השדה ריק, תנקה הכל
+        if (!val) { 
+            list.style.display = "none"; 
+            document.getElementById('results').innerHTML = ""; 
+            return; 
+        }
+
+        // בלשונית מבצעים ואביזרים אין רשימה אוטומטית - מחפשים חופשי
+        if (currentTab === 'sales' || currentTab === 'acc') {
+            list.style.display = "none";
+            handleSearch(val);
+            return;
+        }
+        
+        // החזרת הרשימה המלאה מאות ראשונה
         const filtered = allData[currentTab].filter(s => s.startsWith(val) || s.includes(val));
         if (filtered.length > 0) {
             list.style.display = "block";
@@ -115,7 +122,10 @@
                 };
                 list.appendChild(item);
             });
-        } else { list.style.display = "none"; }
+        } else { 
+            list.style.display = "none";
+            handleSearch(val); // מאפשר חיפוש חופשי אם אין ברשימה
+        }
     }
 
     async function handleSearch(manualQuery) {
@@ -124,11 +134,11 @@
         if (!userInput && currentTab !== 'sales') return;
 
         let query = userInput;
-        if (currentTab === 'smoke') query += " קנאביס רפואי מלאי בית מרקחת";
-        else if (currentTab === 'oil') query += " שמן קנאביס רפואי אונליין";
-        else if (currentTab === 'sales') query = "מבצע קנאביס תוקף קצר";
+        if (currentTab === 'smoke') query += " קנאביס רפואי מלאי";
+        else if (currentTab === 'oil') query += " שמן קנאביס רפואי";
+        else if (currentTab === 'sales') query = (userInput || "") + " מבצע קנאביס תוקף קצר";
 
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי אונליין מעמיק...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי אונליין...</p>";
 
         try {
             const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&nocache=${Date.now()}`);
@@ -144,16 +154,19 @@
 
         const filtered = items.filter(item => {
             const title = item.title.toLowerCase();
-            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("מבצע") || title.includes("תוקף");
             if (blacklist.some(word => title.includes(word))) return false;
             
+            // בחיפוש חופשי או אביזרים אנחנו פחות מחמירים בסינון מילים רפואיות
+            if (currentTab === 'acc' || currentTab === 'vape') return true;
+
+            const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("מבצע") || title.includes("חוזק");
             if (currentTab === 'smoke') return isMedical && !title.includes("שמן");
             if (currentTab === 'oil') return isMedical && !title.includes("תפרחת");
             return isMedical;
         });
 
         if (filtered.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי. נסה זן אחר מהרשימה.</p>";
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי תואם. נסה חיפוש אחר.</p>";
             return;
         }
 
