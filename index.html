@@ -13,10 +13,28 @@
         .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
+        
+        /* שורת חיפוש נקייה - בלי סמלים */
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; }
-        input[type="search"] { width: 100%; padding: 16px; padding-right: 45px; padding-left: 40px; border-radius: 12px; border: 1px solid #333; font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; }
-        .refresh-inside { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 22px; color: #888; cursor: pointer; z-index: 10; }
-        .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.6); display: none; border: 1px solid #ccc; }
+        input[type="text"] { 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 12px; 
+            border: 1px solid #333; 
+            font-size: 18px; 
+            text-align: center; 
+            background: #fff; 
+            color: #000; 
+            outline: none; 
+            box-sizing: border-box;
+            -webkit-appearance: none;
+        }
+        input::-webkit-search-decoration,
+        input::-webkit-search-cancel-button,
+        input::-webkit-search-results-button,
+        input::-webkit-search-results-decoration { display: none; }
+
+        .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
         .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
         .store-name { color: var(--gold); font-size: 13px; font-weight: bold; }
@@ -34,18 +52,16 @@
         <div class="tab" onclick="setTab('oil', this)">שמן רפואי</div>
         <div class="tab" onclick="setTab('vape', this)">אידוי</div>
         <div class="tab" onclick="setTab('acc', this)">אביזרים</div>
-        <div class="tab" onclick="setTab('sales', this)">מבצעי תוקף</div>
     </div>
     <div class="container">
         <div class="search-wrapper">
-            <input type="search" id="q" placeholder="חפש זן או מוצר..." oninput="onInput(this.value)" inputmode="search">
-            <button class="refresh-inside" onclick="handleSearch()" title="רענן מלאי">↻</button>
+            <input type="text" id="q" placeholder="חפש זן..." oninput="onInput(this.value)" autocomplete="off">
             <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
         <div id="results"></div>
     </div>
     <div class="footer-fixed">
-        <div class="disclaimer-bar"><strong>תנאי שימוש:</strong> המידע נמשך מאתרי אונליין ובאחריותם. האתר אינו מוכר קנאביס.</div>
+        <div class="disclaimer-bar">תנאי שימוש: המידע נמשך מאתרי אונליין. האתר אינו מוכר קנאביס.</div>
         <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/iareah" target="_blank" style="color:#003087; text-decoration:none; font-weight:bold;">תמיכה בפרויקט - פייפאל</a></div>
         <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק 2026</div>
     </div>
@@ -85,16 +101,11 @@
         } else { list.style.display = "none"; }
     }
 
-    async function handleSearch(manualQuery) {
-        const userInput = manualQuery !== undefined ? manualQuery : document.getElementById('q').value;
+    async function handleSearch(query) {
         const resDiv = document.getElementById('results');
-        if (!userInput) return;
-
         resDiv.innerHTML = "<p style='text-align:center;'>בודק מלאי בזמן אמת...</p>";
-
         try {
-            // הקריאה ל-API הפנימי שמשתמש במפתח הסודי מהכספת ב-Vercel
-            const response = await fetch(`/api/search?q=${encodeURIComponent(userInput + ' קנאביס רפואי מלאי בתי מרקחת מחיר')}`);
+            const response = await fetch(`/api/search?q=${encodeURIComponent(query + ' קנאביס רפואי מלאי מחיר')}`);
             const data = await response.json();
             renderResults(data.shopping_results || []);
         } catch (e) {
@@ -106,7 +117,7 @@
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
         if (items.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין כרגע.</p>";
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין.</p>";
             return;
         }
         items.forEach(item => {
@@ -116,7 +127,7 @@
                 <div class="store-name">${item.source || "בית מרקחת"}</div>
                 <div style="margin:8px 0; font-weight:bold;">${item.title}</div>
                 <div class="price">₪${item.extracted_price || item.price || "---"}</div>
-                <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה ובדיקת מלאי</a>
+                <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
             `;
             rDiv.appendChild(card);
         });
