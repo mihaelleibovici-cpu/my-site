@@ -14,11 +14,12 @@
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
         
-        /* שורת חיפוש נקייה - בלי סמלים */
-        .search-wrapper { position: relative; width: 100%; margin-top: 10px; }
+        .search-wrapper { position: relative; width: 100%; margin-top: 10px; display: flex; align-items: center; }
         input[type="text"] { 
             width: 100%; 
             padding: 16px; 
+            padding-right: 45px;
+            padding-left: 45px;
             border-radius: 12px; 
             border: 1px solid #333; 
             font-size: 18px; 
@@ -33,6 +34,9 @@
         input::-webkit-search-cancel-button,
         input::-webkit-search-results-button,
         input::-webkit-search-results-decoration { display: none; }
+
+        .clear-btn { position: absolute; right: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
+        .refresh-btn { position: absolute; left: 12px; font-size: 22px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
 
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
@@ -55,7 +59,9 @@
     </div>
     <div class="container">
         <div class="search-wrapper">
-            <input type="text" id="q" placeholder="חפש זן..." oninput="onInput(this.value)" autocomplete="off">
+            <button class="clear-btn" onclick="clearSearch()">×</button>
+            <input type="text" id="q" placeholder="" oninput="onInput(this.value)" autocomplete="off">
+            <button class="refresh-btn" onclick="handleSearch()">↻</button>
             <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
         <div id="results"></div>
@@ -75,13 +81,17 @@
         'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג"]
     };
 
+    function clearSearch() {
+        document.getElementById('q').value = "";
+        document.getElementById('autocompleteList').style.display = "none";
+        document.getElementById('results').innerHTML = "";
+    }
+
     function setTab(tab, el) {
         currentTab = tab;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
-        document.getElementById('q').value = "";
-        document.getElementById('autocompleteList').style.display = "none";
-        document.getElementById('results').innerHTML = "";
+        clearSearch();
     }
 
     function onInput(val) {
@@ -102,10 +112,12 @@
     }
 
     async function handleSearch(query) {
+        const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
+        if (!searchInput) return;
         resDiv.innerHTML = "<p style='text-align:center;'>בודק מלאי בזמן אמת...</p>";
         try {
-            const response = await fetch(`/api/search?q=${encodeURIComponent(query + ' קנאביס רפואי מלאי מחיר')}`);
+            const response = await fetch(`/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי מחיר')}`);
             const data = await response.json();
             renderResults(data.shopping_results || []);
         } catch (e) {
@@ -116,10 +128,7 @@
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        if (items.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין.</p>";
-            return;
-        }
+        if (items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין.</p>"; return; }
         items.forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
