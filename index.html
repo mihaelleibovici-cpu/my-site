@@ -119,36 +119,45 @@
         if (!userInput && currentTab !== 'sales') return;
 
         let eng = internalTranslator[userInput] || "";
-        // שימוש במנוע חדירה - פניה ישירה למלאי קמעונאי
-        let query = `${userInput} ${eng} קנאביס רפואי מלאי פארם`;
+        // מנוע חדירה ממוקד - שאילתה קשיחה לאתרי פארם וקנאביס בלבד
+        let query = `${userInput} ${eng} קנאביס רפואי מלאי בתי מרקחת`;
 
-        resDiv.innerHTML = "<p style='text-align:center;'>חודר לקודקוד המלאי של בתי המרקחת...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>חודר לשרתי המלאי (זמן אמת)...</p>";
 
         try {
-            // הוספת &type=shopping ל-API בשרת כדי לקבל נתוני מלאי אמיתיים
+            // קריאה ל-API עם מנוע שממוקד בשופינג פארם
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&type=shopping&nocache=${Date.now()}`);
             const data = await response.json();
             renderResults(data.shopping_results || data.results || []);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחדירה לשרת. נסה לרענן.</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחדירה לשרת.</p>";
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        
-        // סינון אגרסיבי - רק מוצרים עם מחיר ומקור פארם
+
+        // סינון חסימה קשיח של חולצות, מותגים ואופנה
+        const blacklist = ["חולצה", "מגבת", "תיק", "נעליים", "מכנסיים", "בוקסר", "תחתון", "שמלה", "אופנה", "מותג"];
+
         const filtered = items.filter(item => {
             const title = item.title ? item.title.toLowerCase() : "";
             const source = item.source ? item.source.toLowerCase() : "";
-            const hasPrice = item.extracted_price || item.price;
             
+            // 1. חובה שזה לא יהיה ברשימה השחורה
+            if (blacklist.some(word => title.includes(word))) return false;
+            
+            // 2. חובה שיהיה מחיר (כדי להוכיח שזה מוצר במלאי)
+            const hasPrice = item.extracted_price || item.price;
+            if (!hasPrice) return false;
+
+            // 3. חדירה למקורות רפואיים
             const isMedical = title.includes("קנאביס") || title.includes("תפרחת") || title.includes("שמן") || title.includes("t2") || title.includes("t1") || title.includes("t20");
             const isPharm = source.includes("pharm") || source.includes("פארם") || source.includes("בית מרקחת") || source.includes("be");
             
             if (currentTab === 'acc') return hasPrice;
-            return (isMedical || isPharm) && hasPrice;
+            return isMedical || isPharm;
         });
 
         if (filtered.length === 0) {
