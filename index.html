@@ -11,22 +11,20 @@
         .header { padding: 20px 15px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
         .header h1 { color: var(--main-green); font-size: 28px; margin: 0; }
         
-        /* שורת הלשוניות העליונה - נשארת כפי שביקשת */
         .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
         .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76,175,80,0.1); }
 
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
         
-        /* שורת חיפוש נקייה עם השלמה אוטומטית */
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; }
         input { width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #333; font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; }
         
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 14px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
-        .autocomplete-item:active { background: #f0f0f0; }
 
-        .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
+        .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .store-name { color: var(--gold); font-size: 13px; font-weight: bold; }
         .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
         .sale-tag { color: var(--sale-red); font-size: 14px; font-weight: bold; display: block; margin-bottom: 5px; }
@@ -52,7 +50,7 @@
 
 <div class="container">
     <div class="search-wrapper">
-        <input type="search" id="q" placeholder="הקש אות או חוזק (למשל T20)..." oninput="onInput(this.value)" inputmode="search">
+        <input type="search" id="q" placeholder="בחר לשונית והתחל להקליד..." oninput="onInput(this.value)" inputmode="search">
         <div id="autocompleteList" class="autocomplete-list"></div>
     </div>
     <div id="results"></div>
@@ -65,30 +63,38 @@
 
 <script>
     let currentTab = 'smoke';
-    // רשימה מלאה של זנים וחוזקים להשלמה אוטומטית
     const suggestions = {
-        'smoke': ["T20/C4", "T24/C4", "T15/C3", "T10/C2", "T28/C4", "תכלת", "אלסקה", "מרמלדה", "פיקאסו", "בלאק", "ארז", "אבידקל", "PK", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "RS11", "קוקי קוש"],
-        'oil': ["T20/C4 שמן", "T10/C10 שמן", "T1/C20 שמן", "T15/C3 שמן", "אבידקל שמן", "שמן טיפות"],
-        'vape': ["וופורייזר", "מייטי", "פקס", "וולקנו", "מכשיר אידוי"],
-        'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול"]
+        'smoke': ["T20/C4", "T24/C4", "T15/C3", "T10/C2", "T28/C4", "תפרחת תכלת", "תפרחת אלסקה", "תפרחת מרמלדה", "פיקאסו", "בלאק", "ארז"],
+        'oil': ["שמן קנאביס T20/C4", "שמן קנאביס T10/C10", "שמן קנאביס T1/C20", "שמן קנאביס T15/C3", "אבידקל שמן"],
+        'vape': ["וופורייזר Mighty", "וופורייזר Pax 3", "וופורייזר Volcano", "מכשיר אידוי עט", "חלקי חילוף וופורייזר"],
+        'acc': [] // חיפוש חופשי
     };
 
     function setTab(tab, el) {
         currentTab = tab;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
-        document.getElementById('q').value = "";
+        const input = document.getElementById('q');
+        input.value = "";
         document.getElementById('autocompleteList').style.display = "none";
         document.getElementById('results').innerHTML = "";
+        
+        const placeholders = {
+            'smoke': "הקש חוזק (T20) או שם זן...",
+            'oil': "הקש 'שמן' לראות סוגים...",
+            'vape': "הקש 'וופו' לראות מכשירים...",
+            'acc': "חפש: ניירות, גריינדר וכו'...",
+            'sales': "סורק מבצעים בזמן אמת..."
+        };
+        input.placeholder = placeholders[tab];
         if(tab === 'sales') handleSearch("מבצע קנאביס תוקף");
     }
 
     function onInput(val) {
         const list = document.getElementById('autocompleteList');
         list.innerHTML = "";
-        if (!val || currentTab === 'sales') { list.style.display = "none"; return; }
+        if (!val || currentTab === 'sales' || currentTab === 'acc') { list.style.display = "none"; if(val.length > 2) handleSearch(val); return; }
         
-        // סינון רשימת השמות לפי מה שהוקלד (אות או חוזק)
         const filtered = suggestions[currentTab].filter(s => s.toLowerCase().includes(val.toLowerCase()));
         
         if (filtered.length > 0) {
@@ -97,11 +103,7 @@
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.innerText = s;
-                item.onclick = () => { 
-                    document.getElementById('q').value = s; 
-                    list.style.display = "none"; 
-                    handleSearch(s); 
-                };
+                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
                 list.appendChild(item);
             });
         } else { list.style.display = "none"; }
@@ -110,15 +112,14 @@
     async function handleSearch(manualQuery) {
         const userInput = manualQuery !== undefined ? manualQuery : document.getElementById('q').value;
         const resDiv = document.getElementById('results');
-        
         let query = userInput;
-        if (currentTab === 'smoke') query += " תפרחת קנאביס רפואי ישראל";
-        else if (currentTab === 'oil') query += " שמן קנאביס רפואי פארם";
-        else if (currentTab === 'sales') query = "קנאביס רפואי מבצע תוקף קצר חיסול מלאי";
 
-        if (!userInput && currentTab !== 'sales') return;
+        if (currentTab === 'smoke') query += " קנאביס רפואי תפרחת";
+        else if (currentTab === 'oil') query += " שמן קנאביס רפואי";
+        else if (currentTab === 'vape') query += " וופורייזר אידוי";
+        else if (currentTab === 'sales') query = "קנאביס רפואי מבצע תוקף";
 
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי בתי מרקחת...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי פארם ובתי מרקחת...</p>";
 
         try {
             const r = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(query)}&t=${Date.now()}`);
@@ -131,17 +132,18 @@
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
         
-        // סינון אכזרי נגד זבל (קבנוס, בוקסר, וכל מה שראינו בתמונות)
-        const blacklist = ["קבנוס", "קראף", "תנור", "בוקסר", "חולצה", "תחתון", "נעלי", "שמן מנוע", "קסטרול", "מזון", "חטיף", "מארז"];
+        const blacklist = ["קבנוס", "קראף", "רמקול", "תנור", "בוקסר", "חולצה", "תחתון", "נעלי", "שמן מנוע", "קסטרול", "מארז"];
 
         const filtered = items.filter(item => {
             const title = item.title.toLowerCase();
             const isBlacklisted = blacklist.some(word => title.includes(word));
             if (isBlacklisted) return false;
 
-            // מוודא שהתוצאה רלוונטית לעולם הקנאביס בלבד
-            const isMedical = title.includes("תפרחת") || title.includes("שמן") || title.includes("קנאביס") || title.includes("t2") || title.includes("t1") || title.includes("c1") || title.includes("c2");
-            return isMedical;
+            if (currentTab === 'smoke') return title.includes("תפרחת") || title.includes("t2") || title.includes("t1");
+            if (currentTab === 'oil') return title.includes("שמן") && !title.includes("מנוע");
+            if (currentTab === 'vape') return title.includes("אידוי") || title.includes("וופורייזר") || title.includes("מכשיר");
+            if (currentTab === 'acc') return item.extracted_price < 250; 
+            return true;
         });
 
         if (filtered.length === 0) {
@@ -154,7 +156,7 @@
             card.className = 'product-card';
             const isSale = item.title.includes("תוקף") || item.title.includes("מבצע");
             card.innerHTML = `
-                ${isSale ? '<span class="sale-tag">מבצע תוקף קצר / הנחת פארם</span>' : ''}
+                ${isSale ? '<span class="sale-tag">מבצע תוקף קצר</span>' : ''}
                 <div class="store-name">${item.source}</div>
                 <div class="product-title" style="margin:5px 0; font-weight:bold;">${item.title}</div>
                 <div class="price">₪${item.extracted_price}</div>
