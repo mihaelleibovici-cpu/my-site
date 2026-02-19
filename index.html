@@ -5,50 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>זול צ'ק - קנאביס רפואי</title>
     <style>
-        :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; --card-bg: #1e1e1e; }
-        body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 220px; direction: rtl; }
-        .header { padding: 25px 15px; text-align: center; background: #1a1a1a; border-bottom: 3px solid var(--main-green); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .header h1 { color: var(--main-green); font-size: 32px; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        
-        .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; }
-        .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; color: #888; transition: 0.3s; }
-        .tab.active { color: var(--main-green); border-bottom: 4px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
-
+        :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; }
+        body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 220px; direction: rtl; }
+        .header { padding: 20px 15px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
+        .header h1 { color: var(--main-green); font-size: 28px; margin: 0; }
+        .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
+        .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
+        .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
-        
-        .search-wrapper { position: relative; width: 100%; margin-top: 15px; }
+        .search-wrapper { position: relative; width: 100%; margin-top: 10px; display: flex; align-items: center; }
         input[type="text"] { 
-            width: 100%; padding: 18px; padding-right: 50px; padding-left: 50px;  
-            border-radius: 15px; border: 2px solid #333; font-size: 20px; 
+            width: 100%; padding: 16px; padding-right: 45px; padding-left: 45px;  
+            border-radius: 12px; border: 1px solid #333; font-size: 18px; 
             text-align: center; background: #fff; color: #000; outline: none; 
-            box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-sizing: border-box; -webkit-appearance: none;
         }
-        .refresh-btn { position: absolute; right: 15px; top: 18px; font-size: 24px; color: #4caf50; background: none; border: none; z-index: 10; cursor: pointer; }
-        .clear-btn { position: absolute; left: 15px; top: 18px; font-size: 24px; color: #888; background: none; border: none; z-index: 10; cursor: pointer; }
-
-        .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 15px 15px; z-index: 1001; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; box-shadow: 0 10px 20px rgba(0,0,0,0.5); display: none; }
-        .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; font-size: 18px; text-align: center; }
-
-        .product-card { 
-            background: var(--card-bg); border-radius: 20px; padding: 20px; margin-top: 20px; 
-            border: 1px solid #333; border-right: 6px solid var(--main-green);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-        }
-        .store-tag { background: var(--gold); color: black; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
-        .product-title { font-size: 20px; font-weight: bold; margin-bottom: 12px; line-height: 1.4; color: #fff; }
-        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
-        .price-val { font-size: 30px; color: var(--main-green); font-weight: 900; }
+        /* ריענון בצד ימין */
+        .refresh-btn { position: absolute; right: 12px; font-size: 22px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
+        /* איקס בצד שמאל */
+        .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
         
-        .buy-btn { 
-            display: block; width: 100%; margin-top: 20px; background: var(--main-green); 
-            color: white; text-decoration: none; padding: 15px; border-radius: 12px; 
-            text-align: center; font-weight: bold; font-size: 18px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-
-        .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 2000; }
-        .disclaimer-bar { background: rgba(0,0,0,0.95); color: #aaa; font-size: 12px; padding: 12px; text-align: center; border-top: 1px solid #333; }
-        .paypal-bar { background: #ffc439; padding: 14px; text-align: center; }
-        .footer-orange-bar { background: #ff8c00; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 16px; }
+        .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
+        .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
+        .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
+        .store-name { color: var(--gold); font-size: 13px; font-weight: bold; }
+        .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
+        .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 2000; display: flex; flex-direction: column; }
+        .disclaimer-bar { background: rgba(0,0,0,0.9); color: #888; font-size: 11px; padding: 10px; text-align: center; border-top: 1px solid #333; }
+        .paypal-bar { background: #ffc439; padding: 12px; text-align: center; }
+        .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; text-align: center; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -62,7 +47,7 @@
     <div class="container">
         <div class="search-wrapper">
             <button class="refresh-btn" onclick="handleSearch()">↻</button>
-            <input type="text" id="q" placeholder="חפש זן או מוצר..." oninput="onInput(this.value)" autocomplete="off">
+            <input type="text" id="q" placeholder="" oninput="onInput(this.value)" autocomplete="off">
             <button class="clear-btn" onclick="clearSearch()">×</button>
             <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
@@ -101,7 +86,12 @@
         list.innerHTML = "";
         const cleanVal = val.trim();
         if (!cleanVal) { list.style.display = "none"; return; }
-        const filtered = allData[currentTab].filter(s => s.includes(cleanVal));
+        let filtered;
+        if (cleanVal === "ת" || cleanVal === "שמן") {
+            filtered = allData[currentTab];
+        } else {
+            filtered = allData[currentTab].filter(s => s.includes(cleanVal));
+        }
         if (filtered.length > 0) {
             list.style.display = "block";
             filtered.forEach(s => {
@@ -117,32 +107,30 @@
     async function handleSearch(query) {
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
-        if (!searchInput) return;
-        resDiv.innerHTML = "<p style='text-align:center; padding:20px;'>בודק מלאי בזמן אמת...</p>";
+        if (!searchInput || searchInput.trim() === "ת") return;
+        resDiv.innerHTML = "<p style='text-align:center;'>בודק מלאי בזמן אמת...</p>";
         try {
-            const response = await fetch(`/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי מחיר')}`);
+            // הוספתי "מלאי בתי מרקחת" כדי לדייק את התוצאות
+            const response = await fetch(`/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי בתי מרקחת מחיר')}`);
             const data = await response.json();
             renderResults(data.shopping_results || []);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center; padding:20px;'>שגיאה בחיבור לשרת.</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור לשרת.</p>";
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        if (items.length === 0) { rDiv.innerHTML = "<p style='text-align:center; padding:20px;'>לא נמצא מלאי זמין.</p>"; return; }
+        if (items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין.</p>"; return; }
         items.forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
-            const price = item.extracted_price || item.price || "---";
             card.innerHTML = `
-                <div class="store-tag">${item.source || "בית מרקחת"}</div>
-                <div class="product-title">${item.title}</div>
-                <div class="price-row">
-                    <div class="price-val">₪${price}</div>
-                </div>
-                <a href="${item.link}" target="_blank" class="buy-btn">לרכישה ובדיקת מלאי</a>
+                <div class="store-name">${item.source || "בית מרקחת"}</div>
+                <div style="margin:8px 0; font-weight:bold;">${item.title}</div>
+                <div class="price">₪${item.extracted_price || item.price || "---"}</div>
+                <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
             `;
             rDiv.appendChild(card);
         });
