@@ -6,13 +6,13 @@
     <title>זול צ'ק קנאביס</title>
     <style>
         :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; --wa-green: #25D366; }
-        body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 250px; direction: rtl; overflow-x: hidden; }
+        body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 220px; direction: rtl; overflow-x: hidden; }
         
         .header { padding: 20px 15px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
         .header h1 { color: var(--main-green); font-size: 28px; margin: 0; }
         
         .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
-        .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
+        .tab { flex: 1; min-width: 95px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
         
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
@@ -38,7 +38,7 @@
         .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 2000; display: flex; flex-direction: column; }
         .disclaimer-bar { background: rgba(0,0,0,0.9); color: #888; font-size: 11px; padding: 10px; text-align: center; border-top: 1px solid #333; }
         .paypal-bar { background: #ffc439; padding: 12px; text-align: center; }
-        .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; text-align: center; font-weight: bold; }
+        .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -73,8 +73,18 @@
         'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג"]
     };
 
-    function clearSearch() { document.getElementById('q').value = ""; document.getElementById('autocompleteList').style.display = "none"; document.getElementById('results').innerHTML = ""; }
-    function setTab(tab, el) { currentTab = tab; document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); clearSearch(); }
+    function clearSearch() { 
+        document.getElementById('q').value = ""; 
+        document.getElementById('autocompleteList').style.display = "none"; 
+        document.getElementById('results').innerHTML = ""; 
+    }
+
+    function setTab(tab, el) { 
+        currentTab = tab; 
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); 
+        el.classList.add('active'); 
+        clearSearch(); 
+    }
 
     function onInput(val) {
         const list = document.getElementById('autocompleteList');
@@ -93,7 +103,11 @@
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.innerText = s;
-                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
+                item.onclick = () => { 
+                    document.getElementById('q').value = s; 
+                    list.style.display = "none"; 
+                    handleSearch(s); 
+                };
                 list.appendChild(item);
             });
         } else { list.style.display = "none"; }
@@ -106,7 +120,8 @@
         resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
         
         try {
-            const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי')}`);
+            // זה הצינור המקורי שעבד ברזל מהטלפון
+            const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מחיר')}`);
             if (!response.ok) throw new Error();
             const data = await response.json();
             const combinedResults = [...(data.shopping_results || []), ...(data.organic_results || [])];
@@ -119,14 +134,17 @@
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין.</p>"; return; }
+        if (!items || items.length === 0) { 
+            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין כרגע.</p>"; 
+            return; 
+        }
         items.forEach(item => {
-            let storeName = item.source || (item.link ? new URL(item.link).hostname.replace('www.', '').split('.')[0] : "מעבר לחנות");
+            let storeName = item.source || (item.link ? new URL(item.link).hostname.replace('www.', '').split('.')[0] : "חנות");
             let priceFinal = item.extracted_price ? "₪" + item.extracted_price : (item.price || "לחץ לבדיקה");
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
-                <div class="store-name">${storeName}</div>
+                <div class="store-name">${storeName.toUpperCase()}</div>
                 <div style="margin:8px 0; font-weight:bold; font-size:16px;">${item.title}</div>
                 <div class="price">${priceFinal}</div>
                 <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה / מלאי</a>
