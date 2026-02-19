@@ -20,11 +20,8 @@
             text-align: center; background: #fff; color: #000; outline: none; 
             box-sizing: border-box; -webkit-appearance: none;
         }
-        /* ריענון בצד ימין */
         .refresh-btn { position: absolute; right: 12px; font-size: 22px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
-        /* איקס בצד שמאל */
         .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
-        
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
         .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
@@ -108,21 +105,23 @@
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
         if (!searchInput || searchInput.trim() === "ת") return;
-        resDiv.innerHTML = "<p style='text-align:center;'>בודק מלאי בזמן אמת...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
         try {
-            // הוספתי "מלאי בתי מרקחת" כדי לדייק את התוצאות
-            const response = await fetch(`/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי בתי מרקחת מחיר')}`);
+            // פקודת חיפוש סופית שמתמקדת רק באתרים של בתי מרקחת בישראל
+            const searchQuery = `site:super-pharm.co.il OR site:panaxia.co.il OR site:be-pharm.co.il OR site:d-pharm.co.il OR site:isracann.co.il "${searchInput}"`;
+            const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+            if (!response.ok) throw new Error();
             const data = await response.json();
-            renderResults(data.shopping_results || []);
+            renderResults(data.shopping_results || data.organic_results || []);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור לשרת.</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בעדכון הנתונים.</p>";
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        if (items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין.</p>"; return; }
+        if (items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין בבתי המרקחת.</p>"; return; }
         items.forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
