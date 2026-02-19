@@ -73,10 +73,14 @@
     const allData = { 
         'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"], 
         'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל", "שמן אלסקה"], 
-        'vape': ["Mighty", "Pax"], 
-        'acc': ["ניירות", "גריינדר"] 
+        'vape': ["Mighty", "Pax", "Volcano", "Crafty"], 
+        'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים"] 
     };
-    const citiesByRegion = { 'North': ["עפולה", "נוף הגליל", "חיפה"], 'Center': ["תל אביב", "פתח תקווה"], 'South': ["באר שבע"] };
+    const citiesByRegion = { 
+        'North': ["עפולה", "נוף הגליל", "חיפה", "טבריה", "נהריה", "כרמיאל"], 
+        'Center': ["תל אביב", "פתח תקווה", "ראשון לציון", "נתניה"], 
+        'South': ["באר שבע", "אשדוד", "אשקלון"] 
+    };
 
     function onInput(val) {
         const list = document.getElementById('autocompleteList');
@@ -137,7 +141,7 @@
             card.className = 'product-card';
             card.innerHTML = `
                 <div class="store-name">${store.toUpperCase()}</div>
-                <div style="margin:5px 0; font-weight:bold; font-size:16px;">${item.title}</div>
+                <div style="margin:5px 0; font-weight:bold; font-size:14px;">${item.title}</div>
                 <div class="price">${priceFinal}</div>
                 <div style="display:flex; gap:10px; margin-top:15px;">
                     <a href="${item.link}" target="_blank" style="flex:4; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
