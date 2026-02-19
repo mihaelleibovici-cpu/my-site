@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>זול צ'ק - קנאביס רפואי</title>
+    <title>זול צ'ק קנאביס</title>
     <style>
         :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; }
         body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 220px; direction: rtl; }
@@ -34,7 +34,7 @@
     </style>
 </head>
 <body>
-    <div class="header"><h1>זול צ'ק - קנאביס</h1></div>
+    <div class="header"><h1>זול צ'ק קנאביס</h1></div>
     <div class="tabs-container">
         <div class="tab active" onclick="setTab('smoke', this)">תפרחת</div>
         <div class="tab" onclick="setTab('oil', this)">שמן רפואי</div>
@@ -53,7 +53,7 @@
     <div class="footer-fixed">
         <div class="disclaimer-bar">תנאי שימוש: המידע נמשך מאתרי אונליין. האתר אינו מוכר קנאביס.</div>
         <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/iareah" target="_blank" style="color:#003087; text-decoration:none; font-weight:bold;">תמיכה בפרויקט - פייפאל</a></div>
-        <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק 2026</div>
+        <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק קנאביס 2026</div>
     </div>
 
 <script>
@@ -105,35 +105,42 @@
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
         if (!searchInput || searchInput.trim() === "ת") return;
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי פארם ובתי מרקחת...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
         
         try {
-            // הכתובת של השרת שלך מחוברת כאן ישירות
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי מחיר')}`);
             if (!response.ok) throw new Error();
             const data = await response.json();
-            
-            // בודקים תוצאות חיפוש מכל הסוגים שגוגל מחזיר
-            renderResults(data.shopping_results || data.organic_results || []);
+            const results = [...(data.shopping_results || []), ...(data.organic_results || [])];
+            renderResults(results);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור לנתוני המלאי.</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור לנתונים.</p>";
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין כרגע.</p>"; return; }
+        if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין.</p>"; return; }
+        
         items.forEach(item => {
+            let priceDisp = "בדוק מחיר";
+            if (item.extracted_price) {
+                priceDisp = "₪" + item.extracted_price;
+            } else if (item.price) {
+                priceDisp = item.price;
+            } else if (item.snippet && item.snippet.includes('₪')) {
+                const match = item.snippet.match(/₪\s?(\d+)/);
+                if (match) priceDisp = match[0];
+            }
+
             const card = document.createElement('div');
             card.className = 'product-card';
-            // מחלצים את המחיר הכי טוב שאפשר
-            const priceDisp = item.extracted_price || item.price || "---";
             card.innerHTML = `
-                <div class="store-name">${item.source || "בית מרקחת"}</div>
+                <div class="store-name">${item.source || "מידע מחנות"}</div>
                 <div style="margin:8px 0; font-weight:bold;">${item.title}</div>
-                <div class="price">₪${priceDisp}</div>
-                <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
+                <div class="price">${priceDisp}</div>
+                <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה / בדיקה</a>
             `;
             rDiv.appendChild(card);
         });
