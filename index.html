@@ -13,21 +13,29 @@
         .tab { flex: 1; padding: 10px 2px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: #888; }
         .tab.active { color: var(--main-green); border-bottom: 2px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
         .container { padding: 5px 10px; max-width: 480px; margin: 0 auto; }
+        
+        /* שורת חיפוש נקייה לגמרי */
         .search-wrapper { position: relative; width: 100%; margin-top: 5px; display: flex; align-items: center; z-index: 2002; }
         input[type="text"] { width: 100%; padding: 10px; padding-right: 35px; padding-left: 35px; border-radius: 8px; border: 1px solid #333; font-size: 16px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; }
+        
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 8px 8px; z-index: 2005; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; color: #000; }
+
         .location-box { margin-top: 5px; background: #1a1a1a; padding: 5px; border-radius: 8px; border: 1px solid #333; }
         .region-bar { display: flex; gap: 3px; justify-content: center; margin-bottom: 4px; }
         .region-btn { background: #222; border: 1px solid #444; color: #bbb; padding: 4px 10px; border-radius: 12px; font-size: 11px; cursor: pointer; }
         .region-btn.active { background: var(--main-green); color: white; border-color: var(--main-green); }
         select { width: 100%; padding: 6px; border-radius: 6px; background: #222; color: white; border: 1px solid #444; font-size: 12px; outline: none; }
+
         .refresh-btn { position: absolute; right: 8px; font-size: 16px; color: #888; background: none; border: none; cursor: pointer; }
         .clear-btn { position: absolute; left: 8px; font-size: 16px; color: #888; background: none; border: none; cursor: pointer; }
+        
+        /* מלבן תוצאה עם שם בית המרקחת */
         .product-card { background: #1e1e1e; border-radius: 10px; padding: 15px; margin-top: 8px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
         .store-name { color: var(--gold); font-size: 13px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
         .price { font-size: 22px; color: var(--main-green); font-weight: bold; }
         .tag { display: inline-block; background: rgba(76, 175, 80, 0.2); color: var(--main-green); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-bottom: 5px; }
+        
         .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 3000; }
         .disclaimer-bar { background: rgba(0,0,0,0.95); color: #777; font-size: 9px; padding: 4px; text-align: center; border-top: 1px solid #333; }
         .paypal-bar { background: #ffc439; padding: 8px; text-align: center; font-size: 13px; }
@@ -71,17 +79,8 @@
     </div>
 <script>
     let currentTab = 'smoke';
-    const allData = { 
-        'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"], 
-        'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל"], 
-        'vape': ["Mighty", "Pax", "Volcano"], 
-        'acc': ["ניירות", "גריינדר", "מצת"] 
-    };
-    const citiesByRegion = { 
-        'North': ["עפולה", "נוף הגליל", "חיפה", "טבריה", "נהריה", "כרמיאל"], 
-        'Center': ["תל אביב", "פתח תקווה", "ראשון לציון", "נתניה"], 
-        'South': ["באר שבע", "אשדוד", "אשקלון"] 
-    };
+    const allData = { 'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "PK", "T20/C4", "T24/C4", "GMO", "RS11", "דון קוש"], 'oil': ["שמן T20/C4"], 'vape': ["Mighty"], 'acc': ["ניירות"] };
+    const citiesByRegion = { 'North': ["עפולה", "נוף הגליל", "חיפה", "טבריה", "נהריה", "כרמיאל"], 'Center': ["תל אביב", "פתח תקווה", "ראשון לציון"], 'South': ["באר שבע", "אשדוד", "אשקלון"] };
 
     function onInput(val) {
         const list = document.getElementById('autocompleteList');
@@ -124,7 +123,8 @@
         if (!val || val === "ת") return;
         resDiv.innerHTML = "<p style='text-align:center; font-size:12px;'>סורק מלאי...</p>";
         try {
-            const searchQuery = `${val} קנאביס רפואי מלאי ${city ? 'ב'+city : ''}`;
+            // שכלול החיפוש הממוקד: מחפש את המוצר + המיקום בצורה שגוגל אוהב
+            const searchQuery = `${val} מלאי קנאביס רפואי ${city ? 'בבית מרקחת ב'+city : ''}`;
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchQuery)}`);
             const data = await response.json();
             renderResults([...(data.shopping_results || []), ...(data.organic_results || [])]);
@@ -134,7 +134,7 @@
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center; font-size:12px;'>לא נמצא מלאי זמין.</p>"; return; }
+        if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center; font-size:12px;'>לא נמצא מלאי. נסה חיפוש ללא עיר.</p>"; return; }
         items.forEach(item => {
             let store = item.source || (item.link ? new URL(item.link).hostname.replace('www.','').split('.')[0] : "חנות");
             let priceFinal = "לחץ לבדיקה";
