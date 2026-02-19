@@ -121,8 +121,9 @@
         const city = document.getElementById('citySelect').value;
         const resDiv = document.getElementById('results');
         if (!val || val === "ת" || val === "ש") return;
-        resDiv.innerHTML = "<p style='text-align:center; font-size:12px;'>סורק מלאי...</p>";
+        resDiv.innerHTML = "<p style='text-align:center; font-size:14px;'>סורק מלאי...</p>";
         try {
+            // זה המנוע שעבד לנו ברזל - לא נוגע בו
             const url = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(val + ' קנאביס ' + (city || ''))}`;
             const response = await fetch(url);
             const data = await response.json();
@@ -141,7 +142,7 @@
             card.className = 'product-card';
             card.innerHTML = `
                 <div class="store-name">${store.toUpperCase()}</div>
-                <div style="margin:5px 0; font-weight:bold; font-size:14px;">${item.title}</div>
+                <div style="margin:5px 0; font-weight:bold; font-size:16px;">${item.title}</div>
                 <div class="price">${priceFinal}</div>
                 <div style="display:flex; gap:10px; margin-top:15px;">
                     <a href="${item.link}" target="_blank" style="flex:4; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
