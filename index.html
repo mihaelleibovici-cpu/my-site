@@ -108,16 +108,12 @@
         resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
         
         try {
-            // הוספת https:// לכתובת השרת לפתרון בעיית התקשורת מהטלפון
+            // הוספת https:// ותיקון הכתובת המלאה כדי למנוע חסימה בטלפון
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchInput + ' קנאביס')}`);
             if (!response.ok) throw new Error();
             const data = await response.json();
             
-            const combinedResults = [
-                ...(data.shopping_results || []),
-                ...(data.organic_results || [])
-            ];
-            
+            const combinedResults = [...(data.shopping_results || []), ...(data.organic_results || [])];
             renderResults(combinedResults);
         } catch (e) {
             resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור לנתוני המלאי.</p>";
@@ -127,24 +123,13 @@
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        
         if (!items || items.length === 0) {
             rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין כרגע.</p>";
             return;
         }
-        
         items.forEach(item => {
-            let storeName = item.source;
-            if (!storeName && item.link) {
-                try {
-                    const domain = new URL(item.link).hostname;
-                    storeName = domain.replace('www.', '').split('.')[0];
-                } catch(e) { storeName = "מעבר לחנות"; }
-            }
-            if (!storeName) storeName = "בדיקת מלאי";
-
+            let storeName = item.source || (item.link ? new URL(item.link).hostname.replace('www.', '').split('.')[0] : "מעבר לחנות");
             let priceFinal = item.extracted_price ? "₪" + item.extracted_price : (item.price || "לחץ לבדיקה");
-
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
