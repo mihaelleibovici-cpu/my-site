@@ -72,7 +72,7 @@
     let currentTab = 'smoke';
     const allData = { 
         'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"], 
-        'oil': ["שמן T20/C4", "שמן T10/C10", "שמן אבידקל"], 
+        'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל", "שמן אלסקה"], 
         'vape': ["Mighty", "Pax"], 
         'acc': ["ניירות", "גריינדר"] 
     };
@@ -83,7 +83,7 @@
         list.innerHTML = "";
         const cleanVal = val.trim();
         if (!cleanVal) { list.style.display = "none"; return; }
-        let filtered = (cleanVal === "ת" || cleanVal === "תפרחת") ? allData[currentTab] : allData[currentTab].filter(s => s.includes(cleanVal));
+        let filtered = (cleanVal === "ת" || cleanVal === "תפרחת" || cleanVal === "ש" || cleanVal === "שמן") ? allData[currentTab] : allData[currentTab].filter(s => s.includes(cleanVal));
         if (filtered.length > 0) {
             list.style.display = "block";
             filtered.forEach(s => {
@@ -116,7 +116,7 @@
         const val = query || document.getElementById('q').value;
         const city = document.getElementById('citySelect').value;
         const resDiv = document.getElementById('results');
-        if (!val || val === "ת") return;
+        if (!val || val === "ת" || val === "ש") return;
         resDiv.innerHTML = "<p style='text-align:center; font-size:12px;'>סורק מלאי...</p>";
         try {
             const url = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(val + ' קנאביס ' + (city || ''))}`;
@@ -137,7 +137,7 @@
             card.className = 'product-card';
             card.innerHTML = `
                 <div class="store-name">${store.toUpperCase()}</div>
-                <div style="margin:5px 0; font-weight:bold; font-size:14px;">${item.title}</div>
+                <div style="margin:5px 0; font-weight:bold; font-size:16px;">${item.title}</div>
                 <div class="price">${priceFinal}</div>
                 <div style="display:flex; gap:10px; margin-top:15px;">
                     <a href="${item.link}" target="_blank" style="flex:4; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
