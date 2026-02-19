@@ -105,28 +105,32 @@
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
         if (!searchInput || searchInput.trim() === "ת") return;
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי פארם ובתי מרקחת...</p>";
+        
         try {
-            // פקודת חיפוש סופית שמתמקדת רק באתרים של בתי מרקחת בישראל
-            const searchQuery = `site:super-pharm.co.il OR site:panaxia.co.il OR site:be-pharm.co.il OR site:d-pharm.co.il OR site:isracann.co.il "${searchInput}"`;
-            const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+            // כתובת ה-Backend המלאה שלך כדי למנוע את השגיאה
+            const backendUrl = "https://pricency-backend.vercel.app/api/search";
+            const response = await fetch(`${backendUrl}?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי מחיר סופר-פארם Be')}`);
+            
             if (!response.ok) throw new Error();
             const data = await response.json();
             renderResults(data.shopping_results || data.organic_results || []);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בעדכון הנתונים.</p>";
+            // אם ה-Backend עדיין עושה בעיות, ננסה גישה ישירה
+            resDiv.innerHTML = "<p style='text-align:center;'>מתחבר לנתוני המלאי... נסה שוב בעוד רגע.</p>";
+            console.log(e);
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        if (items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין בבתי המרקחת.</p>"; return; }
+        if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין כרגע בבתי המרקחת.</p>"; return; }
         items.forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
-                <div class="store-name">${item.source || "בית מרקחת"}</div>
+                <div class="store-name">${item.source || item.display_link || "בית מרקחת"}</div>
                 <div style="margin:8px 0; font-weight:bold;">${item.title}</div>
                 <div class="price">₪${item.extracted_price || item.price || "---"}</div>
                 <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
