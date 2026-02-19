@@ -7,42 +7,45 @@
     <style>
         :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; --wa-green: #25D366; }
         body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 220px; direction: rtl; }
-        .header { padding: 20px 15px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
-        .header h1 { color: var(--main-green); font-size: 28px; margin: 0; }
-        .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
-        .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
+        .header { padding: 15px 10px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
+        .header h1 { color: var(--main-green); font-size: 24px; margin: 0; }
+        .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; }
+        .tab { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
-        .container { padding: 15px; max-width: 480px; margin: 0 auto; }
+        .container { padding: 10px; max-width: 480px; margin: 0 auto; }
         
-        /* אזורים קומה 5 */
-        .region-bar { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .region-btn { background: #222; border: 1px solid #444; color: #ccc; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+        /* חיפוש ורשימה צפה - תיקון קומה 1 */
+        .search-wrapper { position: relative; width: 100%; margin-top: 5px; display: flex; align-items: center; z-index: 1002; }
+        input[type="text"] { 
+            width: 100%; padding: 12px; padding-right: 40px; padding-left: 40px;  
+            border-radius: 10px; border: 1px solid #333; font-size: 16px; 
+            text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box;
+        }
+        .autocomplete-list { 
+            position: absolute; top: 100%; left: 0; right: 0; background: #fff; 
+            color: #000; border-radius: 0 0 10px 10px; z-index: 2000; 
+            max-height: 250px; overflow-y: auto; display: none; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .autocomplete-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; }
+
+        /* אזורים וערים - קומות קטנות יותר */
+        .region-bar { display: flex; gap: 5px; margin-top: 8px; justify-content: center; z-index: 1001; position: relative; }
+        .region-btn { background: #222; border: 1px solid #444; color: #ccc; padding: 4px 10px; border-radius: 15px; font-size: 11px; cursor: pointer; }
         .region-btn.active { background: var(--main-green); color: white; border-color: var(--main-green); }
         
-        .city-select-wrapper { margin-top: 10px; display: none; }
-        select { width: 100%; padding: 10px; border-radius: 8px; background: #333; color: white; border: 1px solid var(--main-green); font-size: 14px; outline: none; }
+        .city-select-wrapper { margin-top: 8px; z-index: 1001; position: relative; }
+        select { width: 100%; padding: 8px; border-radius: 6px; background: #333; color: white; border: 1px solid var(--main-green); font-size: 13px; }
 
-        .search-wrapper { position: relative; width: 100%; margin-top: 10px; display: flex; align-items: center; }
-        input[type="text"] { 
-            width: 100%; padding: 16px; padding-right: 45px; padding-left: 45px;  
-            border-radius: 12px; border: 1px solid #333; font-size: 18px; 
-            text-align: center; background: #fff; color: #000; outline: none; 
-            box-sizing: border-box; -webkit-appearance: none;
-        }
-        .refresh-btn { position: absolute; right: 12px; font-size: 22px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
-        .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
+        .refresh-btn { position: absolute; right: 10px; font-size: 18px; color: #888; background: none; border: none; z-index: 11; }
+        .clear-btn { position: absolute; left: 10px; font-size: 18px; color: #888; background: none; border: none; z-index: 11; }
         
-        .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); position: relative; }
-        .store-name { color: var(--gold); font-size: 14px; font-weight: bold; margin-bottom: 5px; }
-        .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
-        .tag { display: inline-block; background: rgba(76, 175, 80, 0.2); color: var(--main-green); padding: 3px 8px; border-radius: 5px; font-size: 11px; margin-bottom: 8px; font-weight: bold; }
+        .product-card { background: #1e1e1e; border-radius: 12px; padding: 15px; margin-top: 10px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
+        .store-name { color: var(--gold); font-size: 12px; font-weight: bold; }
+        .price { font-size: 22px; color: var(--main-green); font-weight: bold; }
+        .tag { display: inline-block; background: rgba(76, 175, 80, 0.2); color: var(--main-green); padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-bottom: 5px; font-weight: bold; }
         
-        .card-actions { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-buy { flex: 3; background: var(--main-green); color: white; text-decoration: none; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; }
-        .btn-share { flex: 1; background: var(--wa-green); color: white; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-
-        .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 2000; display: flex; flex-direction: column; }
-        .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; text-align: center; font-weight: bold; }
+        .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 3000; }
+        .footer-orange-bar { background: #ff8c00; color: white; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -56,8 +59,9 @@
     <div class="container">
         <div class="search-wrapper">
             <button class="refresh-btn" onclick="handleSearch()">↻</button>
-            <input type="text" id="q" placeholder="חפש זן או מוצר..." oninput="onInput(this.value)" autocomplete="off">
+            <input type="text" id="q" placeholder="חפש זן (למשל: תפרחת)" oninput="onInput(this.value)" autocomplete="off">
             <button class="clear-btn" onclick="clearSearch()">×</button>
+            <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
         
         <div class="region-bar">
@@ -67,9 +71,9 @@
             <button class="region-btn" onclick="setRegion('South', this)">דרום</button>
         </div>
 
-        <div id="citySelectWrapper" class="city-select-wrapper">
+        <div id="citySelectWrapper" class="city-select-wrapper" style="display:none;">
             <select id="citySelect" onchange="handleSearch()">
-                <option value="">בחר עיר/יישוב...</option>
+                <option value="">בחר עיר...</option>
             </select>
         </div>
 
@@ -82,48 +86,53 @@
 
 <script>
     let currentTab = 'smoke';
-    let selectedCity = '';
-    
-    const citiesByRegion = {
-        'North': ["נוף הגליל", "חיפה", "עפולה", "טבריה", "נהריה", "כרמיאל", "קריות"],
-        'Center': ["תל אביב", "פתח תקווה", "ראשון לציון", "נתניה", "חולון", "רמת גן"],
-        'South': ["באר שבע", "אשדוד", "אשקלון", "אילת"]
-    };
+    const allData = { 'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "PK", "T20/C4", "T24/C4", "GMO", "RS11"], 'oil': ["שמן T20/C4", "שמן אבידקל"], 'vape': ["Mighty", "Pax"], 'acc': ["ניירות", "גריינדר"] };
+    const citiesByRegion = { 'North': ["נוף הגליל", "חיפה", "עפולה", "טבריה", "נהריה"], 'Center': ["תל אביב", "פתח תקווה", "ראשון לציון"], 'South': ["באר שבע", "אשדוד", "אשקלון"] };
+
+    function onInput(val) {
+        const list = document.getElementById('autocompleteList');
+        list.innerHTML = "";
+        const cleanVal = val.trim();
+        if (!cleanVal) { list.style.display = "none"; return; }
+        
+        let filtered = (cleanVal === "ת" || cleanVal === "תפרחת") ? allData[currentTab] : allData[currentTab].filter(s => s.includes(cleanVal));
+        
+        if (filtered.length > 0) {
+            list.style.display = "block";
+            filtered.forEach(s => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerText = s;
+                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
+                list.appendChild(item);
+            });
+        } else { list.style.display = "none"; }
+    }
 
     function setRegion(reg, el) {
         document.querySelectorAll('.region-btn').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
-        
         const wrapper = document.getElementById('citySelectWrapper');
         const select = document.getElementById('citySelect');
-        
         if (reg && citiesByRegion[reg]) {
             wrapper.style.display = 'block';
             select.innerHTML = '<option value="">כל ה' + el.innerText + '</option>';
             citiesByRegion[reg].forEach(city => {
                 const opt = document.createElement('option');
-                opt.value = city;
-                opt.innerText = city;
-                select.appendChild(opt);
+                opt.value = city; opt.innerText = city; select.appendChild(opt);
             });
-        } else {
-            wrapper.style.display = 'none';
-            select.value = '';
-        }
+        } else { wrapper.style.display = 'none'; }
         if(document.getElementById('q').value) handleSearch();
     }
 
-    async function handleSearch() {
-        const val = document.getElementById('q').value;
+    async function handleSearch(query) {
+        const val = query || document.getElementById('q').value;
         const city = document.getElementById('citySelect').value;
         const resDiv = document.getElementById('results');
-        if (!val) return;
-        
-        resDiv.innerHTML = "<p style='text-align:center;'>מחפש מלאי ב" + (city || "כל הארץ") + "...</p>";
-        
+        if (!val || val === "ת") return;
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי...</p>";
         try {
-            const locQuery = city ? `ב${city}` : "";
-            const searchQuery = `${val} קנאביס רפואי מלאי מחיר ${locQuery}`;
+            const searchQuery = `${val} קנאביס רפואי מלאי מחיר ${city ? 'ב'+city : ''}`;
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchQuery)}`);
             const data = await response.json();
             renderResults([...(data.shopping_results || []), ...(data.organic_results || [])]);
@@ -136,7 +145,6 @@
         items.forEach(item => {
             let store = item.source || (item.link ? new URL(item.link).hostname.replace('www.','') : "חנות");
             let price = item.extracted_price ? "₪"+item.extracted_price : (item.snippet?.match(/₪\s?(\d+)/)?.[0] || "בדיקת מחיר");
-            
             let typeTag = "";
             if(item.title?.includes("סאטיבה") || item.snippet?.includes("סאטיבה")) typeTag = '<span class="tag">סאטיבה</span>';
             else if(item.title?.includes("אינדיקה") || item.snippet?.includes("אינדיקה")) typeTag = '<span class="tag">אינדיקה</span>';
@@ -146,11 +154,11 @@
             card.innerHTML = `
                 <div class="store-name">${store}</div>
                 ${typeTag}
-                <div style="margin:5px 0; font-weight:bold;">${item.title}</div>
+                <div style="margin:5px 0; font-weight:bold; font-size:14px;">${item.title}</div>
                 <div class="price">${price}</div>
-                <div class="card-actions">
-                    <a href="${item.link}" target="_blank" class="btn-buy">לרכישה / מלאי</a>
-                    <button class="btn-share" onclick="window.open('whatsapp://send?text=מצאתי ב-זול צ\'ק: ${encodeURIComponent(item.title)} ב- ${price}. לינק: ${item.link}')">📲</button>
+                <div style="display:flex; gap:8px; margin-top:10px;">
+                    <a href="${item.link}" target="_blank" style="flex:3; background:var(--main-green); color:white; text-decoration:none; padding:10px; border-radius:8px; text-align:center; font-weight:bold; font-size:14px;">לרכישה</a>
+                    <button onclick="window.open('whatsapp://send?text=מצאתי ב-זול צ\'ק: ${encodeURIComponent(item.title)} ב-${price}. לינק: ${item.link}')" style="flex:1; background:var(--wa-green); border:none; border-radius:8px; color:white; font-size:18px;">📲</button>
                 </div>
             `;
             rDiv.appendChild(card);
@@ -158,7 +166,7 @@
     }
 
     function setTab(tab, el) { currentTab = tab; document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); }
-    function clearSearch() { document.getElementById('q').value = ""; document.getElementById('results').innerHTML = ""; }
+    function clearSearch() { document.getElementById('q').value = ""; document.getElementById('results').innerHTML = ""; document.getElementById('autocompleteList').style.display = "none"; }
 </script>
 </body>
 </html>
