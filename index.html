@@ -5,32 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>זול צ'ק קנאביס</title>
     <style>
-        :root { --main-green: #4caf50; --gold: --d4af37; --bg-dark: #121212; --wa-green: #25D366; }
-        body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 250px; direction: rtl; overflow-x: hidden; }
-        .header { padding: 10px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
-        .header h1 { color: var(--main-green); font-size: 22px; margin: 0; }
+        :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; --wa-green: #25D366; }
+        body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 260px; direction: rtl; overflow-x: hidden; }
+        
+        .header { padding: 12px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
+        .header h1 { color: var(--main-green); font-size: 24px; margin: 0; }
+        
         .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; }
-        .tab { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 12px; color: #888; }
+        .tab { flex: 1; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
+        
         .container { padding: 10px; max-width: 480px; margin: 0 auto; }
+        
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; display: flex; align-items: center; z-index: 2002; }
-        input[type="text"] { width: 100%; padding: 12px; padding-right: 40px; padding-left: 40px; border-radius: 10px; border: 1px solid #333; font-size: 16px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; }
-        .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 10px 10px; z-index: 2005; max-height: 250px; overflow-y: auto; display: none; border: 1px solid #ccc; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; color: #000; }
-        .location-box { margin-top: 8px; background: #1a1a1a; padding: 8px; border-radius: 10px; border: 1px solid #333; }
-        .region-bar { display: flex; gap: 5px; justify-content: center; margin-bottom: 5px; }
-        .region-btn { background: #222; border: 1px solid #444; color: #bbb; padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; }
+        input[type="text"] { 
+            width: 100%; padding: 14px; padding-right: 45px; padding-left: 45px;  
+            border-radius: 12px; border: 1px solid #333; font-size: 18px; 
+            text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box;
+        }
+        
+        .autocomplete-list { 
+            position: absolute; top: 100%; left: 0; right: 0; background: #fff; 
+            color: #000; border-radius: 0 0 12px 12px; z-index: 2005; 
+            max-height: 250px; overflow-y: auto; display: none; border: 1px solid #ccc; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; color: #000; }
+
+        .location-box { margin-top: 10px; background: #1a1a1a; padding: 10px; border-radius: 12px; border: 1px solid #333; }
+        .region-bar { display: flex; gap: 5px; justify-content: center; margin-bottom: 6px; }
+        .region-btn { background: #222; border: 1px solid #444; color: #bbb; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; }
         .region-btn.active { background: var(--main-green); color: white; border-color: var(--main-green); }
-        select { width: 100%; padding: 8px; border-radius: 6px; background: #222; color: white; border: 1px solid #444; font-size: 13px; outline: none; }
-        .refresh-btn { position: absolute; right: 10px; font-size: 18px; color: #888; background: none; border: none; cursor: pointer; }
-        .clear-btn { position: absolute; left: 10px; font-size: 18px; color: #888; background: none; border: none; cursor: pointer; }
-        .product-card { background: #1e1e1e; border-radius: 12px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
-        .store-name { color: #d4af37; font-size: 14px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
-        .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
-        .tag { display: inline-block; background: rgba(76, 175, 80, 0.2); color: var(--main-green); padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; margin-bottom: 5px; }
+        select { width: 100%; padding: 10px; border-radius: 8px; background: #222; color: white; border: 1px solid #444; font-size: 14px; outline: none; }
+
+        .refresh-btn { position: absolute; right: 12px; font-size: 20px; color: #888; background: none; border: none; cursor: pointer; }
+        .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; background: none; border: none; cursor: pointer; }
+        
+        .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
+        .store-name { color: var(--gold); font-size: 14px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        .price { font-size: 28px; color: var(--main-green); font-weight: bold; }
+        .tag { display: inline-block; background: rgba(76, 175, 80, 0.2); color: var(--main-green); padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; margin-bottom: 8px; }
+        
         .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 3000; display: flex; flex-direction: column; }
-        .disclaimer-bar { background: rgba(0,0,0,0.95); color: #777; font-size: 10px; padding: 6px; text-align: center; border-top: 1px solid #333; }
-        .paypal-bar { background: #ffc439; padding: 10px; text-align: center; font-size: 14px; }
+        .disclaimer-bar { background: rgba(0,0,0,0.95); color: #888; font-size: 10px; padding: 8px; text-align: center; border-top: 1px solid #333; }
+        .paypal-bar { background: #ffc439; padding: 12px; text-align: center; font-size: 14px; }
         .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 16px; }
     </style>
 </head>
@@ -73,7 +90,7 @@
     let currentTab = 'smoke';
     const allData = { 
         'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"], 
-        'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל"], 
+        'oil': ["שמן T20/C4", "שמן T10/C10", "שמן אבידקל", "שמן אלסקה"], 
         'vape': ["Mighty", "Pax", "Volcano"], 
         'acc': ["ניירות", "גריינדר", "מצת"] 
     };
@@ -88,21 +105,14 @@
         list.innerHTML = "";
         const cleanVal = val.trim();
         if (!cleanVal) { list.style.display = "none"; return; }
-        
-        // תיקון קריטי: החזרת זיהוי מילת המפתח "ת" או "תפרחת"
         let filtered = (cleanVal === "ת" || cleanVal === "תפרחת") ? allData[currentTab] : allData[currentTab].filter(s => s.includes(cleanVal));
-        
         if (filtered.length > 0) {
             list.style.display = "block";
             filtered.forEach(s => {
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.innerText = s;
-                item.onclick = () => { 
-                    document.getElementById('q').value = s; 
-                    list.style.display = "none"; 
-                    handleSearch(s); 
-                };
+                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
                 list.appendChild(item);
             });
         } else { list.style.display = "none"; }
@@ -129,19 +139,18 @@
         const city = document.getElementById('citySelect').value;
         const resDiv = document.getElementById('results');
         if (!val || val === "ת") return;
-        resDiv.innerHTML = "<p style='text-align:center; font-size:12px;'>סורק מלאי...</p>";
+        resDiv.innerHTML = "<p style='text-align:center; font-size:14px;'>סורק מלאי...</p>";
         try {
-            const searchQuery = `${val} קנאביס רפואי מלאי ${city ? city : ''}`;
-            const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchQuery)}`);
+            const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(val + ' קנאביס רפואי מלאי ' + (city || ''))}`);
             const data = await response.json();
             renderResults([...(data.shopping_results || []), ...(data.organic_results || [])]);
-        } catch (e) { resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור.</p>"; }
+        } catch (e) { resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור לשרת.</p>"; }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center; font-size:12px;'>לא נמצא מלאי זמין.</p>"; return; }
+        if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center; font-size:14px;'>לא נמצא מלאי זמין.</p>"; return; }
         items.forEach(item => {
             let store = item.source || (item.link ? new URL(item.link).hostname.replace('www.','').split('.')[0] : "חנות");
             let priceFinal = "לחץ לבדיקה";
@@ -161,11 +170,11 @@
             card.innerHTML = `
                 <div class="store-name">${store.toUpperCase()}</div>
                 ${typeTag}
-                <div style="margin:5px 0; font-weight:bold; font-size:14px;">${item.title}</div>
+                <div style="margin:5px 0; font-weight:bold; font-size:16px;">${item.title}</div>
                 <div class="price">${priceFinal}</div>
-                <div style="display:flex; gap:8px; margin-top:10px;">
-                    <a href="${item.link}" target="_blank" style="flex:4; background:var(--main-green); color:white; text-decoration:none; padding:10px; border-radius:8px; text-align:center; font-weight:bold; font-size:14px;">לרכישה</a>
-                    <button onclick="window.open('whatsapp://send?text=מצאתי ב-זול צ\'ק: ${encodeURIComponent(item.title)} ב-${priceFinal}. לינק: ${item.link}')" style="flex:1; background:var(--wa-green); border:none; border-radius:8px; color:white; font-size:18px;">📲</button>
+                <div style="display:flex; gap:10px; margin-top:15px;">
+                    <a href="${item.link}" target="_blank" style="flex:4; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
+                    <button onclick="window.open('whatsapp://send?text=מצאתי ב-זול צ\'ק: ${encodeURIComponent(item.title)} ב-${priceFinal}. לינק: ${item.link}')" style="flex:1; background:var(--wa-green); border:none; border-radius:10px; color:white; font-size:20px;">📲</button>
                 </div>
             `;
             rDiv.appendChild(card);
