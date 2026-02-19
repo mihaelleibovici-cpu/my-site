@@ -25,7 +25,7 @@
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
         .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
-        .store-name { color: var(--gold); font-size: 13px; font-weight: bold; }
+        .store-name { color: var(--gold); font-size: 14px; font-weight: bold; margin-bottom: 5px; }
         .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
         .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 2000; display: flex; flex-direction: column; }
         .disclaimer-bar { background: rgba(0,0,0,0.9); color: #888; font-size: 11px; padding: 10px; text-align: center; border-top: 1px solid #333; }
@@ -124,20 +124,32 @@
         if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין.</p>"; return; }
         
         items.forEach(item => {
+            // חילוץ שם חנות - אם אין Source, לוקחים מהכתובת
+            let storeName = item.source;
+            if (!storeName && item.link) {
+                try {
+                    const url = new URL(item.link);
+                    storeName = url.hostname.replace('www.', '');
+                } catch(e) { storeName = "צפה בחנות"; }
+            }
+
+            // חילוץ מחיר משופר
             let priceDisp = "בדוק מחיר";
+            const priceRegex = /₪\s?(\d{2,4})|(\d{2,4})\s?₪/;
+            
             if (item.extracted_price) {
                 priceDisp = "₪" + item.extracted_price;
             } else if (item.price) {
-                priceDisp = item.price;
-            } else if (item.snippet && item.snippet.includes('₪')) {
-                const match = item.snippet.match(/₪\s?(\d+)/);
-                if (match) priceDisp = match[0];
+                priceDisp = item.price.includes('₪') ? item.price : "₪" + item.price;
+            } else if (item.snippet) {
+                const match = item.snippet.match(priceRegex);
+                if (match) priceDisp = match[0].includes('₪') ? match[0] : "₪" + match[0];
             }
 
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
-                <div class="store-name">${item.source || "מידע מחנות"}</div>
+                <div class="store-name">${storeName}</div>
                 <div style="margin:8px 0; font-weight:bold;">${item.title}</div>
                 <div class="price">${priceDisp}</div>
                 <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה / בדיקה</a>
