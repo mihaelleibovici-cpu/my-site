@@ -105,30 +105,34 @@
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
         if (!searchInput || searchInput.trim() === "ת") return;
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
+        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי פארם ובתי מרקחת...</p>";
         
         try {
-            // הכתובת המדויקת שראינו ב-Vercel
+            // הכתובת של השרת שלך מחוברת כאן ישירות
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי מחיר')}`);
             if (!response.ok) throw new Error();
             const data = await response.json();
+            
+            // בודקים תוצאות חיפוש מכל הסוגים שגוגל מחזיר
             renderResults(data.shopping_results || data.organic_results || []);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור לשרת החיפוש.</p>";
+            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור לנתוני המלאי.</p>";
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין.</p>"; return; }
+        if (!items || items.length === 0) { rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין כרגע.</p>"; return; }
         items.forEach(item => {
             const card = document.createElement('div');
             card.className = 'product-card';
+            // מחלצים את המחיר הכי טוב שאפשר
+            const priceDisp = item.extracted_price || item.price || "---";
             card.innerHTML = `
                 <div class="store-name">${item.source || "בית מרקחת"}</div>
                 <div style="margin:8px 0; font-weight:bold;">${item.title}</div>
-                <div class="price">₪${item.extracted_price || item.price || "---"}</div>
+                <div class="price">₪${priceDisp}</div>
                 <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה</a>
             `;
             rDiv.appendChild(card);
