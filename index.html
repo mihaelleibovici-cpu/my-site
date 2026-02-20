@@ -86,7 +86,6 @@
         if (!cleanVal) { list.style.display = "none"; return; }
         
         let filtered;
-        // תמיכה בחיפוש אות אחת או מילה ספציפית כפי שביקשת
         if (cleanVal === "ת" || cleanVal === "שמן") {
             filtered = allData[currentTab];
         } else {
@@ -112,14 +111,13 @@
     async function handleSearch(query) {
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
-        if (!searchInput || searchInput.trim() === "ת") return;
+        if (!searchInput || searchInput.trim().length < 2) return;
         
-        resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
+        resDiv.innerHTML = "<p style='text-align:center; color:white;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
         
         try {
-            // חיזוק השאילתה לתוצאות אמת
-            const fullQuery = encodeURIComponent(searchInput + " קנאביס רפואי מלאי מחיר");
-            const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${fullQuery}`);
+            // שינוי הכתובת ל-HTTP רגיל אם יש בעיית SSL או שימוש בפורמט נקי
+            const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי מחיר')}`);
             
             if (!response.ok) throw new Error();
             const data = await response.json();
@@ -129,7 +127,6 @@
                 ...(data.organic_results || [])
             ];
 
-            // עיבוד המחירים למיון
             const processed = combinedResults.map(item => {
                 let p = 9999;
                 const priceRegex = /₪\s?(\d{2,4})|(\d{2,4})\s?₪/;
@@ -148,7 +145,8 @@
             renderResults(processed);
 
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center; color:#ff4444;'>שגיאה בחיבור לנתונים. נסה שוב בעוד רגע.</p>";
+            // החזרת טקסט השגיאה לצבע לבן כפי שביקשת
+            resDiv.innerHTML = "<p style='text-align:center; color:white;'>שגיאה בחיבור לנתונים. נסה שוב בעוד רגע.</p>";
         }
     }
 
@@ -157,7 +155,7 @@
         rDiv.innerHTML = "";
         
         if (items.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין כרגע.</p>";
+            rDiv.innerHTML = "<p style='text-align:center; color:white;'>לא נמצא מלאי זמין כרגע.</p>";
             return;
         }
         
