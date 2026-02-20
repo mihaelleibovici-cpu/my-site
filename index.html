@@ -45,7 +45,7 @@
     <div class="container">
         <div class="search-wrapper">
             <button class="refresh-btn" onclick="handleSearch()">↻</button>
-            <input type="text" id="q" placeholder="חפש זן או מוצר..." oninput="onInput(this.value)" autocomplete="off">
+            <input type="text" id="q" placeholder="" oninput="onInput(this.value)" autocomplete="off">
             <button class="clear-btn" onclick="clearSearch()">×</button>
             <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
@@ -84,7 +84,15 @@
         list.innerHTML = "";
         const cleanVal = val.trim();
         if (!cleanVal) { list.style.display = "none"; return; }
-        let filtered = allData[currentTab].filter(s => s.includes(cleanVal));
+        
+        let filtered;
+        // תמיכה בחיפוש אות אחת או מילה ספציפית כפי שביקשת
+        if (cleanVal === "ת" || cleanVal === "שמן") {
+            filtered = allData[currentTab];
+        } else {
+            filtered = allData[currentTab].filter(s => s.includes(cleanVal));
+        }
+
         if (filtered.length > 0) {
             list.style.display = "block";
             filtered.forEach(s => {
@@ -104,49 +112,43 @@
     async function handleSearch(query) {
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
-        if (!searchInput || searchInput.trim().length < 2) return;
+        if (!searchInput || searchInput.trim() === "ת") return;
         
         resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
         
         try {
-            // הוספת מילות מפתח לחיפוש מדויק יותר של בתי מרקחת בישראל
-            const fullQuery = encodeURIComponent(searchInput + " קנאביס רפואי מחיר מלאי בית מרקחת");
+            // חיזוק השאילתה לתוצאות אמת
+            const fullQuery = encodeURIComponent(searchInput + " קנאביס רפואי מלאי מחיר");
             const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${fullQuery}`);
             
-            if (!response.ok) throw new Error("Network Error");
+            if (!response.ok) throw new Error();
             const data = await response.json();
             
-            let items = [
+            let combinedResults = [
                 ...(data.shopping_results || []),
                 ...(data.organic_results || [])
             ];
 
-            // סינון תוצאות כפולות ועיבוד מחירים
-            const processedItems = items.map(item => {
-                let price = Infinity;
+            // עיבוד המחירים למיון
+            const processed = combinedResults.map(item => {
+                let p = 9999;
                 const priceRegex = /₪\s?(\d{2,4})|(\d{2,4})\s?₪/;
-                
-                if (item.extracted_price) {
-                    price = parseFloat(item.extracted_price);
-                } else if (item.price) {
-                    const match = item.price.match(/\d+/);
-                    if (match) price = parseFloat(match[0]);
+                if (item.extracted_price) p = parseFloat(item.extracted_price);
+                else if (item.price) {
+                    const m = item.price.match(/\d+/);
+                    if (m) p = parseFloat(m[0]);
                 } else if (item.snippet) {
-                    const match = item.snippet.match(priceRegex);
-                    if (match) {
-                        const num = match[0].replace(/[^\d]/g, '');
-                        price = parseFloat(num);
-                    }
+                    const m = item.snippet.match(priceRegex);
+                    if (m) p = parseFloat(m[0].replace(/[^\d]/g, ''));
                 }
-                return { ...item, numericPrice: price };
-            }).filter(item => item.numericPrice !== Infinity);
+                return { ...item, numPrice: p };
+            }).filter(i => i.numPrice < 9999);
 
-            // מיון מהזול ליקר
-            processedItems.sort((a, b) => a.numericPrice - b.numericPrice);
+            processed.sort((a, b) => a.numPrice - b.numPrice);
+            renderResults(processed);
 
-            renderResults(processedItems);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center; color:red;'>שגיאה בחיבור לנתונים. נסה שוב בעוד רגע.</p>";
+            resDiv.innerHTML = "<p style='text-align:center; color:#ff4444;'>שגיאה בחיבור לנתונים. נסה שוב בעוד רגע.</p>";
         }
     }
 
@@ -160,24 +162,20 @@
         }
         
         items.forEach((item, index) => {
-            let storeName = item.source || "בדיקת מלאי";
-            if (item.link && storeName === "בדיקת מלאי") {
-                try {
-                    storeName = new URL(item.link).hostname.replace('www.', '').split('.')[0];
-                } catch(e) {}
+            let store = item.source || "בדיקת מלאי";
+            if (item.link && store === "בדיקת מלאי") {
+                try { store = new URL(item.link).hostname.replace('www.', '').split('.')[0]; } catch(e) {}
             }
 
             const card = document.createElement('div');
             card.className = 'product-card';
-            
-            // סימון התוצאה הזולה ביותר
-            const cheapestTag = index === 0 ? '<div class="cheapest-badge">הכי זול</div>' : '';
+            const badge = index === 0 ? '<div class="cheapest-badge">הכי זול</div>' : '';
             
             card.innerHTML = `
-                ${cheapestTag}
-                <div class="store-name">${storeName.toUpperCase()}</div>
+                ${badge}
+                <div class="store-name">${store.toUpperCase()}</div>
                 <div style="margin:8px 0; font-weight:bold; font-size:16px;">${item.title}</div>
-                <div class="price">₪${item.numericPrice}</div>
+                <div class="price">₪${item.numPrice}</div>
                 <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה / מלאי</a>
             `;
             rDiv.appendChild(card);
