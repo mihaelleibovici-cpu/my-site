@@ -22,6 +22,17 @@
         }
         .refresh-btn { position: absolute; right: 12px; font-size: 22px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
         .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
+        
+        /* עיצוב חדש לסינון אזורים */
+        .area-filter-wrapper { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .filter-select { 
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; 
+            background: #222; color: white; font-size: 16px; outline: none; 
+            appearance: none; -webkit-appearance: none; text-align: center;
+        }
+        .city-select-wrapper { display: none; } /* מוסתר כברירת מחדל */
+        .city-select { border: 1px solid var(--main-green); color: var(--main-green); font-weight: bold; }
+
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
         .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); position: relative; }
@@ -45,10 +56,27 @@
     <div class="container">
         <div class="search-wrapper">
             <button class="refresh-btn" onclick="handleSearch()">↻</button>
-            <input type="text" id="q" placeholder="" oninput="onInput(this.value)" autocomplete="off">
+            <input type="text" id="q" placeholder="חפש מוצר או מותג..." oninput="onInput(this.value)" autocomplete="off">
             <button class="clear-btn" onclick="clearSearch()">×</button>
             <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
+
+        <div class="area-filter-wrapper">
+            <select id="regionSelect" class="filter-select" onchange="updateCities()">
+                <option value="">בחר אזור...</option>
+                <option value="north">צפון</option>
+                <option value="center">מרכז</option>
+                <option value="south">דרום</option>
+                <option value="jerusalem">ירושלים והסביבה</option>
+            </select>
+            
+            <div id="cityWrapper" class="city-select-wrapper">
+                <select id="citySelect" class="filter-select city-select">
+                    <option value="">בחר עיר...</option>
+                </select>
+            </div>
+        </div>
+
         <div id="results"></div>
     </div>
     <div class="footer-fixed">
@@ -66,10 +94,40 @@
         'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג"]
     };
 
+    // נתוני ערים לפי אזורים
+    const citiesByRegion = {
+        'north': ['נוף הגליל', 'עפולה', 'חיפה', 'טבריה', 'נהריה', 'כרמיאל', 'קריות'],
+        'center': ['תל אביב', 'ראשון לציון', 'פתח תקווה', 'נתניה', 'חולון', 'רמת גן'],
+        'south': ['באר שבע', 'אשדוד', 'אשקלון', 'אילת', 'נתיבות'],
+        'jerusalem': ['ירושלים', 'בית שמש', 'מבשרת ציון', 'מעלה אדומים']
+    };
+
+    function updateCities() {
+        const region = document.getElementById('regionSelect').value;
+        const cityWrapper = document.getElementById('cityWrapper');
+        const citySelect = document.getElementById('citySelect');
+        
+        citySelect.innerHTML = '<option value="">בחר עיר...</option>';
+        
+        if (region && citiesByRegion[region]) {
+            cityWrapper.style.display = 'block';
+            citiesByRegion[region].forEach(city => {
+                const opt = document.createElement('option');
+                opt.value = city;
+                opt.innerText = city;
+                citySelect.appendChild(opt);
+            });
+        } else {
+            cityWrapper.style.display = 'none';
+        }
+    }
+
     function clearSearch() {
         document.getElementById('q').value = "";
         document.getElementById('autocompleteList').style.display = "none";
         document.getElementById('results').innerHTML = "";
+        document.getElementById('regionSelect').value = "";
+        updateCities();
     }
 
     function setTab(tab, el) {
@@ -103,14 +161,17 @@
 
     async function handleSearch(query) {
         const searchInput = query || document.getElementById('q').value;
+        const selectedCity = document.getElementById('citySelect').value;
         const resDiv = document.getElementById('results');
+        
         if (!searchInput || searchInput.trim().length < 2) return;
         
         resDiv.innerHTML = "<p style='text-align:center; color:white;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
         
         try {
-            // "ניתוח המעקף" - שימוש בפרמטרים שמכריחים את השרת לענות
-            const apiUrl = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי')}`;
+            // הוספת העיר לשאילתת החיפוש במידה ונבחרה
+            const fullQuery = selectedCity ? `${searchInput} ${selectedCity}` : searchInput;
+            const apiUrl = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(fullQuery + ' קנאביס רפואי מלאי')}`;
             
             const response = await fetch(apiUrl, {
                 method: 'GET',
@@ -125,7 +186,6 @@
                 ...(data.organic_results || [])
             ];
 
-            // סינון ועיבוד מחירים
             const processed = combinedResults.map(item => {
                 let p = 9999;
                 if (item.extracted_price) p = parseFloat(item.extracted_price);
