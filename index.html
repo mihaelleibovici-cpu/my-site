@@ -13,17 +13,12 @@
         .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
         .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
-        
-        /* שורת לשוניות אזורים חדשה */
         .regions-tabs { display: flex; background: #222; border-bottom: 1px solid #444; overflow-x: auto; scrollbar-width: none; }
         .region-tab { flex: 1; min-width: 85px; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 14px; color: #aaa; border-left: 1px solid #333; }
         .region-tab.active { background: #333; color: var(--main-green); font-weight: bold; border-bottom: 2px solid var(--main-green); }
-        
-        /* פאנל ערים שנפתח לאחר בחירת אזור */
         .cities-panel { display: none; background: #1a1a1a; padding: 12px; grid-template-columns: repeat(3, 1fr); gap: 10px; border-bottom: 2px solid var(--main-green); }
         .city-btn { background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; font-size: 13px; text-align: center; cursor: pointer; }
         .city-btn.active { border-color: var(--main-green); color: var(--main-green); font-weight: bold; }
-
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; display: flex; align-items: center; }
         input[type="text"] { width: 100%; padding: 16px; padding-right: 45px; padding-left: 45px; border-radius: 12px; border: 1px solid #333; font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; -webkit-appearance: none; }
@@ -133,7 +128,11 @@
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.innerText = s;
-                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
+                item.onclick = () => { 
+                    document.getElementById('q').value = s; 
+                    list.style.display = "none"; 
+                    handleSearch(s); 
+                };
                 list.appendChild(item);
             });
         } else { list.style.display = "none"; }
@@ -153,24 +152,40 @@
             const processed = combinedResults.map(item => {
                 let p = 9999;
                 if (item.extracted_price) p = parseFloat(item.extracted_price);
-                else if (item.price) { const m = item.price.match(/\d+/); if (m) p = parseFloat(m[0]); }
+                else if (item.price) {
+                    const m = item.price.match(/\d+/);
+                    if (m) p = parseFloat(m[0]);
+                }
                 return { ...item, numPrice: p };
             }).filter(i => i.numPrice < 9999);
             processed.sort((a, b) => a.numPrice - b.numPrice);
             renderResults(processed);
-        } catch (e) { resDiv.innerHTML = "<p style='text-align:center; color:white;'>שגיאה בחיבור. נסה שוב.</p>"; }
+        } catch (e) {
+            resDiv.innerHTML = "<p style='text-align:center; color:white;'>שגיאה בחיבור למאגר הנתונים. נסה שוב.</p>";
+        }
     }
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
-        if (items.length === 0) { rDiv.innerHTML = "<p style='text-align:center; color:white;'>לא נמצא מלאי זמין ברשת כרגע.</p>"; return; }
+        if (items.length === 0) {
+            rDiv.innerHTML = "<p style='text-align:center; color:white;'>לא נמצא מלאי זמין ברשת כרגע.</p>";
+            return;
+        }
         items.forEach((item, index) => {
             let store = item.source || "בדיקת מלאי";
-            if (item.link && store === "בדיקת מלאי") { try { store = new URL(item.link).hostname.replace('www.', '').split('.')[0]; } catch(e) {} }
+            if (item.link && store === "בדיקת מלאי") {
+                try { store = new URL(item.link).hostname.replace('www.', '').split('.')[0]; } catch(e) {}
+            }
             const card = document.createElement('div');
             card.className = 'product-card';
             const badge = index === 0 ? '<div class="cheapest-badge">הכי זול</div>' : '';
-            card.innerHTML = `${badge}<div class="store-name">${store.toUpperCase()}</div><div style="margin:8px 0; font-weight:bold; font-size:16px;">${item.title}</div><div class="price">₪${item.numPrice}</div><a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה / מלאי</a>`;
+            card.innerHTML = `
+                ${badge}
+                <div class="store-name">${store.toUpperCase()}</div>
+                <div style="margin:8px 0; font-weight:bold; font-size:16px;">${item.title}</div>
+                <div class="price">₪${item.numPrice}</div>
+                <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה / מלאי</a>
+            `;
             rDiv.appendChild(card);
         });
     }
