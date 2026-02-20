@@ -16,7 +16,6 @@
         .tab { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 14px; font-weight: bold; border-right: 1px solid #333; transition: 0.3s; }
         .tab.active { background: #2e7d32; color: white; }
         
-        /* הוספתי גלילה פנימית לאזור התוכן כדי שהמשבצות יוכלו לגלול בלי להזיז את הפוטר */
         .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 15px; position: relative; overflow-y: auto; }
         
         .search-wrapper { width: 100%; max-width: 380px; position: relative; display: flex; align-items: center; z-index: 2000; flex-shrink: 0; }
@@ -34,7 +33,6 @@
         
         .btn-search { width: 100%; max-width: 380px; margin-top: 12px; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; flex-shrink: 0; }
         
-        /* --- עיצוב משבצות התוצאות --- */
         #results-container { width: 100%; max-width: 380px; margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px; }
         .result-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         .result-card.cheapest { border: 2px solid #f58220; box-shadow: 0 0 10px rgba(245, 130, 32, 0.4); position: relative; }
@@ -77,6 +75,7 @@
                 <select id="regionSelect" onchange="updateCities()">
                     <option value="">בחר אזור</option>
                     <option value="north">צפון</option>
+                    <option value="center">מרכז</option>
                     <option value="south">דרום</option>
                 </select>
                 <select id="citySelect" style="display:none;"><option value="">עיר</option></select>
@@ -113,14 +112,18 @@
         };
         
         const catNames = { flower: 'תפרחת', oil: 'שמן רפואי', vape: 'אידוי', acc: 'אביזרים' };
-        const cities = { north: ['עפולה', 'חיפה', 'טבריה', 'נוף הגליל'], south: ['באר שבע', 'אשדוד', 'אילת'] };
+        const cities = { 
+            north: ['עפולה', 'חיפה', 'טבריה', 'נוף הגליל'], 
+            center: ['תל אביב', 'ראשון לציון', 'רמת גן', 'פתח תקווה', 'נתניה'],
+            south: ['באר שבע', 'אשדוד', 'אילת'] 
+        };
 
         function switchTab(cat, el) {
             currentCat = cat;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
             clearSearch(null);
-            document.getElementById('results-container').innerHTML = ''; // מנקה תוצאות במעבר לשונית
+            document.getElementById('results-container').innerHTML = '';
         }
 
         function handleTyping(val) {
@@ -166,45 +169,47 @@
             } else { city.style.display = 'none'; }
         }
 
-        function doSearch() {
+        async function doSearch() {
             const q = document.getElementById('mainSearch').value;
+            const city = document.getElementById('citySelect').value;
             const resContainer = document.getElementById('results-container');
             
             if (!q) {
                 return alert("אנא הכנס מוצר לחיפוש");
             }
             
-            // מחיקת תוצאות קודמות
-            resContainer.innerHTML = '';
+            resContainer.innerHTML = '<div style="text-align:center; width:100%; color:#4CAF50; font-weight:bold;">מתחבר למוח... ⏳</div>';
 
-            // יצירת נתוני דמה (Mock Data) לפי המוצר שחיפשת
-            let mockResults = [
-                { name: q, shop: 'טבע בית המרקחת', price: 299, likes: 45 },
-                { name: q, shop: 'פארם ירוק', price: 239, likes: 120 },
-                { name: q, shop: 'מדיקל סנטר', price: 219, likes: 205 },
-                { name: q, shop: 'קנאביס טאון', price: 275, likes: 88 }
-            ];
+            try {
+                // עכשיו שולחים גם את העיר למוח השרת כדי שיסנן!
+                const queryUrl = `/api/search?q=${encodeURIComponent(q)}&city=${encodeURIComponent(city)}`;
+                const response = await fetch(queryUrl);
+                const resultsData = await response.json();
 
-            // סידור המערך מהמחיר הזול ליקר ביותר
-            mockResults.sort((a, b) => a.price - b.price);
+                resContainer.innerHTML = ''; // מנקה טעינה
 
-            // הדפסת המשבצות למסך
-            mockResults.forEach((res, index) => {
-                let card = document.createElement('div');
-                card.className = 'result-card' + (index === 0 ? ' cheapest' : '');
-                
-                // הוספת תגית כתומה למשבצת הראשונה (הכי זולה)
-                let badge = index === 0 ? '<div class="cheapest-badge">הכי זול!</div>' : '';
+                if(resultsData.error) {
+                    resContainer.innerHTML = `<div style="color:#d32f2f; width:100%; text-align:center; font-weight:bold; padding: 10px;">${resultsData.error}</div>`;
+                    return;
+                }
 
-                card.innerHTML = `
-                    ${badge}
-                    <div class="res-title">${res.name}</div>
-                    <div class="res-shop">🏪 ${res.shop}</div>
-                    <div class="res-price">₪${res.price}</div>
-                    <div class="res-likes">👍 ${res.likes} אהבו</div>
-                `;
-                resContainer.appendChild(card);
-            });
+                resultsData.forEach((res, index) => {
+                    let card = document.createElement('div');
+                    card.className = 'result-card' + (index === 0 ? ' cheapest' : '');
+                    let badge = index === 0 ? '<div class="cheapest-badge">הכי זול!</div>' : '';
+
+                    card.innerHTML = `
+                        ${badge}
+                        <div class="res-title">${res.name}</div>
+                        <div class="res-shop">🏪 ${res.shop}</div>
+                        <div class="res-price">₪${res.price}</div>
+                        <div class="res-likes">👍 ${res.likes} אהבו</div>
+                    `;
+                    resContainer.appendChild(card);
+                });
+            } catch (err) {
+                resContainer.innerHTML = '<div style="color:#d32f2f; width:100%; text-align:center;">שגיאת התחברות לשרת.</div>';
+            }
         }
     </script>
 </body>
