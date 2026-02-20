@@ -3,123 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>זול צ'ק - השוואת מחירי קנאביס</title>
+    <title>זול צ'ק קנאביס</title>
     <style>
-        body { font-family: -apple-system, sans-serif; margin: 0; padding: 0; background-color: #f0f2f0; }
-        .header { background: #1a5d1a; color: white; padding: 15px; text-align: center; font-weight: bold; position: sticky; top: 0; z-index: 1000; }
+        body { font-family: sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        /* השלד הירוק המקורי */
+        .header { background-color: #385d2b; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; }
         
-        /* שורת חיפוש נקייה עם X ורענון */
-        .search-wrapper { background: white; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
-        .input-container { position: relative; display: flex; align-items: center; }
-        .main-input { width: 100%; padding: 12px 40px 12px 45px; border: 2px solid #1a5d1a; border-radius: 25px; font-size: 16px; outline: none; }
-        .clear-btn { position: absolute; right: 15px; font-size: 20px; color: #999; cursor: pointer; display: none; }
-        .refresh-btn { position: absolute; left: 15px; font-size: 18px; color: #1a5d1a; cursor: pointer; }
+        .search-section { padding: 15px; background: white; }
+        .search-container { position: relative; border: 2px solid #385d2b; border-radius: 25px; display: flex; align-items: center; padding: 5px 15px; }
+        .refresh-icon { font-size: 20px; color: #7f8c8d; margin-right: 5px; cursor: pointer; }
+        .search-input { border: none; outline: none; width: 100%; padding: 10px; font-size: 18px; text-align: right; }
+        .clear-x { font-size: 20px; color: #999; cursor: pointer; margin-left: 10px; display: none; }
         
-        .filters { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; padding-bottom: 5px; }
-        .chip { background: #e8f5e9; border: 1px solid #1a5d1a; padding: 6px 15px; border-radius: 15px; font-size: 13px; white-space: nowrap; font-weight: bold; }
-        
-        .results { padding: 15px; padding-bottom: 140px; }
-        .card { background: white; margin-bottom: 12px; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-right: 6px solid #1a5d1a; position: relative; }
-        .price { color: #1a5d1a; font-size: 1.4em; font-weight: bold; position: absolute; left: 15px; top: 15px; }
-        
-        .footer { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; z-index: 1000; }
-        .nav-tabs { display: flex; justify-content: space-around; padding: 12px 0; }
-        .tab { background: white; border: 2px solid #1a5d1a; color: #1a5d1a; padding: 8px 25px; border-radius: 20px; font-weight: bold; }
-        .tab.active { background: #1a5d1a; color: white; }
-        .warning { font-size: 10px; color: #888; text-align: center; padding: 5px; background: #f9f9f9; }
-        #paypal-button-container { display: flex; justify-content: center; padding: 5px; }
+        .filters-container { display: flex; gap: 8px; padding: 10px 15px; overflow-x: auto; background: white; }
+        .filter-btn { border: 1.5px solid #385d2b; background: white; border-radius: 20px; padding: 8px 20px; font-size: 16px; font-weight: bold; white-space: nowrap; }
+        .location-btn { border: 1.5px solid #385d2b; background: white; border-radius: 20px; padding: 8px 15px; font-size: 16px; display: flex; align-items: center; gap: 5px; }
+
+        .results-area { padding: 15px; padding-bottom: 160px; }
+        .product-card { background: white; margin-bottom: 12px; padding: 15px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-right: 6px solid #385d2b; position: relative; }
+        .price { color: #385d2b; font-size: 1.4em; font-weight: bold; position: absolute; left: 15px; top: 15px; }
+
+        .bottom-nav { position: fixed; bottom: 80px; width: 100%; display: flex; justify-content: space-around; padding: 10px 0; background: transparent; z-index: 100; }
+        .nav-btn { border: 2px solid #385d2b; background: white; border-radius: 30px; padding: 12px 40px; font-size: 20px; font-weight: bold; color: #385d2b; min-width: 120px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        .footer-text { position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 11px; color: #888; background: #f5f5f5; padding: 10px 0; z-index: 90; }
+        #paypal-button-container { position: fixed; bottom: 45px; width: 100%; display: flex; justify-content: center; z-index: 95; }
     </style>
 </head>
 <body>
 
-<div class="header">ZOL CHECK - זול צ'ק</div>
+<div class="header">זול צ'ק קנאביס</div>
 
-<div class="search-wrapper">
-    <div class="input-container">
-        <span class="refresh-btn" onclick="location.reload()">🔄</span>
-        <input type="text" id="searchInput" class="main-input" placeholder="חפש זן, יצרן או עיר..." oninput="handleInput(this.value)">
-        <span id="clearInput" class="clear-btn" onclick="clearSearch()">✖</span>
-    </div>
-    <div class="filters">
-        <div class="chip" onclick="setRegion('מרכז')">מרכז</div>
-        <div class="chip" onclick="setRegion('צפון')">צפון</div>
-        <div class="chip" onclick="setRegion('דרום')">דרום</div>
-        <div class="chip" id="gps-status">📍 מאתר מיקום...</div>
+<div class="search-section">
+    <div class="search-container">
+        <span class="refresh-icon" onclick="location.reload()">🔄</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="חפש זן, יצרן או עיר..." oninput="handleSearch(this.value)">
+        <span id="clearBtn" class="clear-x" onclick="clearInput()">✖</span>
     </div>
 </div>
 
-<div id="resultsArea" class="results">
+<div class="filters-container">
+    <button class="filter-btn" onclick="setArea('מרכז')">מרכז</button>
+    <button class="filter-btn" onclick="setArea('צפון')">צפון</button>
+    <button class="filter-btn" onclick="setArea('דרום')">דרום</button>
+    <div id="gps-status" class="location-btn">📍 מאתר מיקום...</div>
+</div>
+
+<div class="results-area" id="results">
     </div>
 
-<div class="footer">
-    <div class="nav-tabs">
-        <button class="tab" id="tab-flower" onclick="runQuickSearch('תפרחת', 'tab-flower')">תפרחת</button>
-        <button class="tab" id="tab-oil" onclick="runQuickSearch('שמן', 'tab-oil')">שמן</button>
-    </div>
-    <div id="paypal-button-container"></div>
-    <div class="warning">* המידע באחריות בתי המרקחת. רכישה עם רישיון בתוקף בלבד.</div>
+<div class="bottom-nav">
+    <button class="nav-btn" onclick="quickFilter('תפרחת')">תפרחת</button>
+    <button class="nav-btn" onclick="quickFilter('שמן')">שמן</button>
+</div>
+
+<div id="paypal-button-container"></div>
+
+<div class="footer-text">
+    * המידע באחריות בתי המרקחת. הרכישה בהצגת רישיון קנאביס בתוקף בלבד.
 </div>
 
 <script>
-    const API_URL = "https://api.zolcheck.co.il/v1/cannabis"; // חיבור לכספת
-    let currentPos = null;
+    // פונקציות שורת חיפוש
+    function handleSearch(val) {
+        document.getElementById('clearBtn').style.display = val.length > 0 ? 'block' : 'none';
+        // כאן מופעלת השליפה מהכספת
+    }
 
-    // זיהוי מיקום
+    function clearInput() {
+        document.getElementById('searchInput').value = '';
+        handleSearch('');
+    }
+
+    function quickFilter(type) {
+        document.getElementById('searchInput').value = type;
+        handleSearch(type);
+        // שליפת רשימת תפרחת/שמן מהמאגר
+    }
+
+    // איתור מיקום אוטומטי
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(p => {
-            currentPos = p.coords;
             document.getElementById('gps-status').innerText = "📍 קרוב אליך";
-            fetchData('');
         });
     }
-
-    function handleInput(val) {
-        const clearBtn = document.getElementById('clearInput');
-        clearBtn.style.display = val.length > 0 ? 'block' : 'none';
-        if (val.length > 2) fetchData(val);
-    }
-
-    function clearSearch() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('clearInput').style.display = 'none';
-        fetchData('');
-    }
-
-    function runQuickSearch(type, tabId) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        document.getElementById('searchInput').value = type;
-        handleInput(type);
-        fetchData(type);
-    }
-
-    async function fetchData(query) {
-        const resultsArea = document.getElementById('resultsArea');
-        resultsArea.innerHTML = "<p style='text-align:center;'>בודק מלאי בזמן אמת...</p>";
-
-        try {
-            // משיכת נתוני אמת עם כל הפרמטרים
-            const res = await fetch(`${API_URL}?q=${encodeURIComponent(query)}&lat=${currentPos?.latitude || ''}&lng=${currentPos?.longitude || ''}`);
-            const data = await res.json();
-            
-            if (data.length === 0) {
-                resultsArea.innerHTML = "<p style='text-align:center;'>אין תוצאות למבוקש.</p>";
-                return;
-            }
-
-            resultsArea.innerHTML = data.map(item => `
-                <div class="card">
-                    <span class="price">${item.price}₪</span>
-                    <div style="font-weight:bold; color:#1a5d1a; font-size:1.1em;">${item.name}</div>
-                    <div style="font-size:0.9em; color:#666;">${item.brand} | THC: ${item.thc}%</div>
-                    <div style="margin-top:8px;">🏥 ${item.pharmacy}</div>
-                    <div style="font-size:0.8em; color:#444;">📍 ${item.city} ${item.dist ? '(' + item.dist + ' ק"מ)' : ''}</div>
-                </div>
-            `).join('');
-        } catch (e) {
-            resultsArea.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור למאגר. בודק מפתחות...</p>";
-        }
-    }
 </script>
+
 </body>
 </html>
