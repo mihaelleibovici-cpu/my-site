@@ -10,32 +10,25 @@
         .header { padding: 20px 15px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
         .header h1 { color: var(--main-green); font-size: 28px; margin: 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .cannabis-leaf { width: 32px; height: 32px; fill: var(--main-green); }
-        
         .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
         .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
-        
         .regions-tabs { display: flex; background: #222; border-bottom: 1px solid #444; overflow-x: auto; scrollbar-width: none; }
         .region-tab { flex: 1; min-width: 85px; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 14px; color: #aaa; border-left: 1px solid #333; }
         .region-tab.active { background: #333; color: var(--main-green); font-weight: bold; border-bottom: 2px solid var(--main-green); }
-        
         .cities-panel { display: none; background: #1a1a1a; padding: 12px; grid-template-columns: repeat(3, 1fr); gap: 10px; border-bottom: 2px solid var(--main-green); }
         .city-btn { background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; font-size: 13px; text-align: center; cursor: pointer; }
         .city-btn.active { border-color: var(--main-green); color: var(--main-green); font-weight: bold; }
-        
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; display: flex; align-items: center; }
-        input[type="text"] { width: 100%; padding: 16px; padding-right: 45px; padding-left: 45px; border-radius: 12px; border: 1px solid #333; font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; -webkit-appearance: none; }
-        .refresh-btn { position: absolute; right: 12px; font-size: 22px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
-        .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
-        
+        input[type="text"] { width: 100%; padding: 16px; padding-right: 45px; padding-left: 45px; border-radius: 12px; border: 1px solid #333; font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; }
+        .refresh-btn { position: absolute; right: 12px; font-size: 22px; color: #888; cursor: pointer; background: none; border: none; z-index: 10; }
+        .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; z-index: 10; }
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
-        
         .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); position: relative; }
         .store-name { color: var(--gold); font-size: 14px; font-weight: bold; margin-bottom: 5px; }
         .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
-        
         .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 2000; display: flex; flex-direction: column; }
         .disclaimer-bar { background: rgba(0,0,0,0.9); color: #888; font-size: 11px; padding: 10px; text-align: center; border-top: 1px solid #333; }
         .paypal-bar { background: #ffc439; padding: 12px; text-align: center; }
@@ -47,57 +40,48 @@
     <div class="header">
         <h1>זול <svg class="cannabis-leaf" viewBox="0 0 24 24"><path d="M12,2C12,2 10,7 10,9C10,10.1 10.9,11 12,11C13.1,11 14,10.1 14,9C14,7 12,2 12,2M12,13C10.9,13 10,13.9 10,15C10,17 12,22 12,22C12,22 14,17 14,15C14,13.9 13.1,13 12,13M19,10C17,10 12,12 12,12C12,12 17,14 19,14C20.1,14 21,13.1 21,12C21,10.9 20.1,10 19,10M5,10C3.9,10 3,10.9 3,12C3,13.1 3.9,14 5,14C7,14 12,12 12,12C12,12 7,10 5,10M17.2,17.2C16.4,18 12,16 12,16C12,16 14,20.4 14.8,21.2C15.6,22 16.9,22 17.7,21.2C18.5,20.4 18.5,19.1 17.7,18.3C17.5,18.1 17.2,17.2 17.2,17.2M6.8,17.2C6.8,17.2 6.5,18.1 6.3,18.3C5.5,19.1 5.5,20.4 6.3,21.2C7.1,22 8.4,22 9.2,21.2C10,20.4 12,16 12,16C12,16 7.6,18 6.8,17.2M17.2,6.8C17.2,6.8 17.5,5.9 17.7,5.7C18.5,4.9 18.5,3.6 17.7,2.8C16.9,2 15.6,2 14.8,2.8C14,3.6 12,8 12,8C12,8 16.4,6 17.2,6.8M6.8,6.8C7.6,6 12,8 12,8C12,8 10,3.6 9.2,2.8C8.4,2 7.1,2 6.3,2.8C5.5,3.6 5.5,4.9 6.3,5.7C6.5,5.9 6.8,6.8 6.8,6.8Z"/></svg> צ'ק קנאביס</h1>
     </div>
-
     <div class="tabs-container">
         <div class="tab active" onclick="setTab('smoke', this)">תפרחת</div>
         <div class="tab" onclick="setTab('oil', this)">שמן רפואי</div>
         <div class="tab" onclick="setTab('vape', this)">אידוי</div>
         <div class="tab" onclick="setTab('acc', this)">אביזרים</div>
     </div>
-
     <div class="regions-tabs">
         <div class="region-tab" onclick="selectArea('north', this)">צפון</div>
         <div class="region-tab" onclick="selectArea('center', this)">מרכז</div>
         <div class="region-tab" onclick="selectArea('south', this)">דרום</div>
         <div class="region-tab" onclick="selectArea('jerusalem', this)">ירושלים</div>
     </div>
-
     <div id="citiesPanel" class="cities-panel"></div>
-
     <div class="container">
         <div class="search-wrapper">
             <button class="refresh-btn" onclick="handleSearch()">↻</button>
-            <input type="text" id="q" placeholder="" oninput="onInput(this.value)" autocomplete="off">
+            <input type="text" id="q" placeholder="חפש מוצר..." oninput="onInput(this.value)" autocomplete="off">
             <button class="clear-btn" onclick="clearSearch()">×</button>
             <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
         <div id="results"></div>
     </div>
-
     <div class="footer-fixed">
         <div class="disclaimer-bar">תנאי שימוש: המידע נמשך מאתרי אונליין. האתר אינו מוכר קנאביס.</div>
         <div class="paypal-bar"><a href="https://www.paypal.com/paypalme/iareah" target="_blank" style="color:#003087; text-decoration:none; font-weight:bold;">תמיכה בפרויקט - פייפאל</a></div>
         <div class="footer-orange-bar">© כל הזכויות שמורות למיכאל - זול צ'ק קנאביס 2026</div>
     </div>
-
 <script>
     let currentTab = 'smoke';
     let selectedCity = "";
-    
     const citiesData = {
         'north': ['נוף הגליל', 'עפולה', 'חיפה', 'טבריה', 'נהריה', 'כרמיאל'],
         'center': ['תל אביב', 'ראשון לציון', 'פתח תקווה', 'נתניה', 'חולון'],
         'south': ['באר שבע', 'אשדוד', 'אשקלון', 'אילת', 'נתיבות'],
         'jerusalem': ['ירושלים', 'בית שמש', 'מעלה אדומים']
     };
-
     const allData = {
         'smoke': ["אלסקה", "תכלת", "מרמלדה", "ארז", "אבידקל", "פיקאסו", "בלאק", "PK", "T20/C4", "T24/C4", "T28/C4", "GMO", "RS11", "וודינג סי קיי", "קוקי קוש", "סנסי", "מיריקל", "דסטיני", "יודה", "ג'וראקאן", "ספייס סי קיי", "דון קוש"],
         'oil': ["שמן T20/C4", "שמן T10/C10", "שמן T1/C20", "שמן אבידקל", "שמן אלסקה", "שמן ארז", "שמן תכלת"],
         'vape': ["Mighty", "Pax", "Volcano", "Crafty", "עט אידוי"],
         'acc': ["ניירות גלגול", "גריינדר", "מצת", "פילטרים", "מגש גלגול", "באנג"]
     };
-
     function selectArea(area, el) {
         document.querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
@@ -117,7 +101,6 @@
             panel.appendChild(btn);
         });
     }
-
     function clearSearch() {
         document.getElementById('q').value = "";
         document.getElementById('autocompleteList').style.display = "none";
@@ -127,107 +110,6 @@
         document.querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('citiesPanel').style.display = 'none';
     }
-
     function setTab(tab, el) {
         currentTab = tab;
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        clearSearch();
-    }
-
-    function onInput(val) {
-        const list = document.getElementById('autocompleteList');
-        list.innerHTML = "";
-        const cleanVal = val.trim();
-        if (!cleanVal) { list.style.display = "none"; return; }
-        let filtered = allData[currentTab].filter(s => s.includes(cleanVal));
-        if (filtered.length > 0) {
-            list.style.display = "block";
-            filtered.forEach(s => {
-                const item = document.createElement('div');
-                item.className = 'autocomplete-item';
-                item.innerText = s;
-                item.onclick = () => { 
-                    document.getElementById('q').value = s; 
-                    list.style.display = "none"; 
-                    handleSearch(s); 
-                };
-                list.appendChild(item);
-            });
-        } else { list.style.display = "none"; }
-    }
-
-    async function handleSearch(query) {
-        const searchInput = query || document.getElementById('q').value;
-        const resDiv = document.getElementById('results');
-        if (!searchInput || searchInput.trim().length < 2) return;
-        
-        resDiv.innerHTML = "<p style='text-align:center; color:white;'>סורק מלאי בתי מרקחת" + (selectedCity ? " ב" + selectedCity : "") + "...</p>";
-        
-        try {
-            const qParam = selectedCity ? `${searchInput} ${selectedCity}` : searchInput;
-            const apiUrl = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(qParam + ' קנאביס רפואי מלאי')}`;
-            
-            const response = await fetch(apiUrl, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            
-            if (!response.ok) throw new Error("Server Error");
-            const data = await response.json();
-            
-            let combinedResults = [
-                ...(data.shopping_results || []),
-                ...(data.organic_results || [])
-            ];
-
-            const processed = combinedResults.map(item => {
-                let p = 9999;
-                if (item.extracted_price) p = parseFloat(item.extracted_price);
-                else if (item.price) {
-                    const m = item.price.match(/\d+/);
-                    if (m) p = parseFloat(m[0]);
-                }
-                return { ...item, numPrice: p };
-            }).filter(i => i.numPrice < 9999);
-
-            processed.sort((a, b) => a.numPrice - b.numPrice);
-            renderResults(processed);
-
-        } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center; color:white;'>שגיאה בחיבור למאגר הנתונים. נסה שוב.</p>";
-        }
-    }
-
-    function renderResults(items) {
-        const rDiv = document.getElementById('results');
-        rDiv.innerHTML = "";
-        
-        if (items.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center; color:white;'>לא נמצא מלאי זמין ברשת כרגע.</p>";
-            return;
-        }
-        
-        items.forEach((item, index) => {
-            let store = item.source || "בדיקת מלאי";
-            if (item.link && store === "בדיקת מלאי") {
-                try { store = new URL(item.link).hostname.replace('www.', '').split('.')[0]; } catch(e) {}
-            }
-
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            const badge = index === 0 ? '<div class="cheapest-badge">הכי זול</div>' : '';
-            
-            card.innerHTML = `
-                ${badge}
-                <div class="store-name">${store.toUpperCase()}</div>
-                <div style="margin:8px 0; font-weight:bold; font-size:16px;">${item.title}</div>
-                <div class="price">₪${item.numPrice}</div>
-                <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה / מלאי</a>
-            `;
-            rDiv.appendChild(card);
-        });
-    }
-</script>
-</body>
-</html>
+        document.querySelectorAll('.tab').forEach(t => t
