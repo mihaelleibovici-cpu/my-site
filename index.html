@@ -24,13 +24,14 @@
         .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
-        .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); }
+        .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); position: relative; }
         .store-name { color: var(--gold); font-size: 14px; font-weight: bold; margin-bottom: 5px; }
         .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
         .footer-fixed { position: fixed; bottom: 0; width: 100%; z-index: 2000; display: flex; flex-direction: column; }
         .disclaimer-bar { background: rgba(0,0,0,0.9); color: #888; font-size: 11px; padding: 10px; text-align: center; border-top: 1px solid #333; }
         .paypal-bar { background: #ffc439; padding: 12px; text-align: center; }
         .footer-orange-bar { background: #ff8c00; color: white; padding: 12px; text-align: center; font-weight: bold; }
+        .cheapest-badge { position: absolute; top: 10px; left: 10px; background: var(--gold); color: black; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -44,7 +45,7 @@
     <div class="container">
         <div class="search-wrapper">
             <button class="refresh-btn" onclick="handleSearch()">↻</button>
-            <input type="text" id="q" placeholder="" oninput="onInput(this.value)" autocomplete="off">
+            <input type="text" id="q" placeholder="חפש זן או מוצר..." oninput="onInput(this.value)" autocomplete="off">
             <button class="clear-btn" onclick="clearSearch()">×</button>
             <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
@@ -83,19 +84,18 @@
         list.innerHTML = "";
         const cleanVal = val.trim();
         if (!cleanVal) { list.style.display = "none"; return; }
-        let filtered;
-        if (cleanVal === "ת" || cleanVal === "שמן") {
-            filtered = allData[currentTab];
-        } else {
-            filtered = allData[currentTab].filter(s => s.includes(cleanVal));
-        }
+        let filtered = allData[currentTab].filter(s => s.includes(cleanVal));
         if (filtered.length > 0) {
             list.style.display = "block";
             filtered.forEach(s => {
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.innerText = s;
-                item.onclick = () => { document.getElementById('q').value = s; list.style.display = "none"; handleSearch(s); };
+                item.onclick = () => { 
+                    document.getElementById('q').value = s; 
+                    list.style.display = "none"; 
+                    handleSearch(s); 
+                };
                 list.appendChild(item);
             });
         } else { list.style.display = "none"; }
@@ -104,26 +104,49 @@
     async function handleSearch(query) {
         const searchInput = query || document.getElementById('q').value;
         const resDiv = document.getElementById('results');
-        if (!searchInput || searchInput.trim() === "ת") return;
+        if (!searchInput || searchInput.trim().length < 2) return;
+        
         resDiv.innerHTML = "<p style='text-align:center;'>סורק מלאי בתי מרקחת בזמן אמת...</p>";
         
         try {
-            // תיקון כתובת השרת לפורמט מלא ומאובטח
-            const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(searchInput + ' קנאביס רפואי מלאי מחיר')}`, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            if (!response.ok) throw new Error();
+            // הוספת מילות מפתח לחיפוש מדויק יותר של בתי מרקחת בישראל
+            const fullQuery = encodeURIComponent(searchInput + " קנאביס רפואי מחיר מלאי בית מרקחת");
+            const response = await fetch(`https://pricency-backend.vercel.app/api/search?q=${fullQuery}`);
+            
+            if (!response.ok) throw new Error("Network Error");
             const data = await response.json();
             
-            const combinedResults = [
+            let items = [
                 ...(data.shopping_results || []),
                 ...(data.organic_results || [])
             ];
-            
-            renderResults(combinedResults);
+
+            // סינון תוצאות כפולות ועיבוד מחירים
+            const processedItems = items.map(item => {
+                let price = Infinity;
+                const priceRegex = /₪\s?(\d{2,4})|(\d{2,4})\s?₪/;
+                
+                if (item.extracted_price) {
+                    price = parseFloat(item.extracted_price);
+                } else if (item.price) {
+                    const match = item.price.match(/\d+/);
+                    if (match) price = parseFloat(match[0]);
+                } else if (item.snippet) {
+                    const match = item.snippet.match(priceRegex);
+                    if (match) {
+                        const num = match[0].replace(/[^\d]/g, '');
+                        price = parseFloat(num);
+                    }
+                }
+                return { ...item, numericPrice: price };
+            }).filter(item => item.numericPrice !== Infinity);
+
+            // מיון מהזול ליקר
+            processedItems.sort((a, b) => a.numericPrice - b.numericPrice);
+
+            renderResults(processedItems);
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center;'>שגיאה בחיבור לנתוני המלאי. נסה שוב בעוד רגע.</p>";
+            resDiv.innerHTML = "<p style='text-align:center; color:red;'>שגיאה בחיבור לנתונים. נסה שוב בעוד רגע.</p>";
         }
     }
 
@@ -131,42 +154,30 @@
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
         
-        if (!items || items.length === 0) {
+        if (items.length === 0) {
             rDiv.innerHTML = "<p style='text-align:center;'>לא נמצא מלאי זמין כרגע.</p>";
             return;
         }
         
-        items.forEach(item => {
-            let storeName = item.source;
-            if (!storeName && item.link) {
+        items.forEach((item, index) => {
+            let storeName = item.source || "בדיקת מלאי";
+            if (item.link && storeName === "בדיקת מלאי") {
                 try {
-                    const domain = new URL(item.link).hostname;
-                    storeName = domain.replace('www.', '').split('.')[0];
-                } catch(e) { storeName = "מעבר לחנות"; }
-            }
-            if (!storeName) storeName = "בדיקת מלאי";
-
-            let priceFinal = "לחץ לבדיקה";
-            const priceRegex = /₪\s?(\d{2,4})|(\d{2,4})\s?₪/;
-
-            if (item.extracted_price) {
-                priceFinal = "₪" + item.extracted_price;
-            } else if (item.price) {
-                priceFinal = item.price.includes('₪') ? item.price : "₪" + item.price;
-            } else if (item.snippet) {
-                const match = item.snippet.match(priceRegex);
-                if (match) {
-                    const found = match[0];
-                    priceFinal = found.includes('₪') ? found : "₪" + found;
-                }
+                    storeName = new URL(item.link).hostname.replace('www.', '').split('.')[0];
+                } catch(e) {}
             }
 
             const card = document.createElement('div');
             card.className = 'product-card';
+            
+            // סימון התוצאה הזולה ביותר
+            const cheapestTag = index === 0 ? '<div class="cheapest-badge">הכי זול</div>' : '';
+            
             card.innerHTML = `
-                <div class="store-name" style="text-transform: uppercase;">${storeName}</div>
+                ${cheapestTag}
+                <div class="store-name">${storeName.toUpperCase()}</div>
                 <div style="margin:8px 0; font-weight:bold; font-size:16px;">${item.title}</div>
-                <div class="price">${priceFinal}</div>
+                <div class="price">₪${item.numericPrice}</div>
                 <a href="${item.link}" target="_blank" style="display:block; margin-top:12px; background:var(--main-green); color:white; text-decoration:none; padding:12px; border-radius:10px; text-align:center; font-weight:bold;">לרכישה / מלאי</a>
             `;
             rDiv.appendChild(card);
