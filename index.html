@@ -3,150 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>זול צ'ק - חיפוש קנאביס ממוקד</title>
+    <title>זול צ'ק קנאביס</title>
     <style>
         body {
+            background-color: #000;
+            color: #fff;
             font-family: 'Arial', sans-serif;
-            background-color: #f4f7f6;
+            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
         }
-        .main-card {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            width: 90%;
-            max-width: 420px;
-            text-align: center;
-            border-top: 5px solid #2e7d32;
-        }
-        .logo-box {
+        .header-logo {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 25px;
-        }
-        .logo-box h1 {
-            color: #0056b3;
-            font-size: 32px;
-            margin: 0;
-        }
-        .leaf {
-            font-size: 35px;
-            color: #2e7d32;
-        }
-        input, select {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            font-size: 16px;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        input:focus, select:focus {
-            border-color: #0056b3;
-        }
-        .search-btn {
-            background-color: #0056b3;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 18px;
+            gap: 10px;
+            padding: 20px;
+            color: #4CAF50;
+            font-size: 28px;
             font-weight: bold;
+        }
+        .leaf-icon { font-size: 32px; }
+        
+        .tabs-container {
+            display: flex;
             width: 100%;
+            background: #1a1a1a;
+            border-bottom: 2px solid #4CAF50;
+        }
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-right: 1px solid #333;
         }
-        .search-btn:active {
-            transform: translateY(2px);
+        .tab.active { background: #2e7d32; }
+
+        .search-section {
+            width: 90%;
+            max-width: 500px;
+            margin-top: 20px;
         }
-        .footer-text {
-            margin-top: 25px;
-            font-size: 13px;
-            color: #777;
-            font-weight: bold;
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: none;
+            font-size: 18px;
+            margin-bottom: 15px;
         }
+
+        .dropdown-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        select {
+            flex: 1;
+            padding: 10px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #4CAF50;
+            border-radius: 5px;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+        .paypal-tab { background: #ffc439; color: #000; padding: 10px; font-weight: bold; }
+        .copyright-tab { background: #f58220; color: #fff; padding: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="main-card">
-        <div class="logo-box">
-            <h1>זול</h1>
-            <span class="leaf">🌿</span>
-            <h1>צ'ק</h1>
-        </div>
+    <div class="header-logo">
+        <span>זול</span>
+        <span class="leaf-icon">🌿</span>
+        <span>צ'ק קנאביס</span>
+    </div>
 
-        <input type="text" id="productSearch" placeholder="הקלד שם זן או מוצר קנאביס..." onfocus="fixCursor(this)">
-        
-        <select id="region">
-            <option value="">כל הארץ (בחר אזור)</option>
-            <option value="צפון">צפון</option>
-            <option value="חיפה והקריות">חיפה והקריות</option>
-            <option value="השרון">השרון</option>
-            <option value="מרכז">מרכז</option>
-            <option value="תל אביב">תל אביב</option>
-            <option value="ירושלים">ירושלים</option>
-            <option value="שפלה">שפלה</option>
-            <option value="דרום">דרום</option>
-            <option value="אילת">אילת</option>
+    <div class="tabs-container">
+        <div class="tab active" onclick="showSubItems('flower')">תפרחת</div>
+        <div class="tab" onclick="showSubItems('oil')">שמן רפואי</div>
+        <div class="tab">אידוי</div>
+        <div class="tab">אביזרים</div>
+    </div>
+
+    <div class="search-section">
+        <select id="subItemSelect">
+            <option value="">בחר זן (מילת מפתח)...</option>
         </select>
 
-        <button class="search-btn" onclick="startSearch()">בדיקה בזמן אמת</button>
+        <input type="text" id="mainSearch" placeholder="חפש מוצר...">
 
-        <div class="footer-text">
-            &copy; 2026 זול צ'ק - כל הזכויות שמורות למיכאל
+        <div class="dropdown-row">
+            <select id="regionSelect" onchange="updateCities()">
+                <option value="">בחר אזור</option>
+                <option value="north">צפון</option>
+                <option value="south">דרום</option>
+                <option value="east">מזרח</option>
+                <option value="west">מערב</option>
+            </select>
+            
+            <select id="citySelect" style="display:none;">
+                <option value="">בחר עיר</option>
+            </select>
+        </div>
+
+        <button onclick="executeSearch()" style="width:100%; padding:15px; background:#2e7d32; color:white; border:none; border-radius:8px; font-weight:bold;">חפש עכשיו</button>
+    </div>
+
+    <div class="footer">
+        <div class="paypal-tab">תמיכה בפרויקט - פייפאל</div>
+        <div class="copyright-tab">
+            © כל הזכויות שמורות למיכאל - זול צ'ק קנאביס 2026
         </div>
     </div>
 
     <script>
-        function fixCursor(el) {
-            setTimeout(() => {
-                el.selectionStart = el.selectionEnd = el.value.length;
-            }, 0);
+        const data = {
+            flower: ['דסטיני', 'מרקדו', 'פיסנאטור', 'אלמז'],
+            oil: ['שמן T20/C4', 'שמן T15/C3', 'שמן סאטיבה', 'שמן אינדיקה'],
+            cities: {
+                north: ['עפולה', 'נוף הגליל', 'חיפה', 'טבריה'],
+                south: ['באר שבע', 'אילת', 'אשקלון'],
+                east: ['ירושלים', 'מעלה אדומים'],
+                west: ['תל אביב', 'ראשון לציון']
+            }
+        };
+
+        function showSubItems(type) {
+            const select = document.getElementById('subItemSelect');
+            select.innerHTML = `<option value="">בחר ${type === 'flower' ? 'זן' : 'שמן'}...</option>`;
+            data[type].forEach(item => {
+                let opt = document.createElement('option');
+                opt.value = item;
+                opt.innerHTML = item;
+                select.appendChild(opt);
+            });
         }
 
-        function startSearch() {
-            const query = document.getElementById('productSearch').value.trim();
-            const selectedRegion = document.getElementById('region').value;
-            
-            if (!query) return;
-
-            // בניית מחרוזת החיפוש
-            let fullSearch = query;
-            if (selectedRegion) {
-                fullSearch += " " + selectedRegion;
-            }
-
-            // זיהוי אם מדובר בקנאביס לפי מילות מפתח
-            const keywords = ['תפרחת', 'קנאביס', 'סאטיבה', 'אינדיקה', 'T20', 'T15', 'גראס', 'שמן'];
-            const isCannabis = keywords.some(k => query.includes(k));
-
-            if (isCannabis) {
-                // מפנה לחיפוש הממוקד באתר קנאביס
-                window.location.href = `https://isracann.co.il/?s=${encodeURIComponent(fullSearch)}`;
+        function updateCities() {
+            const region = document.getElementById('regionSelect').value;
+            const citySelect = document.getElementById('citySelect');
+            if (region) {
+                citySelect.style.display = 'block';
+                citySelect.innerHTML = '<option value="">בחר עיר</option>';
+                data.cities[region].forEach(city => {
+                    let opt = document.createElement('option');
+                    opt.value = city;
+                    opt.innerHTML = city;
+                    citySelect.appendChild(opt);
+                });
             } else {
-                // חיפוש כללי
-                window.location.href = `https://www.google.com/search?q=${encodeURIComponent(fullSearch)}`;
+                citySelect.style.display = 'none';
             }
         }
 
-        document.getElementById('productSearch').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                startSearch();
-            }
-        });
-    </script>
+        function executeSearch() {
+            const product = document.getElementById('subItemSelect').value || document.getElementById('mainSearch').value;
+            const city = document.getElementById('citySelect').value;
+            let query = product + (city ? " ב" + city : "");
+            window.location.href = `https://isracann.co.il/?s=${encodeURIComponent(query)}`;
+        }
 
+        // טעינה ראשונית של תפרחות
+        showSubItems('flower');
+    </script>
 </body>
 </html>
