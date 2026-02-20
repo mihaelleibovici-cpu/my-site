@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>זול צ'ק קנאביס</title>
     <style>
-        * { 
-            box-sizing: border-box; 
-        }
-
+        * { box-sizing: border-box; }
+        
         body { 
             background-color: #000; 
             color: #fff; 
@@ -31,11 +29,7 @@
             font-weight: bold; 
         }
 
-        .cannabis-leaf { 
-            width: 30px; 
-            height: 30px; 
-            fill: #2e7d32; 
-        }
+        .cannabis-leaf { width: 30px; height: 30px; fill: #2e7d32; }
 
         .tabs-container { 
             display: flex; 
@@ -54,50 +48,99 @@
             border-right: 1px solid #333; 
         }
 
-        .tab.active { 
-            background: #2e7d32; 
-            color: white; 
-        }
+        .tab.active { background: #2e7d32; color: white; }
 
         .main-content { 
             flex: 1; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 10px; 
-            overflow-y: auto; 
+            padding: 15px; 
         }
 
-        .search-section { 
+        .search-wrapper { 
             width: 100%; 
             max-width: 380px; 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
         }
 
-        input[type="text"], select { 
+        .search-input { 
             width: 100%; 
-            padding: 10px; 
+            padding: 12px 40px; 
             border-radius: 8px; 
             border: 1.5px solid #4CAF50; 
             font-size: 16px; 
-            margin-bottom: 10px; 
             background: #fff; 
             color: #000; 
+            outline: none;
+        }
+
+        .search-icon-right { 
+            position: absolute; 
+            right: 10px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            z-index: 5;
+        }
+
+        .search-icon-left { 
+            position: absolute; 
+            left: 10px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #666;
+            z-index: 5;
+        }
+
+        .floating-list { 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            right: 0; 
+            background: #222; 
+            border: 1px solid #4CAF50; 
+            border-radius: 0 0 8px 8px; 
+            max-height: 200px; 
+            overflow-y: auto; 
+            z-index: 1000; 
+            display: none; 
+        }
+
+        .list-item { 
+            padding: 12px; 
+            border-bottom: 1px solid #333; 
+            cursor: pointer; 
+            text-align: right;
+        }
+
+        .list-item:hover { background: #333; }
+
+        .dropdown-row { 
+            width: 100%; 
+            max-width: 380px; 
+            display: flex; 
+            gap: 8px; 
+            margin-top: 15px; 
         }
 
         select { 
+            flex: 1; 
             background: #222; 
             color: #fff; 
+            border: 1.5px solid #4CAF50; 
+            border-radius: 8px; 
             height: 45px; 
-        }
-
-        .dropdown-row { 
-            display: flex; 
-            gap: 8px; 
-            margin-bottom: 10px; 
+            padding: 0 10px; 
+            font-size: 14px;
         }
 
         .btn-search { 
             width: 100%; 
+            max-width: 380px; 
+            margin-top: 15px; 
             padding: 15px; 
             background: #2e7d32; 
             color: white; 
@@ -108,84 +151,52 @@
             cursor: pointer; 
         }
 
-        #results-container { 
-            width: 100%; 
-            margin-top: 15px; 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-        }
-
         .footer { 
             width: 100%; 
             text-align: center; 
             font-size: 11px; 
+            margin-top: auto; 
         }
 
-        .warning-bar { 
-            background: #d32f2f; 
-            color: #fff; 
-            padding: 6px; 
-            font-weight: bold; 
-        }
-
-        .paypal-tab { 
-            background: #ffc439; 
-            color: #000; 
-            padding: 12px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            display: block; 
-            text-decoration: none; 
-        }
-
-        .copyright-tab { 
-            background: #f58220; 
-            color: #fff; 
-            padding: 10px; 
-        }
+        .warning-bar { background: #d32f2f; color: #fff; padding: 8px; font-weight: bold; }
+        .paypal-tab { background: #ffc439; color: #000; padding: 12px; font-weight: bold; cursor: pointer; display: block; text-decoration: none; }
+        .copyright-tab { background: #f58220; color: #fff; padding: 10px; }
     </style>
 </head>
 <body>
+
     <div class="header-logo">
         <span>זול</span>
-        <svg class="cannabis-leaf" viewBox="0 0 24 24">
-            <path d="M12,2C12,2 11,7 8,9C5,11 2,11 2,11C2,11 7,12 9,15C11,18 11,22 11,22C11,22 12,17 15,15C18,13 22,13 22,13C22,13 17,12 15,9C13,6 12,2 12,2Z"/>
-        </svg>
+        <svg class="cannabis-leaf" viewBox="0 0 24 24"><path d="M12,2C12,2 11,7 8,9C5,11 2,11 2,11C2,11 7,12 9,15C11,18 11,22 11,22C11,22 12,17 15,15C18,13 22,13 22,13C22,13 17,12 15,9C13,6 12,2 12,2Z"/></svg>
         <span>צ'ק קנאביס</span>
     </div>
 
     <div class="tabs-container">
-        <div id="tab-flower" class="tab active" onclick="switchCategory('flower')">תפרחת</div>
-        <div id="tab-oil" class="tab" onclick="switchCategory('oil')">שמן רפואי</div>
-        <div class="tab" onclick="switchCategory('vape')">אידוי</div>
-        <div class="tab" onclick="switchCategory('acc')">אביזרים</div>
+        <div class="tab active" onclick="switchTab('flower', this)">תפרחת</div>
+        <div class="tab" onclick="switchTab('oil', this)">שמן רפואי</div>
+        <div class="tab" onclick="switchTab('vape', this)">אידוי</div>
+        <div class="tab" onclick="switchTab('acc', this)">אביזרים</div>
     </div>
 
     <div class="main-content">
-        <div class="search-section">
-            <select id="subItemSelect">
-                <option value="">בחר מוצר...</option>
-            </select>
-            
-            <input type="text" id="manualSearch" placeholder="חיפוש חופשי...">
-            
-            <div class="dropdown-row">
-                <select id="regionSelect" onchange="handleRegionChange()">
-                    <option value="">אזור</option>
-                    <option value="north">צפון</option>
-                    <option value="south">דרום</option>
-                    <option value="east">מזרח</option>
-                    <option value="west">מערב</option>
-                </select>
-                <select id="citySelect" style="display:none;">
-                    <option value="">עיר</option>
-                </select>
-            </div>
-            
-            <button class="btn-search" onclick="runFinalSearch()">חפש עכשיו</button>
-            <div id="results-container"></div>
+        <div class="search-wrapper">
+            <span class="search-icon-right" onclick="location.reload()">🔄</span>
+            <input type="text" id="mainSearch" class="search-input" placeholder="הקלד שם או מילת מפתח..." oninput="handleTyping(this.value)">
+            <span class="search-icon-left" onclick="clearSearch()">✕</span>
+            <div id="floatingList" class="floating-list"></div>
         </div>
+
+        <div class="dropdown-row">
+            <select id="regionSelect" onchange="updateCities()">
+                <option value="">בחר אזור</option>
+                <option value="north">צפון</option>
+                <option value="south">דרום</option>
+                <option value="center">מרכז</option>
+            </select>
+            <select id="citySelect" style="display:none;"><option value="">בחר עיר</option></select>
+        </div>
+
+        <button class="btn-search" onclick="doSearch()">חפש עכשיו</button>
     </div>
 
     <div class="footer">
@@ -195,67 +206,65 @@
     </div>
 
     <script>
-        const categories = {
-            flower: ['דסטיני', 'מרקדו', 'פיסנאטור', 'אלמז', 'קינגסטון'],
-            oil: ['שמן T20/C4', 'שמן T15/C3', 'שמן סאטיבה', 'שמן אינדיקה'],
+        let currentCat = 'flower';
+        const data = {
+            flower: ['אינדיקה T20/C4', 'סאטיבה T20/C4', 'היבריד T20/C4', 'דסטיני', 'מרקדו', 'אלמז', 'קינגסטון', 'פיסנאטור'],
+            oil: ['שמן אינדיקה T20/C4', 'שמן סאטיבה T20/C4', 'שמן T15/C3', 'שמן פול ספקטרום'],
             vape: ['וולקנו', 'מייטי', 'קראפטי', 'פאקס'],
             acc: ['ניירות גלגול', 'גריינדר', 'מצית טורבו']
         };
 
-        const locations = {
-            north: ['עפולה', 'נוף הגליל', 'חיפה', 'טבריה'],
-            south: ['באר שבע', 'אילת', 'אשדוד'],
-            east: ['ירושלים', 'בית שמש'],
-            west: ['תל אביב', 'ראשון לציון']
+        const cities = { 
+            north: ['עפולה', 'חיפה', 'נוף הגליל', 'טבריה'], 
+            south: ['באר שבע', 'אשדוד', 'אילת'],
+            center: ['תל אביב', 'ראשון לציון', 'נתניה']
         };
 
-        function switchCategory(type) {
+        function switchTab(cat, el) {
+            currentCat = cat;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => {
-                if(tab.innerText.includes(type === 'flower' ? 'תפרחת' : type === 'oil' ? 'שמן' : type === 'vape' ? 'אידוי' : 'אביזרים')) {
-                    tab.classList.add('active');
-                }
-            });
-            
-            const subSelect = document.getElementById('subItemSelect');
-            subSelect.innerHTML = '<option value="">בחר מוצר...</option>';
-            if(categories[type]) {
-                categories[type].forEach(item => {
-                    let opt = document.createElement('option');
-                    opt.value = item;
-                    opt.textContent = item;
-                    subSelect.appendChild(opt);
-                });
-            }
+            el.classList.add('active');
+            clearSearch();
         }
 
-        function handleRegionChange() {
-            const region = document.getElementById('regionSelect').value;
-            const citySelect = document.getElementById('citySelect');
-            if (region && locations[region]) {
-                citySelect.style.display = 'block';
-                citySelect.innerHTML = '<option value="">עיר</option>';
-                locations[region].forEach(city => {
-                    let opt = document.createElement('option');
-                    opt.value = city;
-                    opt.textContent = city;
-                    citySelect.appendChild(opt);
-                });
+        function handleTyping(val) {
+            const list = document.getElementById('floatingList');
+            if (val.length < 1) { list.style.display = 'none'; return; }
+            const matches = data[currentCat].filter(item => item.includes(val));
+            if (matches.length > 0) {
+                list.innerHTML = matches.map(m => `<div class="list-item" onclick="selectItem('${m}')">${m}</div>`).join('');
+                list.style.display = 'block';
+            } else { list.style.display = 'none'; }
+        }
+
+        function selectItem(val) {
+            document.getElementById('mainSearch').value = val;
+            document.getElementById('floatingList').style.display = 'none';
+        }
+
+        function clearSearch() {
+            document.getElementById('mainSearch').value = '';
+            document.getElementById('floatingList').style.display = 'none';
+        }
+
+        function updateCities() {
+            const reg = document.getElementById('regionSelect').value;
+            const city = document.getElementById('citySelect');
+            if (reg && cities[reg]) {
+                city.style.display = 'block';
+                city.innerHTML = '<option value="">בחר עיר</option>' + cities[reg].map(c => `<option value="${c}">${c}</option>`).join('');
             } else {
-                citySelect.style.display = 'none';
+                city.style.display = 'none';
             }
         }
 
-        function runFinalSearch() {
-            const product = document.getElementById('subItemSelect').value || document.getElementById('manualSearch').value;
-            const city = document.getElementById('citySelect').value;
-            if (!product) return alert("בחר מוצר");
-            let finalQuery = product + (city ? " ב" + city : "");
-            window.location.href = `https://isracann.co.il/?s=${encodeURIComponent(finalQuery)}`;
+        function doSearch() {
+            const q = document.getElementById('mainSearch').value;
+            const c = document.getElementById('citySelect').value;
+            if (!q) return alert("אנא הקלד או בחר מוצר");
+            let query = q + (c ? " ב" + c : "");
+            window.location.href = `https://isracann.co.il/?s=${encodeURIComponent(query)}`;
         }
-
-        switchCategory('flower');
     </script>
 </body>
 </html>
