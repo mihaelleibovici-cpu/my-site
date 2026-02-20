@@ -10,14 +10,16 @@
         .app-container { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; flex-direction: column; justify-content: space-between; }
         
         .header-logo { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; color: #4CAF50; font-size: 28px; font-weight: bold; }
-        .cannabis-leaf { width: 32px; height: 32px; fill: #f58220; } /* צבע כתום מותאם אישית */
+        .cannabis-leaf { width: 32px; height: 32px; fill: #f58220; }
         
-        .tabs-container { display: flex; width: 100%; background: #1a1a1a; border-bottom: 2px solid #4CAF50; }
+        .tabs-container { display: flex; width: 100%; background: #1a1a1a; border-bottom: 2px solid #4CAF50; flex-shrink: 0; }
         .tab { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 14px; font-weight: bold; border-right: 1px solid #333; transition: 0.3s; }
         .tab.active { background: #2e7d32; color: white; }
         
-        .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 15px; position: relative; }
-        .search-wrapper { width: 100%; max-width: 380px; position: relative; display: flex; align-items: center; z-index: 2000; }
+        /* הוספתי גלילה פנימית לאזור התוכן כדי שהמשבצות יוכלו לגלול בלי להזיז את הפוטר */
+        .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 15px; position: relative; overflow-y: auto; }
+        
+        .search-wrapper { width: 100%; max-width: 380px; position: relative; display: flex; align-items: center; z-index: 2000; flex-shrink: 0; }
         .search-input { width: 100%; padding: 12px 45px; border-radius: 8px; border: 2px solid #4CAF50; font-size: 16px; background: #fff; color: #000; outline: none; }
         
         .search-icon-right { position: absolute; right: 12px; cursor: pointer; font-size: 20px; z-index: 2001; color: #666; display: flex; align-items: center; justify-content: center; height: 100%; width: 30px; }
@@ -27,12 +29,22 @@
         .list-item { padding: 12px; border-bottom: 1px solid #333; cursor: pointer; text-align: right; color: #fff; font-size: 15px; }
         .list-item:hover { background: #333; color: #4CAF50; }
         
-        .dropdown-row { width: 100%; max-width: 380px; display: flex; gap: 8px; margin-top: 12px; }
+        .dropdown-row { width: 100%; max-width: 380px; display: flex; gap: 8px; margin-top: 12px; flex-shrink: 0; }
         select { flex: 1; background: #222; color: #fff; border: 1.5px solid #4CAF50; border-radius: 8px; height: 42px; padding: 0 5px; font-size: 14px; }
         
-        .btn-search { width: 100%; max-width: 380px; margin-top: 12px; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .btn-search { width: 100%; max-width: 380px; margin-top: 12px; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; flex-shrink: 0; }
         
-        .footer { width: 100%; text-align: center; font-size: 11px; }
+        /* --- עיצוב משבצות התוצאות --- */
+        #results-container { width: 100%; max-width: 380px; margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px; }
+        .result-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .result-card.cheapest { border: 2px solid #f58220; box-shadow: 0 0 10px rgba(245, 130, 32, 0.4); position: relative; }
+        .cheapest-badge { position: absolute; top: -10px; right: 50%; transform: translateX(50%); background: #f58220; color: #000; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+        .res-title { font-weight: bold; font-size: 14px; color: #4CAF50; }
+        .res-shop { font-size: 12px; color: #ccc; }
+        .res-price { font-size: 20px; font-weight: bold; color: #fff; }
+        .res-likes { font-size: 12px; color: #888; }
+        
+        .footer { width: 100%; text-align: center; font-size: 11px; flex-shrink: 0; z-index: 10; background: #000; }
         .warning-bar { background: #d32f2f; color: #fff; padding: 6px; font-weight: bold; }
         .paypal-tab { background: #ffc439; color: #000; padding: 10px; font-weight: bold; cursor: pointer; display: block; text-decoration: none; }
         .copyright-tab { background: #f58220; color: #fff; padding: 10px; }
@@ -40,7 +52,7 @@
 </head>
 <body>
     <div class="app-container">
-        <div>
+        <div style="flex-shrink: 0;">
             <div class="header-logo">
                 <span>זול צ'ק</span>
                 <svg class="cannabis-leaf" viewBox="0 0 24 24"><path d="M12,2C12,2 11,7 8,9C5,11 2,11 2,11C2,11 7,12 9,15C11,18 11,22 11,22C11,22 12,17 15,15C18,13 22,13 22,13C22,13 17,12 15,9C13,6 12,2 12,2Z"/></svg>
@@ -52,34 +64,38 @@
                 <div class="tab" onclick="switchTab('vape', this)">אידוי</div>
                 <div class="tab" onclick="switchTab('acc', this)">אביזרים</div>
             </div>
-            <div class="main-content">
-                <div class="search-wrapper">
-                    <span class="search-icon-right" onmousedown="refreshPage(event)">🔄</span>
-                    <input type="text" id="mainSearch" class="search-input" placeholder="" oninput="handleTyping(this.value)" autocomplete="off">
-                    <span class="search-icon-left" onmousedown="clearSearch(event)">✕</span>
-                    <div id="floatingList" class="floating-list"></div>
-                </div>
-                <div class="dropdown-row">
-                    <select id="regionSelect" onchange="updateCities()">
-                        <option value="">בחר אזור</option>
-                        <option value="north">צפון</option>
-                        <option value="south">דרום</option>
-                    </select>
-                    <select id="citySelect" style="display:none;"><option value="">עיר</option></select>
-                </div>
-                <button class="btn-search" onclick="doSearch()">חפש עכשיו</button>
-            </div>
         </div>
+
+        <div class="main-content">
+            <div class="search-wrapper">
+                <span class="search-icon-right" onmousedown="refreshPage(event)">🔄</span>
+                <input type="text" id="mainSearch" class="search-input" placeholder="" oninput="handleTyping(this.value)" autocomplete="off">
+                <span class="search-icon-left" onmousedown="clearSearch(event)">✕</span>
+                <div id="floatingList" class="floating-list"></div>
+            </div>
+            <div class="dropdown-row">
+                <select id="regionSelect" onchange="updateCities()">
+                    <option value="">בחר אזור</option>
+                    <option value="north">צפון</option>
+                    <option value="south">דרום</option>
+                </select>
+                <select id="citySelect" style="display:none;"><option value="">עיר</option></select>
+            </div>
+            <button class="btn-search" onclick="doSearch()">חפש עכשיו</button>
+            
+            <div id="results-container"></div>
+        </div>
+
         <div class="footer">
             <div class="warning-bar">אתר להשוואת מחירים בלבד - לא למכירה</div>
             <a href="https://www.paypal.me/iareah" target="_blank" class="paypal-tab">תמיכה בפרויקט - PayPal</a>
             <div class="copyright-tab">© כל הזכויות שמורות למיכאל 2026</div>
         </div>
     </div>
+    
     <script>
         let currentCat = 'flower';
         
-        /* המוח: רשימות מעודכנות ומורחבות */
         const data = {
             flower: [
                 'אינדיקה', 'סאטיבה', 'היבריד', 
@@ -104,6 +120,7 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
             clearSearch(null);
+            document.getElementById('results-container').innerHTML = ''; // מנקה תוצאות במעבר לשונית
         }
 
         function handleTyping(val) {
@@ -132,6 +149,7 @@
             if(e) { e.preventDefault(); e.stopPropagation(); }
             document.getElementById('mainSearch').value = '';
             document.getElementById('floatingList').style.display = 'none';
+            document.getElementById('results-container').innerHTML = '';
         }
         
         function refreshPage(e) {
@@ -150,8 +168,43 @@
 
         function doSearch() {
             const q = document.getElementById('mainSearch').value;
-            if (!q) return alert("אנא הכנס מוצר לחיפוש");
-            window.location.href = `https://isracann.co.il/?s=${encodeURIComponent(q)}`;
+            const resContainer = document.getElementById('results-container');
+            
+            if (!q) {
+                return alert("אנא הכנס מוצר לחיפוש");
+            }
+            
+            // מחיקת תוצאות קודמות
+            resContainer.innerHTML = '';
+
+            // יצירת נתוני דמה (Mock Data) לפי המוצר שחיפשת
+            let mockResults = [
+                { name: q, shop: 'טבע בית המרקחת', price: 299, likes: 45 },
+                { name: q, shop: 'פארם ירוק', price: 239, likes: 120 },
+                { name: q, shop: 'מדיקל סנטר', price: 219, likes: 205 },
+                { name: q, shop: 'קנאביס טאון', price: 275, likes: 88 }
+            ];
+
+            // סידור המערך מהמחיר הזול ליקר ביותר
+            mockResults.sort((a, b) => a.price - b.price);
+
+            // הדפסת המשבצות למסך
+            mockResults.forEach((res, index) => {
+                let card = document.createElement('div');
+                card.className = 'result-card' + (index === 0 ? ' cheapest' : '');
+                
+                // הוספת תגית כתומה למשבצת הראשונה (הכי זולה)
+                let badge = index === 0 ? '<div class="cheapest-badge">הכי זול!</div>' : '';
+
+                card.innerHTML = `
+                    ${badge}
+                    <div class="res-title">${res.name}</div>
+                    <div class="res-shop">🏪 ${res.shop}</div>
+                    <div class="res-price">₪${res.price}</div>
+                    <div class="res-likes">👍 ${res.likes} אהבו</div>
+                `;
+                resContainer.appendChild(card);
+            });
         }
     </script>
 </body>
