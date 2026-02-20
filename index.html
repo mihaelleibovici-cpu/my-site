@@ -7,41 +7,31 @@
     <style>
         :root { --main-green: #4caf50; --gold: #d4af37; --bg-dark: #121212; }
         body { font-family: system-ui, sans-serif; background-color: var(--bg-dark); color: white; margin: 0; padding-bottom: 220px; direction: rtl; }
-        
-        /* לוגו עם עלה קנאביס בין המילים */
         .header { padding: 20px 15px; text-align: center; background: #1a1a1a; border-bottom: 2px solid var(--main-green); }
         .header h1 { color: var(--main-green); font-size: 28px; margin: 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .cannabis-leaf { width: 30px; height: 30px; fill: var(--main-green); }
-
-        /* לשוניות קטגוריות */
-        .tabs-container { display: flex; background: #1a1a1a; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
+        .cannabis-leaf { width: 32px; height: 32px; fill: var(--main-green); }
+        
+        .tabs-container { display: flex; background: #1a1a1a; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; overflow-x: auto; scrollbar-width: none; }
         .tab { flex: 1; min-width: 90px; padding: 15px 10px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; color: #888; white-space: nowrap; }
         .tab.active { color: var(--main-green); border-bottom: 3px solid var(--main-green); background: rgba(76, 175, 80, 0.1); }
-
-        /* לשוניות אזורים - מופיע מתחת לקטגוריות */
+        
         .regions-tabs { display: flex; background: #222; border-bottom: 1px solid #444; overflow-x: auto; scrollbar-width: none; }
-        .region-tab { flex: 1; min-width: 80px; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 14px; color: #aaa; border-left: 1px solid #333; }
+        .region-tab { flex: 1; min-width: 85px; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 14px; color: #aaa; border-left: 1px solid #333; }
         .region-tab.active { background: #333; color: var(--main-green); font-weight: bold; border-bottom: 2px solid var(--main-green); }
-
-        /* פאנל ערים */
-        .cities-panel { display: none; background: #1a1a1a; padding: 10px; grid-template-columns: repeat(3, 1fr); gap: 8px; border-bottom: 2px solid var(--main-green); }
-        .city-btn { background: #2a2a2a; border: 1px solid #444; color: white; padding: 8px; border-radius: 6px; font-size: 12px; text-align: center; cursor: pointer; }
+        
+        .cities-panel { display: none; background: #1a1a1a; padding: 12px; grid-template-columns: repeat(3, 1fr); gap: 10px; border-bottom: 2px solid var(--main-green); }
+        .city-btn { background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; font-size: 13px; text-align: center; cursor: pointer; }
         .city-btn.active { border-color: var(--main-green); color: var(--main-green); font-weight: bold; }
-
+        
         .container { padding: 15px; max-width: 480px; margin: 0 auto; }
         .search-wrapper { position: relative; width: 100%; margin-top: 10px; display: flex; align-items: center; }
-        input[type="text"] { 
-            width: 100%; padding: 16px; padding-right: 45px; padding-left: 45px;  
-            border-radius: 12px; border: 1px solid #333; font-size: 18px; 
-            text-align: center; background: #fff; color: #000; outline: none; 
-            box-sizing: border-box; -webkit-appearance: none;
-        }
+        input[type="text"] { width: 100%; padding: 16px; padding-right: 45px; padding-left: 45px; border-radius: 12px; border: 1px solid #333; font-size: 18px; text-align: center; background: #fff; color: #000; outline: none; box-sizing: border-box; -webkit-appearance: none; }
         .refresh-btn { position: absolute; right: 12px; font-size: 22px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
         .clear-btn { position: absolute; left: 12px; font-size: 20px; color: #888; cursor: pointer; background: none; border: none; padding: 5px; z-index: 10; }
+        
         .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; color: #000; border-radius: 0 0 12px 12px; z-index: 1001; max-height: 350px; overflow-y: auto; display: none; border: 1px solid #ccc; }
         .autocomplete-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; text-align: center; font-weight: bold; font-size: 16px; }
         
-        /* כרטיסי מוצר */
         .product-card { background: #1e1e1e; border-radius: 15px; padding: 18px; margin-top: 15px; border: 1px solid #333; border-right: 4px solid var(--main-green); position: relative; }
         .store-name { color: var(--gold); font-size: 14px; font-weight: bold; margin-bottom: 5px; }
         .price { font-size: 26px; color: var(--main-green); font-weight: bold; }
@@ -55,13 +45,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>
-            זול 
-            <svg class="cannabis-leaf" viewBox="0 0 24 24">
-                <path d="M12,2C12,2 10,7 10,9C10,10.1 10.9,11 12,11C13.1,11 14,10.1 14,9C14,7 12,2 12,2M12,13C10.9,13 10,13.9 10,15C10,17 12,22 12,22C12,22 14,17 14,15C14,13.9 13.1,13 12,13M19,10C17,10 12,12 12,12C12,12 17,14 19,14C20.1,14 21,13.1 21,12C21,10.9 20.1,10 19,10M5,10C3.9,10 3,10.9 3,12C3,13.1 3.9,14 5,14C7,14 12,12 12,12C12,12 7,10 5,10M17.2,17.2C16.4,18 12,16 12,16C12,16 14,20.4 14.8,21.2C15.6,22 16.9,22 17.7,21.2C18.5,20.4 18.5,19.1 17.7,18.3C17.5,18.1 17.2,17.2 17.2,17.2M6.8,17.2C6.8,17.2 6.5,18.1 6.3,18.3C5.5,19.1 5.5,20.4 6.3,21.2C7.1,22 8.4,22 9.2,21.2C10,20.4 12,16 12,16C12,16 7.6,18 6.8,17.2M17.2,6.8C17.2,6.8 17.5,5.9 17.7,5.7C18.5,4.9 18.5,3.6 17.7,2.8C16.9,2 15.6,2 14.8,2.8C14,3.6 12,8 12,8C12,8 16.4,6 17.2,6.8M6.8,6.8C7.6,6 12,8 12,8C12,8 10,3.6 9.2,2.8C8.4,2 7.1,2 6.3,2.8C5.5,3.6 5.5,4.9 6.3,5.7C6.5,5.9 6.8,6.8 6.8,6.8Z"/>
-            </svg>
-            צ'ק קנאביס
-        </h1>
+        <h1>זול <svg class="cannabis-leaf" viewBox="0 0 24 24"><path d="M12,2C12,2 10,7 10,9C10,10.1 10.9,11 12,11C13.1,11 14,10.1 14,9C14,7 12,2 12,2M12,13C10.9,13 10,13.9 10,15C10,17 12,22 12,22C12,22 14,17 14,15C14,13.9 13.1,13 12,13M19,10C17,10 12,12 12,12C12,12 17,14 19,14C20.1,14 21,13.1 21,12C21,10.9 20.1,10 19,10M5,10C3.9,10 3,10.9 3,12C3,13.1 3.9,14 5,14C7,14 12,12 12,12C12,12 7,10 5,10M17.2,17.2C16.4,18 12,16 12,16C12,16 14,20.4 14.8,21.2C15.6,22 16.9,22 17.7,21.2C18.5,20.4 18.5,19.1 17.7,18.3C17.5,18.1 17.2,17.2 17.2,17.2M6.8,17.2C6.8,17.2 6.5,18.1 6.3,18.3C5.5,19.1 5.5,20.4 6.3,21.2C7.1,22 8.4,22 9.2,21.2C10,20.4 12,16 12,16C12,16 7.6,18 6.8,17.2M17.2,6.8C17.2,6.8 17.5,5.9 17.7,5.7C18.5,4.9 18.5,3.6 17.7,2.8C16.9,2 15.6,2 14.8,2.8C14,3.6 12,8 12,8C12,8 16.4,6 17.2,6.8M6.8,6.8C7.6,6 12,8 12,8C12,8 10,3.6 9.2,2.8C8.4,2 7.1,2 6.3,2.8C5.5,3.6 5.5,4.9 6.3,5.7C6.5,5.9 6.8,6.8 6.8,6.8Z"/></svg> צ'ק קנאביס</h1>
     </div>
 
     <div class="tabs-container">
@@ -83,7 +67,7 @@
     <div class="container">
         <div class="search-wrapper">
             <button class="refresh-btn" onclick="handleSearch()">↻</button>
-            <input type="text" id="q" placeholder="חפש מוצר..." oninput="onInput(this.value)" autocomplete="off">
+            <input type="text" id="q" placeholder="" oninput="onInput(this.value)" autocomplete="off">
             <button class="clear-btn" onclick="clearSearch()">×</button>
             <div id="autocompleteList" class="autocomplete-list"></div>
         </div>
@@ -99,7 +83,7 @@
 <script>
     let currentTab = 'smoke';
     let selectedCity = "";
-
+    
     const citiesData = {
         'north': ['נוף הגליל', 'עפולה', 'חיפה', 'טבריה', 'נהריה', 'כרמיאל'],
         'center': ['תל אביב', 'ראשון לציון', 'פתח תקווה', 'נתניה', 'חולון'],
@@ -181,15 +165,22 @@
         resDiv.innerHTML = "<p style='text-align:center; color:white;'>סורק מלאי בתי מרקחת" + (selectedCity ? " ב" + selectedCity : "") + "...</p>";
         
         try {
-            // הוספת העיר לשאילתה אם נבחרה
             const qParam = selectedCity ? `${searchInput} ${selectedCity}` : searchInput;
             const apiUrl = `https://pricency-backend.vercel.app/api/search?q=${encodeURIComponent(qParam + ' קנאביס רפואי מלאי')}`;
             
-            const response = await fetch(apiUrl, { method: 'GET', headers: { 'Accept': 'application/json' } });
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            
             if (!response.ok) throw new Error("Server Error");
             const data = await response.json();
             
-            let combinedResults = [...(data.shopping_results || []), ...(data.organic_results || [])];
+            let combinedResults = [
+                ...(data.shopping_results || []),
+                ...(data.organic_results || [])
+            ];
+
             const processed = combinedResults.map(item => {
                 let p = 9999;
                 if (item.extracted_price) p = parseFloat(item.extracted_price);
@@ -204,25 +195,29 @@
             renderResults(processed);
 
         } catch (e) {
-            resDiv.innerHTML = "<p style='text-align:center; color:white;'>שגיאה בחיבור. נסה שוב.</p>";
+            resDiv.innerHTML = "<p style='text-align:center; color:white;'>שגיאה בחיבור למאגר הנתונים. נסה שוב.</p>";
         }
     }
 
     function renderResults(items) {
         const rDiv = document.getElementById('results');
         rDiv.innerHTML = "";
+        
         if (items.length === 0) {
-            rDiv.innerHTML = "<p style='text-align:center; color:white;'>לא נמצא מלאי זמין.</p>";
+            rDiv.innerHTML = "<p style='text-align:center; color:white;'>לא נמצא מלאי זמין ברשת כרגע.</p>";
             return;
         }
+        
         items.forEach((item, index) => {
             let store = item.source || "בדיקת מלאי";
             if (item.link && store === "בדיקת מלאי") {
                 try { store = new URL(item.link).hostname.replace('www.', '').split('.')[0]; } catch(e) {}
             }
+
             const card = document.createElement('div');
             card.className = 'product-card';
             const badge = index === 0 ? '<div class="cheapest-badge">הכי זול</div>' : '';
+            
             card.innerHTML = `
                 ${badge}
                 <div class="store-name">${store.toUpperCase()}</div>
