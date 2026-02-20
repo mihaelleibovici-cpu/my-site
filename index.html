@@ -3,98 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>זול צ'ק קנאביס - השוואת מחירים</title>
+    <title>זול צ'ק קנאביס</title>
     <style>
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .header-logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 25px;
-            color: #4CAF50;
-            font-size: 35px;
-            font-weight: bold;
-        }
-        .leaf-icon { font-size: 40px; color: #2e7d32; }
+        body { background-color: #000; color: #fff; font-family: Arial, sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header-logo { display: flex; align-items: center; gap: 10px; padding: 15px; color: #4CAF50; font-size: 28px; font-weight: bold; }
         
-        .tabs-container {
-            display: flex;
-            width: 100%;
-            background: #1a1a1a;
-            border-bottom: 3px solid #4CAF50;
-        }
-        .tab {
-            flex: 1;
-            padding: 18px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: bold;
-            border-right: 1px solid #333;
-            transition: background 0.3s;
-        }
+        /* עיצוב עלה קנאביס ב-SVG */
+        .cannabis-leaf { width: 40px; height: 40px; fill: #2e7d32; }
+
+        .tabs-container { display: flex; width: 100%; background: #1a1a1a; border-bottom: 2px solid #4CAF50; }
+        .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-size: 14px; font-weight: bold; border-right: 1px solid #333; }
         .tab.active { background: #2e7d32; color: white; }
 
-        .search-section {
-            width: 90%;
-            max-width: 480px;
-            margin-top: 30px;
-            padding: 20px;
+        .search-section { width: 92%; max-width: 400px; margin-top: 15px; }
+        
+        /* תיבות חיפוש קטנות יותר */
+        input[type="text"], select { 
+            width: 100%; 
+            padding: 10px; 
+            border-radius: 8px; 
+            border: 1.5px solid #4CAF50; 
+            font-size: 16px; 
+            margin-bottom: 10px; 
+            background: #fff; 
+            color: #000; 
+            box-sizing: border-box; 
         }
-        input[type="text"], select {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #4CAF50;
-            font-size: 18px;
-            margin-bottom: 15px;
-            background: #fff;
-            color: #000;
-            box-sizing: border-box;
+        
+        select { background: #222; color: #fff; height: 40px; }
+        .dropdown-row { display: flex; gap: 8px; margin-bottom: 15px; }
+        
+        .btn-search { 
+            width: 100%; 
+            padding: 12px; 
+            background: #2e7d32; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            cursor: pointer; 
         }
-        select { background: #222; color: #fff; cursor: pointer; }
 
-        .dropdown-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .btn-search {
-            width: 100%;
-            padding: 18px;
-            background: #2e7d32;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .btn-search:active { transform: scale(0.98); }
-
-        .footer {
-            margin-top: auto;
-            width: 100%;
-            text-align: center;
-        }
-        .paypal-tab { background: #ffc439; color: #000; padding: 12px; font-weight: bold; cursor: pointer; }
-        .copyright-tab { background: #f58220; color: #fff; padding: 18px; font-weight: bold; }
+        .footer { margin-top: auto; width: 100%; text-align: center; font-size: 13px; }
+        .paypal-tab { background: #ffc439; color: #000; padding: 8px; font-weight: bold; }
+        .copyright-tab { background: #f58220; color: #fff; padding: 10px; }
     </style>
 </head>
 <body>
-
     <div class="header-logo">
         <span>זול</span>
-        <span class="leaf-icon">🌿</span>
+        <svg class="cannabis-leaf" viewBox="0 0 24 24">
+            <path d="M12,2C12,2 11,7 8,9C5,11 2,11 2,11C2,11 7,12 9,15C11,18 11,22 11,22C11,22 12,17 15,15C18,13 22,13 22,13C22,13 17,12 15,9C13,6 12,2 12,2Z"/>
+        </svg>
         <span>צ'ק קנאביס</span>
     </div>
 
@@ -106,66 +67,51 @@
     </div>
 
     <div class="search-section">
-        <select id="subItemSelect">
-            <option value="">בחר זן (מילת מפתח)...</option>
-        </select>
-
-        <input type="text" id="manualSearch" placeholder="או הקלד חיפוש חופשי..." onfocus="fixCursor(this)">
-
+        <select id="subItemSelect"><option value="">בחר זן...</option></select>
+        <input type="text" id="manualSearch" placeholder="חיפוש חופשי...">
         <div class="dropdown-row">
             <select id="regionSelect" onchange="handleRegionChange()">
-                <option value="">בחר אזור</option>
+                <option value="">אזור</option>
                 <option value="north">צפון</option>
                 <option value="south">דרום</option>
                 <option value="east">מזרח</option>
                 <option value="west">מערב</option>
             </select>
-            
-            <select id="citySelect" style="display:none;">
-                <option value="">בחר עיר</option>
-            </select>
+            <select id="citySelect" style="display:none;"><option value="">עיר</option></select>
         </div>
-
         <button class="btn-search" onclick="runFinalSearch()">חפש עכשיו</button>
     </div>
 
     <div class="footer">
-        <div class="paypal-tab" onclick="window.location.href='https://www.paypal.com/donate?hosted_button_id=YOUR_ID'">תמיכה בפרויקט - פייפאל</div>
-        <div class="copyright-tab">
-            © כל הזכויות שמורות למיכאל - זול צ'ק קנאביס 2026
-        </div>
+        <div class="paypal-tab">תמיכה בפרויקט - PayPal</div>
+        <div class="copyright-tab">© כל הזכויות שמורות למיכאל 2026</div>
     </div>
 
     <script>
         const categories = {
-            flower: ['דסטיני', 'מרקדו', 'פיסנאטור', 'אלמז', 'קינגסטון', 'מיאמי'],
-            oil: ['שמן T20/C4', 'שמן T15/C3', 'שמן סאטיבה', 'שמן אינדיקה', 'שמן פול ספקטרום']
+            flower: ['דסטיני', 'מרקדו', 'פיסנאטור', 'אלמז', 'קינגסטון'],
+            oil: ['שמן T20/C4', 'שמן T15/C3', 'שמן סאטיבה', 'שמן אינדיקה']
         };
-
         const locations = {
-            north: ['עפולה', 'נוף הגליל', 'חיפה', 'טבריה', 'כרמיאל'],
-            south: ['באר שבע', 'אילת', 'אשקלון', 'אשדוד'],
-            east: ['ירושלים', 'מעלה אדומים', 'בית שמש'],
-            west: ['תל אביב', 'ראשון לציון', 'חולון', 'נתניה']
+            north: ['עפולה', 'נוף הגליל', 'חיפה', 'טבריה'],
+            south: ['באר שבע', 'אילת', 'אשדוד'],
+            east: ['ירושלים', 'בית שמש'],
+            west: ['תל אביב', 'ראשון לציון']
         };
-
-        function fixCursor(el) {
-            setTimeout(() => { el.selectionStart = el.selectionEnd = el.value.length; }, 0);
-        }
 
         function switchCategory(type) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + type).classList.add('active');
-            
+            if(document.getElementById('tab-' + type)) {
+                document.getElementById('tab-' + type).classList.add('active');
+            }
             const subSelect = document.getElementById('subItemSelect');
             subSelect.innerHTML = `<option value="">בחר ${type === 'flower' ? 'זן' : 'שמן'}...</option>`;
-            
-            categories[type].forEach(item => {
-                let opt = document.createElement('option');
-                opt.value = item;
-                opt.textContent = item;
-                subSelect.appendChild(opt);
-            });
+            if(categories[type]) {
+                categories[type].forEach(item => {
+                    let opt = document.createElement('option');
+                    opt.value = item; opt.textContent = item; subSelect.appendChild(opt);
+                });
+            }
         }
 
         function handleRegionChange() {
@@ -173,34 +119,23 @@
             const citySelect = document.getElementById('citySelect');
             if (region && locations[region]) {
                 citySelect.style.display = 'block';
-                citySelect.innerHTML = '<option value="">בחר עיר</option>';
+                citySelect.innerHTML = '<option value="">עיר</option>';
                 locations[region].forEach(city => {
                     let opt = document.createElement('option');
-                    opt.value = city;
-                    opt.textContent = city;
-                    citySelect.appendChild(opt);
+                    opt.value = city; opt.textContent = city; citySelect.appendChild(opt);
                 });
-            } else {
-                citySelect.style.display = 'none';
-            }
+            } else { citySelect.style.display = 'none'; }
         }
 
         function runFinalSearch() {
             const product = document.getElementById('subItemSelect').value || document.getElementById('manualSearch').value;
             const city = document.getElementById('citySelect').value;
-            
-            if (!product) {
-                alert("נא לבחור זן או להקליד מוצר");
-                return;
-            }
-
+            if (!product) return alert("בחר מוצר");
             let finalQuery = product + (city ? " ב" + city : "");
             window.location.href = `https://isracann.co.il/?s=${encodeURIComponent(finalQuery)}`;
         }
 
-        // אתחול ראשוני
         switchCategory('flower');
     </script>
 </body>
 </html>
-
