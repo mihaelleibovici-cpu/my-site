@@ -8,22 +8,30 @@
         * { box-sizing: border-box; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000; color: #fff; font-family: Arial, sans-serif; overflow: hidden; }
         .app-container { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; flex-direction: column; justify-content: space-between; }
-        .header-logo { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px; color: #4CAF50; font-size: 24px; font-weight: bold; }
-        .cannabis-leaf { width: 28px; height: 28px; fill: #2e7d32; }
+        
+        .header-logo { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; color: #4CAF50; font-size: 28px; font-weight: bold; }
+        .cannabis-leaf { width: 32px; height: 32px; fill: #f58220; } /* צבע כתום מותאם אישית */
+        
         .tabs-container { display: flex; width: 100%; background: #1a1a1a; border-bottom: 2px solid #4CAF50; }
-        .tab { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 13px; font-weight: bold; border-right: 1px solid #333; }
+        .tab { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 14px; font-weight: bold; border-right: 1px solid #333; transition: 0.3s; }
         .tab.active { background: #2e7d32; color: white; }
+        
         .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 15px; position: relative; }
         .search-wrapper { width: 100%; max-width: 380px; position: relative; display: flex; align-items: center; z-index: 2000; }
         .search-input { width: 100%; padding: 12px 45px; border-radius: 8px; border: 2px solid #4CAF50; font-size: 16px; background: #fff; color: #000; outline: none; }
+        
         .search-icon-right { position: absolute; right: 12px; cursor: pointer; font-size: 20px; z-index: 2001; color: #666; display: flex; align-items: center; justify-content: center; height: 100%; width: 30px; }
         .search-icon-left { position: absolute; left: 12px; cursor: pointer; font-size: 20px; font-weight: bold; color: #666; z-index: 2001; display: flex; align-items: center; justify-content: center; height: 100%; width: 30px; }
+        
         .floating-list { position: absolute; top: 100%; left: 0; right: 0; background: #222; border: 2px solid #4CAF50; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; z-index: 3000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
         .list-item { padding: 12px; border-bottom: 1px solid #333; cursor: pointer; text-align: right; color: #fff; font-size: 15px; }
         .list-item:hover { background: #333; color: #4CAF50; }
+        
         .dropdown-row { width: 100%; max-width: 380px; display: flex; gap: 8px; margin-top: 12px; }
         select { flex: 1; background: #222; color: #fff; border: 1.5px solid #4CAF50; border-radius: 8px; height: 42px; padding: 0 5px; font-size: 14px; }
+        
         .btn-search { width: 100%; max-width: 380px; margin-top: 12px; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        
         .footer { width: 100%; text-align: center; font-size: 11px; }
         .warning-bar { background: #d32f2f; color: #fff; padding: 6px; font-weight: bold; }
         .paypal-tab { background: #ffc439; color: #000; padding: 10px; font-weight: bold; cursor: pointer; display: block; text-decoration: none; }
@@ -34,9 +42,9 @@
     <div class="app-container">
         <div>
             <div class="header-logo">
-                <span>זול</span>
+                <span>זול צ'ק</span>
                 <svg class="cannabis-leaf" viewBox="0 0 24 24"><path d="M12,2C12,2 11,7 8,9C5,11 2,11 2,11C2,11 7,12 9,15C11,18 11,22 11,22C11,22 12,17 15,15C18,13 22,13 22,13C22,13 17,12 15,9C13,6 12,2 12,2Z"/></svg>
-                <span>צ'ק קנאביס</span>
+                <span>קנאביס</span>
             </div>
             <div class="tabs-container">
                 <div class="tab active" onclick="switchTab('flower', this)">תפרחת</div>
@@ -70,12 +78,24 @@
     </div>
     <script>
         let currentCat = 'flower';
+        
+        /* המוח: רשימות מעודכנות ומורחבות */
         const data = {
-            flower: ['אינדיקה T20/C4', 'סאטיבה T20/C4', 'היבריד T20/C4', 'דסטיני', 'מרקדו', 'פיסנאטור', 'אלמז', 'קינגסטון'],
-            oil: ['שמן אינדיקה T20/C4', 'שמן סאטיבה T20/C4', 'שמן פול ספקטרום'],
-            vape: ['וולקנו', 'מייטי', 'פאקס'], 
-            acc: ['ניירות גלגול', 'גריינדר', 'מצית טורבו']
+            flower: [
+                'אינדיקה', 'סאטיבה', 'היבריד', 
+                'אינדיקה T20/C4', 'סאטיבה T20/C4', 'היבריד T20/C4', 
+                'דסטיני', 'מרקדו', 'פיסנאטור', 'אלמז', 'קינגסטון', 
+                'תכלת', 'רומא', 'אלסקה', 'ארז', 'ג\'נגו', 'רפאל', 'מידנייט', 'פי קיי'
+            ],
+            oil: [
+                'שמן אינדיקה', 'שמן סאטיבה', 'שמן היבריד',
+                'שמן אינדיקה T20/C4', 'שמן סאטיבה T20/C4', 'שמן היבריד T20/C4',
+                'שמן פול ספקטרום', 'שמן CBD T1/C20', 'שמן אבידקל', 'שמן בקאן', 'שמן T10/C10'
+            ],
+            vape: ['וולקנו', 'מייטי', 'פאקס', 'קראפטי', 'אריזר'], 
+            acc: ['ניירות גלגול', 'גריינדר', 'מצית טורבו', 'פילטרים', 'מגש גלגול']
         };
+        
         const catNames = { flower: 'תפרחת', oil: 'שמן רפואי', vape: 'אידוי', acc: 'אביזרים' };
         const cities = { north: ['עפולה', 'חיפה', 'טבריה', 'נוף הגליל'], south: ['באר שבע', 'אשדוד', 'אילת'] };
 
@@ -130,7 +150,7 @@
 
         function doSearch() {
             const q = document.getElementById('mainSearch').value;
-            if (!q) return alert("בחר מוצר");
+            if (!q) return alert("אנא הכנס מוצר לחיפוש");
             window.location.href = `https://isracann.co.il/?s=${encodeURIComponent(q)}`;
         }
     </script>
