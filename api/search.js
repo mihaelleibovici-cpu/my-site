@@ -5,68 +5,69 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "אנא הכנס מוצר לחיפוש" });
   }
 
+  // כותרות זיוף מתקדמות כדי לעקוף חסימות אבטחה של בתי המרקחת
+  const advancedHeaders = {
+    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Cache-Control': 'max-age=0',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1'
+  };
+
+  async function fetchPharmacy(shopName, searchUrl) {
+    try {
+      const response = await fetch(searchUrl, { headers: advancedHeaders });
+      
+      if (!response.ok) return null; // אם נחסמנו, נחזיר ריק והשרת ימשיך הלאה
+      
+      const html = await response.text();
+      
+      // חילוץ מחירים חכם יותר שמתעלם ממספרים לא רלוונטיים
+      const priceRegex = /₪\s*([1-4][0-9]{2})|([1-4][0-9]{2})\s*₪/g;
+      let match;
+      let validPrices = [];
+
+      while ((match = priceRegex.exec(html)) !== null) {
+        const p1 = parseInt(match[1]);
+        const p2 = parseInt(match[2]);
+        if (p1 >= 100 && p1 <= 450) validPrices.push(p1);
+        if (p2 >= 100 && p2 <= 450) validPrices.push(p2);
+      }
+
+      if (validPrices.length > 0) {
+        return {
+          name: `${q}`,
+          shop: shopName,
+          price: Math.min(...validPrices).toString(),
+          likes: Math.floor(Math.random() * 40) + 10,
+          buyUrl: searchUrl
+        };
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+
   try {
     const results = [];
 
-    // פונקציית מנוע השאיבה המרכזי
-    async function fetchPrice(shopName, url) {
-      try {
-        // התחזות לדפדפן רגיל כדי לעקוף חסימות אבטחה בסיסיות
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept-Language': 'he-IL,he;q=0.9'
-          }
-        });
-
-        if (!response.ok) return null;
-
-        const html = await response.text();
-
-        // סורק את האתר ומחפש מחירים בסביבת סמל השקל
-        const priceRegex = /₪\s*([0-9]{2,4})|([0-9]{2,4})\s*₪/g;
-        let match;
-        let prices = [];
-
-        while ((match = priceRegex.exec(html)) !== null) {
-          if (match[1]) prices.push(parseInt(match[1]));
-          if (match[2]) prices.push(parseInt(match[2]));
-        }
-
-        // סינון רעשי רקע: לוקח רק מחירים הגיוניים לתפרחות ושמנים
-        const validPrices = prices.filter(p => p >= 100 && p <= 450);
-
-        if (validPrices.length > 0) {
-          // שולף את המחיר הזול ביותר שנמצא בעמוד (לרוב מחירו של המוצר שחיפשנו)
-          const minPrice = Math.min(...validPrices);
-          return {
-            name: `${q}`,
-            shop: shopName,
-            price: minPrice.toString(),
-            likes: Math.floor(Math.random() * 40) + 10, // מנגנון לייקים זמני
-            buyUrl: url
-          };
-        }
-
-        return null; 
-      } catch (error) {
-        return null;
-      }
-    }
-
-    // הפעלת השאיבה במקביל לכל בתי המרקחת לביצועים מהירים
+    // תקיפה מקבילה של שלושת היעדים
     const [pharmYarok, shor, maxPharm] = await Promise.all([
-      fetchPrice("פארם ירוק", `https://pharm-yarok.co.il/?s=${encodeURIComponent(q)}&post_type=product`),
-      fetchPrice("שור טבצ'ניק", `https://shor.co.il/search?q=${encodeURIComponent(q)}`),
-      fetchPrice("מקס פארם", `https://maxpharm.co.il/search?q=${encodeURIComponent(q)}`)
+      fetchPharmacy("פארם ירוק", `https://pharm-yarok.co.il/?s=${encodeURIComponent(q)}&post_type=product`),
+      fetchPharmacy("שור טבצ'ניק", `https://shor.co.il/search?q=${encodeURIComponent(q)}`),
+      fetchPharmacy("מקס פארם", `https://maxpharm.co.il/search?q=${encodeURIComponent(q)}`)
     ]);
 
-    // הוספת התוצאות התקינות בלבד
     if (pharmYarok) results.push(pharmYarok);
     if (shor) results.push(shor);
     if (maxPharm) results.push(maxPharm);
 
-    // אם אף בית מרקחת לא החזיר מחיר תקין
     if (results.length === 0) {
        return res.status(200).json([{
         name: "לא נמצא במלאי",
@@ -77,12 +78,10 @@ export default async function handler(req, res) {
       }]);
     }
 
-    // מיון אוטומטי מהזול ליקר עבור זול צ'ק
     results.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-
     return res.status(200).json(results);
 
   } catch (error) {
-    return res.status(500).json({ error: "שגיאה בסריקת בתי המרקחת." });
+    return res.status(500).json({ error: "שגיאת מערכת פנימית בחילוץ הנתונים." });
   }
 }
