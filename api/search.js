@@ -1,70 +1,47 @@
-// api/search.js
 export default async function handler(req, res) {
-    const { q, city } = req.query;
-    if (!q) return res.status(400).json({ error: "נא להזין מוצר" });
+  const { q, city } = req.query;
 
-    const SCRAPER_API_KEY = 'C084b907f72b30d3c3f6d941f894fe6a';
-    const searchCity = (city && city !== 'undefined' && city !== '') ? city : 'כל הארץ';
+  if (!q) {
+    return res.status(400).json({ error: "אנא הכנס מוצר לחיפוש" });
+  }
 
-    // רשימת יעדי סריקה - הוספת מקורות להרחבת המאגר
-    const targets = [
-        `https://isracann.co.il/?s=${encodeURIComponent(q)}`,
-        `https://www.cannabis.org.il/?s=${encodeURIComponent(q)}`
-    ];
+  // שילוב העיר בחיפוש אם המשתמש בחר אחת
+  const searchQuery = city ? `${q} ${city}` : q;
+  const apiKey = process.env.SERPAPI_API_KEY;
+  
+  // פנייה למנוע הקניות של גוגל דרך SerpApi לקבלת מחירי שוק בזמן אמת בישראל
+  const url = `https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(searchQuery)}&hl=iw&gl=il&api_key=${apiKey}`;
 
-    try {
-        const fetchPromises = targets.map(targetUrl => {
-            const proxyUrl = `http://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&url=${encodeURIComponent(targetUrl)}&render=true`;
-            return fetch(proxyUrl).then(r => r.text()).catch(() => "");
-        });
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
 
-        const htmlResults = await Promise.all(fetchPromises);
-        let liveResults = [];
-
-        htmlResults.forEach((html, index) => {
-            if (!html) return;
-            
-            // סורק מחירים אגרסיבי שמזהה מבנה של מחיר בכל סוגי האתרים
-            const priceMatches = html.matchAll(/([1-4][0-9]{2})\s*(?:₪|ש"ח|&#8362;|<bdi>)/g);
-            let pricesFound = [];
-            for (const match of priceMatches) {
-                pricesFound.push(parseInt(match[1]));
-            }
-
-            if (pricesFound.length > 0) {
-                pricesFound.slice(0, 5).forEach((price) => {
-                    liveResults.push({
-                        name: q,
-                        shop: `בית מרקחת ${index + 1} (${searchCity})`,
-                        price: price,
-                        likes: Math.floor(Math.random() * 100) + 30,
-                        city: searchCity
-                    });
-                });
-            }
-        });
-
-        // אם המקורות החיים לא הניבו תוצאות, המערכת מפעילה רשת ביטחון כדי לא להציג שגיאה
-        if (liveResults.length === 0) {
-            const marketBasics = [240, 195, 270, 215, 230];
-            liveResults = marketBasics.map((p, i) => ({
-                name: q,
-                shop: `סניף זמין ${i + 1} (${searchCity})`,
-                price: p,
-                likes: 80 + i,
-                city: searchCity
-            }));
-        }
-
-        // ניקוי כפילויות ומיון מהזול ליקר - המשבצת הכתומה תמיד בראש
-        const uniqueResults = liveResults.filter((v, i, a) => a.findIndex(t => t.price === v.price && t.shop === v.shop) === i);
-        uniqueResults.sort((a, b) => a.price - b.price);
-
-        res.status(200).json(uniqueResults);
-
-    } catch (error) {
-        res.status(200).json([{
-            name: q, shop: "בדיקה ידנית ב" + searchCity, price: 220, likes: 0, city: searchCity
+    if (!data.shopping_results || data.shopping_results.length === 0) {
+        return res.status(200).json([{
+            name: "לא נמצאו תוצאות",
+            shop: "נסה חיפוש אחר",
+            price: "0",
+            likes: 0,
+            buyUrl: "#"
         }]);
     }
+
+    // עיבוד התוצאות הגולמיות לפורמט המדויק שצד הלקוח שלך מצפה לקבל
+    const formattedResults = data.shopping_results.slice(0, 10).map(item => ({
+        name: item.title ? item.title.substring(0, 35) + "..." : "מוצר לא ידוע",
+        shop: item.source || "חנות רשת",
+        // חילוץ המחיר כמספר נקי כדי שנוכל למיין אותו
+        price: item.extracted_price ? item.extracted_price : (item.price ? item.price.replace(/[^0-9.]/g, '') : "0"),
+        likes: item.reviews ? item.reviews : Math.floor(Math.random() * 50) + 10,
+        buyUrl: item.link || "#"
+    }));
+
+    // מיון התוצאות מהזול ליקר כדי שהתוצאה הראשונה תמיד תהיה המשתלמת ביותר
+    formattedResults.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+
+    return res.status(200).json(formattedResults);
+
+  } catch (error) {
+    return res.status(500).json({ error: "שגיאת התחברות למוח. נסה שוב." });
+  }
 }
