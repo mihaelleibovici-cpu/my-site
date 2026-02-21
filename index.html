@@ -34,32 +34,32 @@
         .btn-search { width: 100%; max-width: 380px; margin-top: 12px; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; flex-shrink: 0; }
         
         #results-container { width: 100%; max-width: 380px; margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px; }
-        .result-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); position: relative; padding-bottom: 55px; } 
+        .result-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); position: relative; padding-bottom: 60px; }
         .result-card.cheapest { border: 2px solid #f58220; box-shadow: 0 0 10px rgba(245, 130, 32, 0.4); }
         .cheapest-badge { position: absolute; top: -10px; right: 50%; transform: translateX(50%); background: #f58220; color: #000; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 10px; white-space: nowrap; z-index: 5; }
         .res-title { font-weight: bold; font-size: 14px; color: #4CAF50; }
         .res-shop { font-size: 12px; color: #ccc; }
         .res-price { font-size: 20px; font-weight: bold; color: #fff; }
         
-        /* משבצת המבצעים החדשה שביקשת */
-        .deal-box { background: #f58220; color: #000; font-size: 10px; font-weight: bold; border-radius: 5px; margin-top: 2px; padding: 3px; border: 1px solid #000; }
+        /* משבצת מבצעים מקצועית */
+        .deal-box { background: #f58220; color: #000; font-size: 10px; font-weight: bold; border-radius: 5px; margin-top: 2px; padding: 4px; border: 1px solid #000; line-height: 1.1; }
 
         .card-actions-inline {
             display: flex;
             justify-content: space-between;
             position: absolute;
-            bottom: 8px; 
-            left: 8px; 
-            right: 8px; 
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
             gap: 5px;
         }
         
         .action-btn-small {
             flex: 1;
-            padding: 5px;
+            padding: 6px;
             border-radius: 5px;
             text-align: center;
-            font-size: 10px; 
+            font-size: 10px;
             text-decoration: none;
             color: white;
             font-weight: bold;
@@ -125,21 +125,56 @@
     <script>
         let currentCat = 'flower';
         
-        // החזרתי את כל הרשימה המקורית והמלאה שלך בדיוק כפי שהייתה
+        // החזרתי את כל הרשימה המקורית והמלאה שלך בדיוק כפי שהייתה, פרוסה לשורות
         const data = {
             flower: [
-                'אינדיקה', 'סאטיבה', 'היבריד', 
-                'אינדיקה T20/C4', 'סאטיבה T20/C4', 'היבריד T20/C4', 
-                'דסטיני', 'מרקדו', 'פיסנאטור', 'אלמז', 'קינגסטון', 
-                'תכלת', 'רומא', 'אלסקה', 'ארז', 'ג\'נגו', 'רפאל', 'מידנייט', 'פי קיי'
+                'אינדיקה',
+                'סאטיבה',
+                'היבריד',
+                'אינדיקה T20/C4',
+                'סאטיבה T20/C4',
+                'היבריד T20/C4',
+                'דסטיני',
+                'מרקדו',
+                'פיסנאטור',
+                'אלמז',
+                'קינגסטון',
+                'תכלת',
+                'רומא',
+                'אלסקה',
+                'ארז',
+                'ג\'נגו',
+                'רפאל',
+                'מידנייט',
+                'פי קיי'
             ],
             oil: [
-                'שמן אינדיקה', 'שמן סאטיבה', 'שמן היבריד',
-                'שמן אינדיקה T20/C4', 'שמן סאטיבה T20/C4', 'שמן היבריד T20/C4',
-                'שמן פול ספקטרום', 'שמן CBD T1/C20', 'שמן אבידקל', 'שמן בקאן', 'שמן T10/C10'
+                'שמן אינדיקה',
+                'שמן סאטיבה',
+                'שמן היבריד',
+                'שמן אינדיקה T20/C4',
+                'שמן סאטיבה T20/C4',
+                'שמן היבריד T20/C4',
+                'שמן פול ספקטרום',
+                'שמן CBD T1/C20',
+                'שמן אבידקל',
+                'שמן בקאן',
+                'שמן T10/C10'
             ],
-            vape: ['וולקנו', 'מייטי', 'פאקס', 'קראפטי', 'אריזר'], 
-            acc: ['ניירות גלגול', 'גריינדר', 'מצית טורבו', 'פילטרים', 'מגש גלגול']
+            vape: [
+                'וולקנו',
+                'מייטי',
+                'פאקס',
+                'קראפטי',
+                'אריזר'
+            ], 
+            acc: [
+                'ניירות גלגול',
+                'גריינדר',
+                'מצית טורבו',
+                'פילטרים',
+                'מגש גלגול'
+            ]
         };
         
         const catNames = { flower: 'תפרחת', oil: 'שמן רפואי', vape: 'אידוי', acc: 'אביזרים' };
@@ -155,6 +190,7 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
             clearSearch(null);
+            document.getElementById('results-container').innerHTML = '';
         }
 
         function handleTyping(val) {
@@ -173,7 +209,7 @@
         }
 
         function clearSearch(e) {
-            if(e) { e.preventDefault(); }
+            if(e) { e.preventDefault(); e.stopPropagation(); }
             document.getElementById('mainSearch').value = '';
             document.getElementById('floatingList').style.display = 'none';
             document.getElementById('results-container').innerHTML = '';
