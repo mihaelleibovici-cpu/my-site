@@ -6,34 +6,39 @@ export default async function handler(req, res) {
 
   async function fetchPharmacyData(shopName, searchUrl) {
     try {
-      // הוספתי render=true ו-wait_for כדי לוודא שהאתר נטען במלואו לפני הסריקה
-      const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il&render=true&wait_for=1000`;
+      // ביטלתי את ה-render כדי שזה יהיה מהיר בטיל. הוספתי הגדרות חדירה ישירות לשרת.
+      const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il&keep_headers=true`;
       
-      const response = await fetch(proxyUrl);
+      const response = await fetch(proxyUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' }
+      });
+
       if (!response.ok) return null;
       const html = await response.text();
 
-      // חיפוש מחירים בפינצטה - תופס פורמטים של ₪200, 200₪, וגם מחירים בתוך טקסט
-      const priceRegex = /(?:₪\s*(\d{2,3}))|(?:(\d{2,3})\s*₪)/g;
+      //Regex מקצועי שמוצא מחירים בפורמט של 180, 250.00, או ₪320
+      const priceRegex = /(?:₪|ILS|price|מחיר)\s*[:=]?\s*(\d{2,3}(?:\.\d{2})?)/gi;
       let match;
       let prices = [];
       while ((match = priceRegex.exec(html)) !== null) {
-        const p = parseFloat(match[1] || match[2]);
-        // סינון: מוצרי קנאביס הם לרוב בין 140 ל-450 ש"ח
-        if (p >= 140 && p <= 480) prices.push(p);
+        const p = parseFloat(match[1]);
+        if (p >= 130 && p <= 500) prices.push(p);
       }
 
-      // חיפוש מבצעים (למשל: 3 ב-550)
-      const dealRegex = /([2-4]\s*(?:ב-|ב)\s*\d{3})/g;
-      const dealMatch = html.match(dealRegex);
-      const deal = dealMatch ? dealMatch[0] : null;
+      // אם לא מצאנו מחיר ספציפי, נחפש כל מספר 3-ספרתי שמופיע ליד סימן שקל
+      if (prices.length === 0) {
+        const fallbackRegex = /(\d{3})\s*₪|₪\s*(\d{3})/g;
+        while ((match = fallbackRegex.exec(html)) !== null) {
+          const p = parseFloat(match[1] || match[2]);
+          if (p >= 130 && p <= 500) prices.push(p);
+        }
+      }
 
       if (prices.length > 0) {
         return {
           name: q,
           shop: shopName,
           price: Math.min(...prices).toString(),
-          deal: deal, 
           buyUrl: searchUrl
         };
       }
@@ -42,20 +47,22 @@ export default async function handler(req, res) {
   }
 
   try {
-    // מריץ חיפוש מקביל ב-3 בתי מרקחת שונים
+    // מריץ חיפוש מקביל ב-4 מקורות שונים כדי להבטיח תוצאה
     const rawResults = await Promise.all([
       fetchPharmacyData("פארם ירוק", `https://pharm-yarok.co.il/?s=${encodeURIComponent(q)}&post_type=product`),
       fetchPharmacyData("שור טבצ'ניק", `https://shor.co.il/search?q=${encodeURIComponent(q)}`),
-      fetchPharmacyData("מקס פארם", `https://maxpharm.co.il/search?q=${encodeURIComponent(q)}`)
+      fetchPharmacyData("מקס פארם", `https://maxpharm.co.il/search?q=${encodeURIComponent(q)}`),
+      fetchPharmacyData("טלפארם", `https://www.telepharm.co.il/catalogsearch/result/?q=${encodeURIComponent(q)}`)
     ]);
 
     const results = rawResults.filter(r => r !== null);
     
-    // מיון מהזול ליקר
+    // אם באמת אין תוצאות בבתי המרקחת האלו כרגע
+    if (results.length === 0) return res.status(200).json([]);
+
     results.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-    
     return res.status(200).json(results);
   } catch (error) {
-    return res.status(500).json({ error: "שגיאת שרת פנימית" });
+    return res.status(500).json({ error: "שגיאת שרת" });
   }
 }
