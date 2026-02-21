@@ -2,21 +2,12 @@ export default async function handler(req, res) {
   const { q } = req.query;
   if (!q) return res.status(400).json({ error: "אנא הכנס מוצר לחיפוש" });
 
-  // מנגנון חכם: מחפש את המפתח תחת כמה שמות אפשריים למקרה של טעות בשם בוורסל
-  const scraperApiKey = process.env.SERPAPI_API_KEY || 
-                         process.env.SCRAPER_API_KEY || 
-                         process.env.SCRAPER_API || 
-                         process.env.API_KEY;
-
-  if (!scraperApiKey) {
-    return res.status(500).json({ 
-      error: "המפתח עדיין לא זוהה. וודא שהזנת מפתח ב-Environment Variables של Vercel ושמרת." 
-    });
-  }
+  // המפתח שלך מוטמע ישירות בקוד כדי לעקוף בעיות סנכרון של Vercel
+  const scraperApiKey = 'c084b907f72b30d3c3f6d941f894fe6a';
 
   async function fetchExactPrice(shopName, targetUrl) {
     try {
-      // חדירה עמוקה עם רינדור מלא
+      // חדירה עמוקה עם רינדור דף מלא וזהות ישראלית - עוקף חסימות אבטחה
       const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(targetUrl)}&render=true&country_code=il`;
       
       const response = await fetch(proxyUrl);
@@ -24,7 +15,7 @@ export default async function handler(req, res) {
       
       const html = await response.text();
 
-      // איתור מחיר בפינצטה (100-450 ש"ח)
+      // חיפוש מחירים בפינצטה בתוך הקוד שנחשף
       const priceRegex = /(?:₪\s*([1-4][0-9]{2}(?:\.[0-9]{2})?))|([1-4][0-9]{2}(?:\.[0-9]{2})?)\s*₪/g;
       let match;
       let validPrices = [];
@@ -41,7 +32,7 @@ export default async function handler(req, res) {
           name: q,
           shop: shopName,
           price: Math.min(...validPrices).toString(),
-          likes: Math.floor(Math.random() * 30) + 15,
+          likes: Math.floor(Math.random() * 20) + 15,
           buyUrl: targetUrl
         };
       }
@@ -50,6 +41,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    // הרצת שלוש זרועות חדירה במקביל לתוצאה מהירה
     const results = (await Promise.all([
       fetchExactPrice("פארם ירוק", `https://pharm-yarok.co.il/?s=${encodeURIComponent(q)}&post_type=product`),
       fetchExactPrice("שור טבצ'ניק", `https://shor.co.il/search?q=${encodeURIComponent(q)}`),
@@ -58,19 +50,19 @@ export default async function handler(req, res) {
 
     if (results.length === 0) {
       return res.status(200).json([{
-        name: "לא נמצא במלאי כרגע",
-        shop: "בדיקה הושלמה",
+        name: "לא נמצא במלאי",
+        shop: "בבדיקה עמוקה",
         price: "0",
         likes: 0,
         buyUrl: "#"
       }]);
     }
 
+    // מיון מהזול ליקר כדי שהתצוגה שלך תהיה מושלמת
     results.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
     return res.status(200).json(results);
 
   } catch (error) {
-    return res.status(500).json({ error: "שגיאה בתהליך החדירה לנתונים." });
+    return res.status(500).json({ error: "שגיאת שרת בזמן החדירה לנתונים." });
   }
 }
-// עדכון גרסה סופי ומחייב - הפעלת המקדח
