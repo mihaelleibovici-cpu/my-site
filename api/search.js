@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       
       const html = await response.text();
 
-      // זיהוי מחירים ברמת פינצטה: לוכד מספרים תקינים (100-450) צמודים לסמל ה-₪
+      // זיהוי מחירים ברמת פינצטה: לוכד מספרים תקינים (100-450) צמודים לסמל השקל
       const priceRegex = /(?:₪\s*([1-4][0-9]{2}(?:\.[0-9]{2})?))|([1-4][0-9]{2}(?:\.[0-9]{2})?)\s*₪/g;
       let match;
       let validPrices = [];
@@ -52,7 +52,7 @@ export default async function handler(req, res) {
       fetchExactPrice("מקס פארם", `https://maxpharm.co.il/search?q=${encodeURIComponent(q)}`)
     ])).filter(r => r !== null);
 
-    // תגובת אל-כשל במקרה של חוסר במלאי גורף
+    // תגובת אל כשל במקרה של חוסר במלאי גורף
     if (results.length === 0) {
       return res.status(200).json([{
         name: "לא נמצא במלאי",
@@ -71,3 +71,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "שגיאת מערכת פנימית בחדירה." });
   }
 }
+
+// עדכון גרסה בטוח לאיפוס ומשיכת המפתח החדש מוורסל
