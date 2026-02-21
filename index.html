@@ -34,13 +34,47 @@
         .btn-search { width: 100%; max-width: 380px; margin-top: 12px; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; flex-shrink: 0; }
         
         #results-container { width: 100%; max-width: 380px; margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px; }
-        .result-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-        .result-card.cheapest { border: 2px solid #f58220; box-shadow: 0 0 10px rgba(245, 130, 32, 0.4); position: relative; }
+        .result-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); position: relative; padding-bottom: 40px; } /* הוספתי position: relative ופדינג תחתון */
+        .result-card.cheapest { border: 2px solid #f58220; box-shadow: 0 0 10px rgba(245, 130, 32, 0.4); }
         .cheapest-badge { position: absolute; top: -10px; right: 50%; transform: translateX(50%); background: #f58220; color: #000; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
         .res-title { font-weight: bold; font-size: 14px; color: #4CAF50; }
         .res-shop { font-size: 12px; color: #ccc; }
         .res-price { font-size: 20px; font-weight: bold; color: #fff; }
         .res-likes { font-size: 12px; color: #888; }
+
+        /* התוספת של הכפתורים בתוך המשבצת */
+        .card-actions-inline {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            bottom: 8px; /* מרווח מלמטה */
+            left: 8px; /* מרווח משמאל */
+            right: 8px; /* מרווח מימין */
+            gap: 5px;
+        }
+        
+        .action-btn-small {
+            flex: 1;
+            padding: 5px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 10px; /* טקסט קטן כדי שיתאים */
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        
+        .buy-btn-small {
+            background-color: #3498db; /* כחול - צד ימין */
+        }
+        
+        .whatsapp-btn-small {
+            background-color: #25d366; /* ירוק - צד שמאל */
+        }
         
         .footer { width: 100%; text-align: center; font-size: 11px; flex-shrink: 0; z-index: 10; background: #000; }
         .warning-bar { background: #d32f2f; color: #fff; padding: 6px; font-weight: bold; }
@@ -112,8 +146,10 @@
         };
         
         const catNames = { flower: 'תפרחת', oil: 'שמן רפואי', vape: 'אידוי', acc: 'אביזרים' };
+        
+        // הוספתי את נהריה לרשימת ערי הצפון לפי בקשתך
         const cities = { 
-            north: ['עפולה', 'חיפה', 'טבריה', 'נוף הגליל'], 
+            north: ['נהריה', 'עפולה', 'חיפה', 'טבריה', 'נוף הגליל'], 
             center: ['תל אביב', 'ראשון לציון', 'רמת גן', 'פתח תקווה', 'נתניה'],
             south: ['באר שבע', 'אשדוד', 'אילת'] 
         };
@@ -181,12 +217,11 @@
             resContainer.innerHTML = '<div style="text-align:center; width:100%; color:#4CAF50; font-weight:bold;">מתחבר למוח... ⏳</div>';
 
             try {
-                // עכשיו שולחים גם את העיר למוח השרת כדי שיסנן!
                 const queryUrl = `/api/search?q=${encodeURIComponent(q)}&city=${encodeURIComponent(city)}`;
                 const response = await fetch(queryUrl);
                 const resultsData = await response.json();
 
-                resContainer.innerHTML = ''; // מנקה טעינה
+                resContainer.innerHTML = '';
 
                 if(resultsData.error) {
                     resContainer.innerHTML = `<div style="color:#d32f2f; width:100%; text-align:center; font-weight:bold; padding: 10px;">${resultsData.error}</div>`;
@@ -198,12 +233,22 @@
                     card.className = 'result-card' + (index === 0 ? ' cheapest' : '');
                     let badge = index === 0 ? '<div class="cheapest-badge">הכי זול!</div>' : '';
 
+                    // יצירת לינק וואטסאפ מותאם אישית
+                    const shareText = `מצאתי ${res.name} במחיר זול של ₪${res.price} ב-${res.shop}! הנה הלינק לרכישה: ${res.buyUrl || 'https://my-site-phi-dusky.vercel.app/'}`;
+                    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
+                    // התוספת של הכפתורים - בתוך הכרטיסייה
                     card.innerHTML = `
                         ${badge}
                         <div class="res-title">${res.name}</div>
                         <div class="res-shop">🏪 ${res.shop}</div>
                         <div class="res-price">₪${res.price}</div>
                         <div class="res-likes">👍 ${res.likes} אהבו</div>
+                        
+                        <div class="card-actions-inline">
+                            <a href="${res.buyUrl || '#'}" target="_blank" class="action-btn-small buy-btn-small">קנייה</a>
+                            <a href="${whatsappUrl}" target="_blank" class="action-btn-small whatsapp-btn-small">וואטסאפ</a>
+                        </div>
                     `;
                     resContainer.appendChild(card);
                 });
