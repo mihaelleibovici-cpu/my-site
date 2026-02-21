@@ -41,6 +41,7 @@
         .res-shop { font-size: 12px; color: #ccc; }
         .res-price { font-size: 20px; font-weight: bold; color: #fff; }
         
+        /* משבצת המבצעים שביקשת */
         .deal-box { background: #f58220; color: #000; font-size: 10px; font-weight: bold; border-radius: 5px; margin-top: 2px; padding: 4px; border: 1px solid #000; line-height: 1.1; }
 
         .card-actions-inline {
@@ -124,59 +125,25 @@
     <script>
         let currentCat = 'flower';
         
-        // הרשימות המלאות והמורחבות שלך - שורה שורה ללא פשרות
+        // רשימת הברזל המלאה - לא נגעתי בה!
         const data = {
             flower: [
-                'אינדיקה',
-                'סאטיבה',
-                'היבריד',
-                'אינדיקה T20/C4',
-                'סאטיבה T20/C4',
-                'היבריד T20/C4',
-                'דסטיני',
-                'מרקדו',
-                'פיסנאטור',
-                'אלמז',
-                'קינגסטון',
-                'תכלת',
-                'רומא',
-                'אלסקה',
-                'ארז',
-                'ג\'נגו',
-                'רפאל',
-                'מידנייט',
-                'פי קיי'
+                'אינדיקה', 'סאטיבה', 'היבריד', 
+                'אינדיקה T20/C4', 'סאטיבה T20/C4', 'היבריד T20/C4', 
+                'דסטיני', 'מרקדו', 'פיסנאטור', 'אלמז', 'קינגסטון', 
+                'תכלת', 'רומא', 'אלסקה', 'ארז', 'ג\'נגו', 'רפאל', 'מידנייט', 'פי קיי'
             ],
             oil: [
-                'שמן אינדיקה',
-                'שמן סאטיבה',
-                'שמן היבריד',
-                'שמן אינדיקה T20/C4',
-                'שמן סאטיבה T20/C4',
-                'שמן היבריד T20/C4',
-                'שמן פול ספקטרום',
-                'שמן CBD T1/C20',
-                'שמן אבידקל',
-                'שמן בקאן',
-                'שמן T10/C10'
+                'שמן אינדיקה', 'שמן סאטיבה', 'שמן היבריד',
+                'שמן אינדיקה T20/C4', 'שמן סאטיבה T20/C4', 'שמן היבריד T20/C4',
+                'שמן פול ספקטרום', 'שמן CBD T1/C20', 'שמן אבידקל', 'שמן בקאן', 'שמן T10/C10'
             ],
-            vape: [
-                'וולקנו',
-                'מייטי',
-                'פאקס',
-                'קראפטי',
-                'אריזר'
-            ], 
-            acc: [
-                'ניירות גלגול',
-                'גריינדר',
-                'מצית טורבו',
-                'פילטרים',
-                'מגש גלגול'
-            ]
+            vape: ['וולקנו', 'מייטי', 'פאקס', 'קראפטי', 'אריזר'], 
+            acc: ['ניירות גלגול', 'גריינדר', 'מצית טורבו', 'פילטרים', 'מגש גלגול']
         };
         
         const catNames = { flower: 'תפרחת', oil: 'שמן רפואי', vape: 'אידוי', acc: 'אביזרים' };
+        
         const cities = { 
             north: ['נהריה', 'עפולה', 'חיפה', 'טבריה', 'נוף הגליל'], 
             center: ['תל אביב', 'ראשון לציון', 'רמת גן', 'פתח תקווה', 'נתניה'],
@@ -188,6 +155,7 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
             clearSearch(null);
+            document.getElementById('results-container').innerHTML = '';
         }
 
         function handleTyping(val) {
@@ -206,7 +174,7 @@
         }
 
         function clearSearch(e) {
-            if(e) { e.preventDefault(); }
+            if(e) { e.preventDefault(); e.stopPropagation(); }
             document.getElementById('mainSearch').value = '';
             document.getElementById('floatingList').style.display = 'none';
             document.getElementById('results-container').innerHTML = '';
