@@ -6,19 +6,21 @@ export default async function handler(req, res) {
 
   async function fetchPharmacyData(shopName, searchUrl) {
     try {
-      // שימוש ב-Proxy כדי לעקוף חסימות של בתי מרקחת
-      const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il`;
+      // שימוש ב-Premium Proxy כדי לעקוף חסימות קשות
+      const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il&device_type=mobile`;
       const response = await fetch(proxyUrl);
       if (!response.ok) return null;
       const html = await response.text();
 
-      // רג'קס (Regex) משופר - מחפש מחירים בין 120 ל-500 ש"ח ומתעלם מ-100 ש"ח של משלוח
-      const priceRegex = /(?:₪\s*([1-4][0-9][0-9]))|(([1-4][0-9][0-9])\s*₪)/g;
+      // חיפוש מחירים גמיש (Regex) - מוצא כל מספר בין 100 ל-600 שצמוד אליו סימן ₪
+      // זה יתפוס מחירים גם אם יש רווחים או פורמטים שונים
+      const priceRegex = /(?:₪\s*(\d{2,3}))|(?:(\d{2,3})\s*₪)|(?:price">₪?(\d{2,3}))/g;
       let match;
       let prices = [];
       while ((match = priceRegex.exec(html)) !== null) {
-        const p = parseFloat(match[1] || match[2]);
-        if (p >= 120 && p <= 500) prices.push(p);
+        const p = parseFloat(match[1] || match[2] || match[3]);
+        // סינון חכם: מתעלמים מ-100 (משלוח) ומחפשים מחירים הגיוניים לקנאביס
+        if (p > 130 && p < 550) prices.push(p);
       }
 
       // חיפוש מבצעים בטקסט (למשל: 3 ב-550)
@@ -40,23 +42,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    // חיפוש במקביל בשלושה מוקדים שונים
     const rawResults = await Promise.all([
       fetchPharmacyData("פארם ירוק", `https://pharm-yarok.co.il/?s=${encodeURIComponent(q)}&post_type=product`),
       fetchPharmacyData("שור טבצ'ניק", `https://shor.co.il/search?q=${encodeURIComponent(q)}`),
       fetchPharmacyData("מקס פארם", `https://maxpharm.co.il/search?q=${encodeURIComponent(q)}`)
     ]);
 
-    // סינון תוצאות ריקות
     const results = rawResults.filter(r => r !== null);
     
-    // אם לא נמצא כלום, נחזיר הודעה ברורה
-    if (results.length === 0) return res.status(200).json([]);
-
     // מיון מהזול ליקר
     results.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+    
     return res.status(200).json(results);
   } catch (error) {
-    return res.status(500).json({ error: "שגיאת שרת בחיפוש" });
+    return res.status(500).json({ error: "שגיאת שרת" });
   }
 }
