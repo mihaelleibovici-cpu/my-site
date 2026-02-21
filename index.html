@@ -34,31 +34,32 @@
         .btn-search { width: 100%; max-width: 380px; margin-top: 12px; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; flex-shrink: 0; }
         
         #results-container { width: 100%; max-width: 380px; margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px; }
-        .result-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); position: relative; padding-bottom: 40px; } /* הוספתי position: relative ופדינג תחתון */
+        .result-card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); position: relative; padding-bottom: 50px; }
         .result-card.cheapest { border: 2px solid #f58220; box-shadow: 0 0 10px rgba(245, 130, 32, 0.4); }
-        .cheapest-badge { position: absolute; top: -10px; right: 50%; transform: translateX(50%); background: #f58220; color: #000; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+        .cheapest-badge { position: absolute; top: -10px; right: 50%; transform: translateX(50%); background: #f58220; color: #000; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 10px; white-space: nowrap; z-index: 5; }
         .res-title { font-weight: bold; font-size: 14px; color: #4CAF50; }
         .res-shop { font-size: 12px; color: #ccc; }
         .res-price { font-size: 20px; font-weight: bold; color: #fff; }
-        .res-likes { font-size: 12px; color: #888; }
+        
+        /* משבצת מבצעים חדשה */
+        .deal-box { background: #f58220; color: #000; font-size: 11px; font-weight: bold; border-radius: 6px; margin-top: 4px; padding: 4px; border: 1px solid #000; }
 
-        /* התוספת של הכפתורים בתוך המשבצת */
         .card-actions-inline {
             display: flex;
             justify-content: space-between;
             position: absolute;
-            bottom: 8px; /* מרווח מלמטה */
-            left: 8px; /* מרווח משמאל */
-            right: 8px; /* מרווח מימין */
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
             gap: 5px;
         }
         
         .action-btn-small {
             flex: 1;
-            padding: 5px;
+            padding: 6px;
             border-radius: 5px;
             text-align: center;
-            font-size: 10px; /* טקסט קטן כדי שיתאים */
+            font-size: 10px;
             text-decoration: none;
             color: white;
             font-weight: bold;
@@ -68,13 +69,8 @@
             box-sizing: border-box;
         }
         
-        .buy-btn-small {
-            background-color: #3498db; /* כחול - צד ימין */
-        }
-        
-        .whatsapp-btn-small {
-            background-color: #25d366; /* ירוק - צד שמאל */
-        }
+        .buy-btn-small { background-color: #3498db; }
+        .whatsapp-btn-small { background-color: #25d366; }
         
         .footer { width: 100%; text-align: center; font-size: 11px; flex-shrink: 0; z-index: 10; background: #000; }
         .warning-bar { background: #d32f2f; color: #fff; padding: 6px; font-weight: bold; }
@@ -128,26 +124,13 @@
     
     <script>
         let currentCat = 'flower';
-        
         const data = {
-            flower: [
-                'אינדיקה', 'סאטיבה', 'היבריד', 
-                'אינדיקה T20/C4', 'סאטיבה T20/C4', 'היבריד T20/C4', 
-                'דסטיני', 'מרקדו', 'פיסנאטור', 'אלמז', 'קינגסטון', 
-                'תכלת', 'רומא', 'אלסקה', 'ארז', 'ג\'נגו', 'רפאל', 'מידנייט', 'פי קיי'
-            ],
-            oil: [
-                'שמן אינדיקה', 'שמן סאטיבה', 'שמן היבריד',
-                'שמן אינדיקה T20/C4', 'שמן סאטיבה T20/C4', 'שמן היבריד T20/C4',
-                'שמן פול ספקטרום', 'שמן CBD T1/C20', 'שמן אבידקל', 'שמן בקאן', 'שמן T10/C10'
-            ],
-            vape: ['וולקנו', 'מייטי', 'פאקס', 'קראפטי', 'אריזר'], 
-            acc: ['ניירות גלגול', 'גריינדר', 'מצית טורבו', 'פילטרים', 'מגש גלגול']
+            flower: ['אינדיקה', 'סאטיבה', 'היבריד', 'תכלת', 'רומא', 'אלסקה', 'ארז', 'ג\'נגו', 'רפאל', 'מידנייט', 'פי קיי'],
+            oil: ['שמן אינדיקה', 'שמן סאטיבה', 'שמן היבריד', 'שמן פול ספקטרום'],
+            vape: ['וולקנו', 'מייטי', 'פאקס'], 
+            acc: ['ניירות גלגול', 'גריינדר', 'מגש גלגול']
         };
-        
         const catNames = { flower: 'תפרחת', oil: 'שמן רפואי', vape: 'אידוי', acc: 'אביזרים' };
-        
-        // הוספתי את נהריה לרשימת ערי הצפון לפי בקשתך
         const cities = { 
             north: ['נהריה', 'עפולה', 'חיפה', 'טבריה', 'נוף הגליל'], 
             center: ['תל אביב', 'ראשון לציון', 'רמת גן', 'פתח תקווה', 'נתניה'],
@@ -159,20 +142,12 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
             clearSearch(null);
-            document.getElementById('results-container').innerHTML = '';
         }
 
         function handleTyping(val) {
             const list = document.getElementById('floatingList');
             if (!val || val.trim().length === 0) { list.style.display = 'none'; return; }
-            
-            let matches = [];
-            if (catNames[currentCat].startsWith(val.trim())) {
-                matches = data[currentCat];
-            } else {
-                matches = data[currentCat].filter(item => item.includes(val));
-            }
-
+            let matches = data[currentCat].filter(item => item.includes(val));
             if (matches.length > 0) {
                 list.innerHTML = matches.map(m => `<div class="list-item" onclick="selectItem('${m}')">${m}</div>`).join('');
                 list.style.display = 'block';
@@ -185,16 +160,13 @@
         }
 
         function clearSearch(e) {
-            if(e) { e.preventDefault(); e.stopPropagation(); }
+            if(e) { e.preventDefault(); }
             document.getElementById('mainSearch').value = '';
             document.getElementById('floatingList').style.display = 'none';
             document.getElementById('results-container').innerHTML = '';
         }
         
-        function refreshPage(e) {
-            if(e) { e.preventDefault(); e.stopPropagation(); }
-            location.reload();
-        }
+        function refreshPage(e) { if(e) location.reload(); }
 
         function updateCities() {
             const reg = document.getElementById('regionSelect').value;
@@ -207,53 +179,46 @@
 
         async function doSearch() {
             const q = document.getElementById('mainSearch').value;
-            const city = document.getElementById('citySelect').value;
             const resContainer = document.getElementById('results-container');
+            if (!q) return alert("אנא הכנס מוצר לחיפוש");
             
-            if (!q) {
-                return alert("אנא הכנס מוצר לחיפוש");
-            }
-            
-            resContainer.innerHTML = '<div style="text-align:center; width:100%; color:#4CAF50; font-weight:bold;">מתחבר למוח... ⏳</div>';
+            resContainer.innerHTML = '<div style="text-align:center; width:100%; color:#4CAF50; font-weight:bold;">חודר למערכות בבדיקה כירורגית... ⏳</div>';
 
             try {
-                const queryUrl = `/api/search?q=${encodeURIComponent(q)}&city=${encodeURIComponent(city)}`;
-                const response = await fetch(queryUrl);
+                const response = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
                 const resultsData = await response.json();
-
                 resContainer.innerHTML = '';
 
-                if(resultsData.error) {
-                    resContainer.innerHTML = `<div style="color:#d32f2f; width:100%; text-align:center; font-weight:bold; padding: 10px;">${resultsData.error}</div>`;
+                if(!resultsData || resultsData.length === 0 || resultsData[0].price === "0") {
+                    resContainer.innerHTML = '<div style="color:#d32f2f; width:100%; text-align:center; font-weight:bold;">לא נמצאו תוצאות אמת כרגע.</div>';
                     return;
                 }
 
                 resultsData.forEach((res, index) => {
                     let card = document.createElement('div');
                     card.className = 'result-card' + (index === 0 ? ' cheapest' : '');
+                    
+                    let dealHtml = res.deal ? `<div class="deal-box">🔥 מבצע: ${res.deal}</div>` : '';
                     let badge = index === 0 ? '<div class="cheapest-badge">הכי זול!</div>' : '';
 
-                    // יצירת לינק וואטסאפ מותאם אישית
-                    const shareText = `מצאתי ${res.name} במחיר זול של ₪${res.price} ב-${res.shop}! הנה הלינק לרכישה: ${res.buyUrl || 'https://my-site-phi-dusky.vercel.app/'}`;
+                    const shareText = `מצאתי ${res.name} ב-₪${res.price} ב-${res.shop}! זול צ'ק: ${window.location.href}`;
                     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 
-                    // התוספת של הכפתורים - בתוך הכרטיסייה
                     card.innerHTML = `
                         ${badge}
                         <div class="res-title">${res.name}</div>
                         <div class="res-shop">🏪 ${res.shop}</div>
                         <div class="res-price">₪${res.price}</div>
-                        <div class="res-likes">👍 ${res.likes} אהבו</div>
-                        
+                        ${dealHtml}
                         <div class="card-actions-inline">
                             <a href="${res.buyUrl || '#'}" target="_blank" class="action-btn-small buy-btn-small">קנייה</a>
-                            <a href="${whatsappUrl}" target="_blank" class="action-btn-small whatsapp-btn-small">וואטסאפ</a>
+                            <a href="${whatsappUrl}" target="_blank" class="action-btn-small whatsapp-btn-small">שתף</a>
                         </div>
                     `;
                     resContainer.appendChild(card);
                 });
             } catch (err) {
-                resContainer.innerHTML = '<div style="color:#d32f2f; width:100%; text-align:center;">שגיאת התחברות לשרת.</div>';
+                resContainer.innerHTML = '<div style="color:#d32f2f; width:100%; text-align:center;">שגיאת תקשורת בחיפוש.</div>';
             }
         }
     </script>
