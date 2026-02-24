@@ -148,7 +148,6 @@
             if (!val || val.trim().length === 0) { list.style.display = 'none'; return; }
             
             let matches = [];
-            // החזרתי את הלוגיקה המקורית שלך - אם מקלידים ת' זה מראה את כל התפרחות
             if (catNames[currentCat].startsWith(val.trim())) {
                 matches = data[currentCat];
             } else {
@@ -189,7 +188,7 @@
             const resContainer = document.getElementById('results-container');
             if (!q) return alert("אנא הכנס מוצר לחיפוש");
             
-            resContainer.innerHTML = '<div style="text-align:center; width:100%; color:#4CAF50; font-weight:bold;">חודר למערכות בבדיקה כירורגית... ⏳</div>';
+            resContainer.innerHTML = '<div style="text-align:center; width:100%; color:#4CAF50; font-weight:bold;">שואב נתונים בזמן אמת... ⏳</div>';
 
             try {
                 const response = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
@@ -210,6 +209,8 @@
 
                     const shareText = `מצאתי ${res.name} ב-₪${res.price} ב-${res.shop}! זול צ'ק: ${window.location.href}`;
                     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+                    
+                    const finalBuyUrl = (res.buyUrl && res.buyUrl !== '#') ? res.buyUrl : `https://www.google.com/search?q=${encodeURIComponent(res.shop + ' ' + res.name)}`;
 
                     card.innerHTML = `
                         ${badge}
@@ -218,7 +219,7 @@
                         <div class="res-price">₪${res.price}</div>
                         ${dealHtml}
                         <div class="card-actions-inline">
-                            <a href="${res.buyUrl || '#'}" target="_blank" class="action-btn-small buy-btn-small">קנייה</a>
+                            <button onclick="window.open('${finalBuyUrl}', '_blank')" class="action-btn-small buy-btn-small" style="border:none; cursor:pointer; font-family:inherit;">קנייה</button>
                             <a href="${whatsappUrl}" target="_blank" class="action-btn-small whatsapp-btn-small">שתף</a>
                         </div>
                     `;
