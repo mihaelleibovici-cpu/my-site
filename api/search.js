@@ -4,20 +4,23 @@ export default async function handler(req, res) {
 
   const scraperApiKey = 'c084b907f72b30d3c3f6d941f894fe6a';
 
+  // מאגר האתרים. עבור נוף הגליל, נשתמש בקישור המרוכז שאתה הבאת
   const pharmacies = [
     { name: "פארם ירוק", url: `https://pharm-yarok.co.il/?s=${encodeURIComponent(q)}&post_type=product`, city: "נתניה", address: "האומנות 5, נתניה" },
     { name: "שור טבצ'ניק", url: `https://shor.co.il/?s=${encodeURIComponent(q)}&post_type=product`, city: "תל אביב", address: "המלך ג'ורג' 54, תל אביב" },
     { name: "מקס פארם", url: `https://maxpharm.co.il/?s=${encodeURIComponent(q)}&post_type=product`, city: "חולון", address: "סוקולוב 43, חולון" },
-    { name: "סופר פארם נוף הגליל", url: `https://cannabiz.co.il/חנויות-קנאביס-בנוף-הגליל-מלאי-בתי-מרקח/`, city: "נוף הגליל", address: "אריאל שרון 41, נוף הגליל" }
+    
+    // החיבור החדש והאגרסיבי לאתר קנאביז לפי הקישור ששלחת
+    { name: "בתי מרקחת נוף הגליל", url: `https://cannabiz.co.il/חנויות-קנאביס-בנוף-הגליל-מלאי-בתי-מרקח/`, city: "נוף הגליל", address: "נוף הגליל (המיקום המדויק יופיע בעת הרכישה)" }
   ];
 
   async function fetchWithTimeout(shop) {
     const controller = new AbortController();
+    // מגבלת זמן קשיחה של 8.5 שניות כדי ש-Vercel לא יקריס אותנו
     const timeout = setTimeout(() => controller.abort(), 8500);
 
     try {
-      const isCannabiz = shop.url.includes('cannabiz');
-      
+      // אנחנו לא מבקשים render=true, אנחנו שואבים את הקוד הגולמי והמהיר
       const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(shop.url)}&country_code=il&premium=true`;
       
       const response = await fetch(proxyUrl, { 
@@ -31,33 +34,35 @@ export default async function handler(req, res) {
       if (!response.ok) return null;
       
       let html = await response.text();
+      
+      // מנקים לחלוטין את כל הקוד העיצובי של האתר ומשאירים רק טקסט נקי ברצף
       const cleanText = html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ');
 
+      // מוודאים שהמוצר בכלל מופיע בדף
+      const searchIndex = cleanText.indexOf(q);
+      if (searchIndex === -1) return null; 
+
+      // אם אנחנו סורקים את קנאביז (נוף הגליל), נבצע חיפוש ממוקד סביב אזור המוצר
       let validPrices = [];
-
-      if (isCannabiz) {
-        // אלגוריתם מיוחד ומהיר לאתר קנאביז (נוף הגליל)
-        const searchIndex = cleanText.indexOf(q);
-        if (searchIndex === -1) return null;
-
-        const productArea = cleanText.substring(searchIndex, searchIndex + 250);
+      
+      if (shop.url.includes('cannabiz')) {
+        // לוקחים רדיוס טקסט מסביב לשם המוצר כדי למצוא את המחירים שלו בכל בתי המרקחת שברשימה
+        const productArea = cleanText.substring(Math.max(0, searchIndex - 50), searchIndex + 400);
+        // מחפשים מספרים הגיוניים לקנאביס בטווח המחירים הסטנדרטי
         const pricesInArea = productArea.match(/\b([1-4][0-9]{2}|500)\b/g);
         
         if (pricesInArea) {
-           validPrices = pricesInArea.map(n => parseInt(n)).filter(p => p >= 140 && p <= 500);
+           validPrices = pricesInArea.map(n => parseInt(n)).filter(p => p >= 130 && p <= 450);
         }
       } else {
-        // אלגוריתם רגיל שעובד מעולה לחיפוש כללי
-        const searchTerms = q.split(" ");
-        const hasProduct = searchTerms.some(term => cleanText.includes(term));
-        if (!hasProduct) return null; 
-
+        // חיפוש רגיל לאתרים בודדים
         const allNumbers = cleanText.match(/\b([1-4][0-9]{2}|500)\b/g);
         if (allNumbers) {
-           validPrices = allNumbers.map(n => parseInt(n)).filter(p => p >= 140 && p <= 500);
+           validPrices = allNumbers.map(n => parseInt(n)).filter(p => p >= 130 && p <= 450);
         }
       }
 
+      // מחזירים רק את התוצאה עם המחיר הכי זול שמצאנו
       if (validPrices.length > 0) {
         return {
           name: q,
