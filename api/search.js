@@ -6,33 +6,28 @@ export default async function handler(req, res) {
 
   async function fetchWithTimeout(shopName, searchUrl) {
     const controller = new AbortController();
-    // השארנו 8.5 שניות כדי להיות בטוחים בטווח של השרת
-    const timeout = setTimeout(() => controller.abort(), 8500); 
+    const timeout = setTimeout(() => controller.abort(), 8500);
 
     try {
-      const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il`;
+      // שימוש ב-premium=true כדי לנסות לעקוף חסימות אבטחה של האתרים
+      const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il&premium=true`;
       
-      const response = await fetch(proxyUrl, { 
-        signal: controller.signal,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7'
-        }
-      });
+      const response = await fetch(proxyUrl, { signal: controller.signal });
       clearTimeout(timeout);
 
-      if (!response.ok) return null;
+      if (!response.ok) {
+        return { name: `שגיאת רשת: קוד ${response.status}`, shop: shopName, price: "0", buyUrl: "#" };
+      }
+      
       let html = await response.text();
 
-      // שלב 1: המרת קודי שקל ורווחים
+      // שולפים את כותרת הדף כדי לדעת איזה דף השרת באמת קיבל
+      const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+      const pageTitle = titleMatch ? titleMatch[1] : "ללא כותרת";
+
       html = html.replace(/&#8362;/g, '₪').replace(/&nbsp;/g, ' ');
-      
-      // שלב 2 (הפתרון החדש): מחיקת כל תגיות ה-HTML! הופך את הדף לטקסט נקי בלבד.
-      // זה יעלים את כל ההפרעות בין המספר לסימן השקל.
       const cleanText = html.replace(/<[^>]*>?/gm, ' ');
 
-      // מחפשים בתוך הטקסט הנקי
       const priceRegex = /(?:₪|ש"ח)\s*(\d{2,4}(?:\.\d{1,2})?)|(\d{2,4}(?:\.\d{1,2})?)\s*(?:₪|ש"ח)/g;
       let match;
       let prices = [];
@@ -52,9 +47,21 @@ export default async function handler(req, res) {
           buyUrl: searchUrl
         };
       }
-      return null;
+
+      // אם לא מצאנו מחיר, השרת יזרוק למסך את כותרת האתר כדי שנראה מה חסם אותנו
+      return {
+        name: `לא זוהה מחיר. תשובת האתר: ${pageTitle.substring(0, 35)}...`,
+        shop: shopName,
+        price: "0",
+        buyUrl: searchUrl
+      };
     } catch (e) {
-      return null; 
+      return {
+        name: `שגיאת קריסה או ניתוק השרת (Timeout)`,
+        shop: shopName,
+        price: "0",
+        buyUrl: "#"
+      };
     }
   }
 
@@ -65,11 +72,8 @@ export default async function handler(req, res) {
       fetchWithTimeout("מקס פארם", `https://maxpharm.co.il/search?q=${encodeURIComponent(q)}`)
     ]);
 
-    const filteredResults = results.filter(r => r !== null);
-    filteredResults.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-    
-    return res.status(200).json(filteredResults);
+    return res.status(200).json(results);
   } catch (error) {
-    return res.status(500).json({ error: "שגיאת שרת" });
+    return res.status(500).json({ error: "שגיאת שרת כללית" });
   }
 }
