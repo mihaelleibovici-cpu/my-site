@@ -6,13 +6,12 @@ export default async function handler(req, res) {
 
   async function fetchWithTimeout(shopName, searchUrl) {
     const controller = new AbortController();
-    // 8.5 שניות מקסימום כדי שורסל לא יקריס את השרת
+    // השארנו 8.5 שניות כדי להיות בטוחים בטווח של השרת
     const timeout = setTimeout(() => controller.abort(), 8500); 
 
     try {
       const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il`;
       
-      // הזרקת זהות של דפדפן אמיתי כדי למנוע חסימת בוטים מצד אתרי הפארם
       const response = await fetch(proxyUrl, { 
         signal: controller.signal,
         headers: {
@@ -26,14 +25,19 @@ export default async function handler(req, res) {
       if (!response.ok) return null;
       let html = await response.text();
 
-      // ניקוי סימני שקל נסתרים בקוד HTML
+      // שלב 1: המרת קודי שקל ורווחים
       html = html.replace(/&#8362;/g, '₪').replace(/&nbsp;/g, ' ');
+      
+      // שלב 2 (הפתרון החדש): מחיקת כל תגיות ה-HTML! הופך את הדף לטקסט נקי בלבד.
+      // זה יעלים את כל ההפרעות בין המספר לסימן השקל.
+      const cleanText = html.replace(/<[^>]*>?/gm, ' ');
 
+      // מחפשים בתוך הטקסט הנקי
       const priceRegex = /(?:₪|ש"ח)\s*(\d{2,4}(?:\.\d{1,2})?)|(\d{2,4}(?:\.\d{1,2})?)\s*(?:₪|ש"ח)/g;
       let match;
       let prices = [];
       
-      while ((match = priceRegex.exec(html)) !== null) {
+      while ((match = priceRegex.exec(cleanText)) !== null) {
         const p = parseFloat(match[1] || match[2]);
         if (!isNaN(p) && p >= 140 && p <= 500) {
           prices.push(p);
