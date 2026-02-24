@@ -4,13 +4,12 @@ export default async function handler(req, res) {
 
   const scraperApiKey = 'c084b907f72b30d3c3f6d941f894fe6a';
 
-  // מאגר בתי המרקחת האמיתי - עכשיו משלב גם שאיבה ישירה וגם אתרי צד שלישי כמו קנאביז
   const pharmacies = [
     { name: "פארם ירוק", url: `https://pharm-yarok.co.il/?s=${encodeURIComponent(q)}&post_type=product`, city: "נתניה", address: "האומנות 5, נתניה" },
     { name: "שור טבצ'ניק", url: `https://shor.co.il/?s=${encodeURIComponent(q)}&post_type=product`, city: "תל אביב", address: "המלך ג'ורג' 54, תל אביב" },
     { name: "מקס פארם", url: `https://maxpharm.co.il/?s=${encodeURIComponent(q)}&post_type=product`, city: "חולון", address: "סוקולוב 43, חולון" },
     
-    // החיבור החדש לבתי המרקחת בנוף הגליל דרך אינדקס קנאביז
+    // החיבור האמיתי לקנאביז - סופר פארם נוף הגליל
     { name: "סופר פארם נוף הגליל", url: `https://cannabiz.co.il/חנויות-קנאביס-בנוף-הגליל-מלאי-בתי-מרקח/`, city: "נוף הגליל", address: "אריאל שרון 41, נוף הגליל" }
   ];
 
@@ -19,8 +18,11 @@ export default async function handler(req, res) {
     const timeout = setTimeout(() => controller.abort(), 8500);
 
     try {
-      // Premium שואב גם דפים מורכבים עם טבלאות
-      const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(shop.url)}&country_code=il&premium=true`;
+      // אם זה אתר קנאביז, אנחנו חייבים render=true כדי לטעון את טבלאות המלאי המוסתרות
+      const isCannabiz = shop.url.includes('cannabiz');
+      const renderFlag = isCannabiz ? '&render=true' : '';
+      
+      const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(shop.url)}&country_code=il&premium=true${renderFlag}`;
       
       const response = await fetch(proxyUrl, { 
         signal: controller.signal,
@@ -35,16 +37,22 @@ export default async function handler(req, res) {
       let html = await response.text();
       const cleanText = html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ');
 
-      // מוודאים שהמוצר קיים במלאי שנסרק
-      const searchTerms = q.split(" ");
-      const hasProduct = searchTerms.some(term => cleanText.includes(term));
-      if (!hasProduct) return null; 
+      // מציאת המוצר בתוך ים הטקסט
+      const searchIndex = cleanText.indexOf(q);
+      
+      // אם המוצר לא נמצא בטקסט הנקי, הוא לא במלאי
+      if (searchIndex === -1) return null;
 
-      // שולפים את כל המחירים ההגיוניים לקנאביס רפואי
-      const allNumbers = cleanText.match(/\b([1-4][0-9]{2}|500)\b/g);
+      // צייד ממוקד: חותכים רק 150 תווים קדימה מהמקום שבו מצאנו את שם המוצר
+      // כדי להבטיח שאנחנו לוקחים את המחיר שלו ולא של מוצר אחר ברשימה
+      const productArea = cleanText.substring(searchIndex, searchIndex + 150);
+      
+      // מחפשים מחירים הגיוניים (140 עד 500) רק באזור של המוצר הספציפי
+      const pricesInArea = productArea.match(/\b([1-4][0-9]{2}|500)\b/g);
+      
       let validPrices = [];
-      if (allNumbers) {
-         validPrices = allNumbers.map(n => parseInt(n)).filter(p => p >= 140 && p <= 500);
+      if (pricesInArea) {
+         validPrices = pricesInArea.map(n => parseInt(n)).filter(p => p >= 140 && p <= 500);
       }
 
       if (validPrices.length > 0) {
