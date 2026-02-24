@@ -6,11 +6,12 @@ export default async function handler(req, res) {
 
   async function fetchWithTimeout(shopName, searchUrl) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000); // מקסימום 8 שניות לאתר
+    // שינוי 1: הארכת זמן ההמתנה ל-15 שניות. הרינדור לוקח זמן, ו-8 שניות יחתכו את הבקשה מוקדם מדי.
+    const timeout = setTimeout(() => controller.abort(), 15000); 
 
     try {
-      // שימוש ב-ScraperAPI ללא render כדי להבטיח מהירות מקסימלית
-      const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il`;
+      // שינוי 2: הוספת render=true כדי שהאתר יטען את ה-JavaScript ויציג את המחירים האמיתיים
+      const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il&render=true`;
       
       const response = await fetch(proxyUrl, { signal: controller.signal });
       clearTimeout(timeout);
@@ -18,13 +19,17 @@ export default async function handler(req, res) {
       if (!response.ok) return null;
       const html = await response.text();
 
-      // חיפוש מחירים ממוקד - מחפש מספרים של 3 ספרות שצמודים לסימן שקל
-      const priceRegex = /(\d{3})\s*₪|₪\s*(\d{3})/g;
+      // שינוי 3: Regex חכם יותר שצד גם אגורות, גם את המילה "ש"ח" וגם מספרים דו-ספרתיים או ארבע-ספרתיים
+      const priceRegex = /(?:₪|ש"ח)\s*(\d{2,4}(?:\.\d{1,2})?)|(\d{2,4}(?:\.\d{1,2})?)\s*(?:₪|ש"ח)/g;
       let match;
       let prices = [];
+      
       while ((match = priceRegex.exec(html)) !== null) {
         const p = parseFloat(match[1] || match[2]);
-        if (p >= 140 && p <= 500) prices.push(p);
+        // השארתי את טווח המחירים שלך כפי שהוא
+        if (!isNaN(p) && p >= 140 && p <= 500) {
+          prices.push(p);
+        }
       }
 
       if (prices.length > 0) {
@@ -42,7 +47,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // מריץ את כולם במקביל - מי שלא עונה מהר, נשאר בחוץ
     const results = await Promise.all([
       fetchWithTimeout("פארם ירוק", `https://pharm-yarok.co.il/?s=${encodeURIComponent(q)}&post_type=product`),
       fetchWithTimeout("שור טבצ'ניק", `https://shor.co.il/search?q=${encodeURIComponent(q)}`),
@@ -51,7 +55,6 @@ export default async function handler(req, res) {
 
     const filteredResults = results.filter(r => r !== null);
     
-    // מיון מהזול ליקר
     filteredResults.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
     
     return res.status(200).json(filteredResults);
