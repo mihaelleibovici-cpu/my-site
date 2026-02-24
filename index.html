@@ -136,7 +136,6 @@
         };
         const catNames = { flower: 'תפרחת', oil: 'שמן רפואי', vape: 'אידוי', acc: 'אביזרים' };
         
-        // הוספתי את חולון כדי להתאים למקס פארם
         const cities = { 
             north: ['נהריה', 'עפולה', 'חיפה', 'טבריה', 'נוף הגליל'], 
             center: ['תל אביב', 'ראשון לציון', 'רמת גן', 'פתח תקווה', 'נתניה', 'חולון'],
@@ -162,7 +161,8 @@
             }
 
             if (matches.length > 0) {
-                list.innerHTML = matches.map(m => `<div class="list-item" onclick="selectItem('${m}')">${m}</div>`).join('');
+                // התיקון הקריטי כאן: שימוש ב-this.innerText שמונע קריסה על תווים כמו גרש בשם הזן
+                list.innerHTML = matches.map(m => `<div class="list-item" onclick="selectItem(this.innerText)">${m}</div>`).join('');
                 list.style.display = 'block';
             } else { list.style.display = 'none'; }
         }
@@ -192,7 +192,7 @@
 
         async function doSearch() {
             const q = document.getElementById('mainSearch').value;
-            const city = document.getElementById('citySelect').value; // שולף את העיר הנבחרת
+            const city = document.getElementById('citySelect').value;
             const resContainer = document.getElementById('results-container');
             
             if (!q) return alert("אנא הכנס מוצר לחיפוש");
@@ -200,7 +200,6 @@
             resContainer.innerHTML = '<div style="text-align:center; width:100%; color:#4CAF50; font-weight:bold;">שואב נתונים בזמן אמת... ⏳</div>';
 
             try {
-                // שולח לשרת את בקשת החיפוש יחד עם העיר
                 let fetchUrl = `/api/search?q=${encodeURIComponent(q)}`;
                 if (city) fetchUrl += `&city=${encodeURIComponent(city)}`;
                 
