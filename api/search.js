@@ -9,7 +9,6 @@ export default async function handler(req, res) {
     const timeout = setTimeout(() => controller.abort(), 8500);
 
     try {
-      // שימוש ב-premium=true כדי לנסות לעקוף חסימות אבטחה של האתרים
       const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il&premium=true`;
       
       const response = await fetch(proxyUrl, { signal: controller.signal });
@@ -21,14 +20,14 @@ export default async function handler(req, res) {
       
       let html = await response.text();
 
-      // שולפים את כותרת הדף כדי לדעת איזה דף השרת באמת קיבל
       const titleMatch = html.match(/<title>(.*?)<\/title>/i);
       const pageTitle = titleMatch ? titleMatch[1] : "ללא כותרת";
 
-      html = html.replace(/&#8362;/g, '₪').replace(/&nbsp;/g, ' ');
+      html = html.replace(/&#8362;/g, '₪').replace(/&nbsp;/g, ' ').replace(/ש"ח/g, '₪');
       const cleanText = html.replace(/<[^>]*>?/gm, ' ');
 
-      const priceRegex = /(?:₪|ש"ח)\s*(\d{2,4}(?:\.\d{1,2})?)|(\d{2,4}(?:\.\d{1,2})?)\s*(?:₪|ש"ח)/g;
+      // ביטוי רגולרי גמיש בהרבה - מחפש פשוט מספרים בני 3 ספרות שקרובים לסמל המטבע
+      const priceRegex = /₪\s*(\d{3})|(\d{3})\s*₪/g;
       let match;
       let prices = [];
       
@@ -48,16 +47,15 @@ export default async function handler(req, res) {
         };
       }
 
-      // אם לא מצאנו מחיר, השרת יזרוק למסך את כותרת האתר כדי שנראה מה חסם אותנו
       return {
-        name: `לא זוהה מחיר. תשובת האתר: ${pageTitle.substring(0, 35)}...`,
+        name: `לא זוהה מחיר. כותרת: ${pageTitle.substring(0, 35)}...`,
         shop: shopName,
         price: "0",
         buyUrl: searchUrl
       };
     } catch (e) {
       return {
-        name: `שגיאת קריסה או ניתוק השרת (Timeout)`,
+        name: `שגיאת ניתוק השרת`,
         shop: shopName,
         price: "0",
         buyUrl: "#"
@@ -68,8 +66,9 @@ export default async function handler(req, res) {
   try {
     const results = await Promise.all([
       fetchWithTimeout("פארם ירוק", `https://pharm-yarok.co.il/?s=${encodeURIComponent(q)}&post_type=product`),
-      fetchWithTimeout("שור טבצ'ניק", `https://shor.co.il/search?q=${encodeURIComponent(q)}`),
-      fetchWithTimeout("מקס פארם", `https://maxpharm.co.il/search?q=${encodeURIComponent(q)}`)
+      // תיקון כתובות החיפוש למבנה הנכון של האתרים
+      fetchWithTimeout("שור טבצ'ניק", `https://shor.co.il/?s=${encodeURIComponent(q)}&post_type=product`),
+      fetchWithTimeout("מקס פארם", `https://maxpharm.co.il/?s=${encodeURIComponent(q)}&post_type=product`)
     ]);
 
     return res.status(200).json(results);
