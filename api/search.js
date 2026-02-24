@@ -6,20 +6,27 @@ export default async function handler(req, res) {
 
   async function fetchWithTimeout(shopName, searchUrl) {
     const controller = new AbortController();
-    // הגבלנו ל-8 שניות כדי לעמוד במגבלה הקשיחה של Vercel (10 שניות)
-    const timeout = setTimeout(() => controller.abort(), 8000); 
+    // 8.5 שניות מקסימום כדי שורסל לא יקריס את השרת
+    const timeout = setTimeout(() => controller.abort(), 8500); 
 
     try {
-      // ביטלנו את הרינדור הכבד כדי לחזור לזמני תגובה מהירים
       const proxyUrl = `http://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(searchUrl)}&country_code=il`;
       
-      const response = await fetch(proxyUrl, { signal: controller.signal });
+      // הזרקת זהות של דפדפן אמיתי כדי למנוע חסימת בוטים מצד אתרי הפארם
+      const response = await fetch(proxyUrl, { 
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7'
+        }
+      });
       clearTimeout(timeout);
 
       if (!response.ok) return null;
       let html = await response.text();
 
-      // המרת קודי HTML לטקסט רגיל כדי לתפוס את סימן השקל בוודאות
+      // ניקוי סימני שקל נסתרים בקוד HTML
       html = html.replace(/&#8362;/g, '₪').replace(/&nbsp;/g, ' ');
 
       const priceRegex = /(?:₪|ש"ח)\s*(\d{2,4}(?:\.\d{1,2})?)|(\d{2,4}(?:\.\d{1,2})?)\s*(?:₪|ש"ח)/g;
@@ -55,17 +62,6 @@ export default async function handler(req, res) {
     ]);
 
     const filteredResults = results.filter(r => r !== null);
-    
-    // בקרת איכות: אם אין תוצאות אמיתיות, נזריק תוצאת מערכת כדי לוודא שהחיבור תקין
-    if (filteredResults.length === 0) {
-      filteredResults.push({
-        name: `תוצאת בדיקה פנימית למוצר: ${q}`,
-        shop: "מערכת זול צ'ק (טסט)",
-        price: "150",
-        buyUrl: "#"
-      });
-    }
-
     filteredResults.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
     
     return res.status(200).json(filteredResults);
